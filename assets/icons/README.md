@@ -1,0 +1,1 @@
+Cartella icone PWA.
