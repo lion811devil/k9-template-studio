@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>K9 Template Studio V1.2 Modulare</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ff7a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="K9 Studio">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="assets/icons/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>K9 Template Studio <span>V1.2 · struttura modulare · GitHub Pages</span></h1>
+</header>
+
+<div id="updateBanner" class="update-banner">È disponibile un aggiornamento. Chiudi e riapri l’app oppure ricarica la pagina.</div>
+<div class="app">
+  <aside class="panel archive-panel">
+    <h2>Archivio</h2>
+    <div class="logic-card" id="archiveStats">
+      <div><b>📁 Modelli:</b> <span id="statModels">0</span></div>
+      <div><b>🏅 Certificati emessi:</b> <span id="statIssued">0</span></div>
+      <div><b>🆔 Ultimo ID:</b> <span id="statLastId">-</span></div>
+      <div><b>💾 Ultimo backup:</b> <span id="statLastBackup">mai</span></div>
+    </div>
+    <label>Ricerca modelli</label><input id="modelSearch" class="search-input" placeholder="Cerca modello, cartella o versione">
+    <label><input type="checkbox" id="onlyFavorites"> Solo preferiti</label>
+    <label>Cartella</label>
+    <select id="folderFilter">
+      <option>Tutte</option><option>Attestati</option><option>Certificati</option><option>Diplomi</option>
+      <option>Badge</option><option>Tesserini</option><option>Locandine</option><option>Moduli</option><option>Altro</option>
+    </select>
+    <div id="archiveList" style="margin-top:12px"></div>
+
+    <hr class="divider">
+
+    <h2>Nuovo modello</h2>
+    <label>Nome modello</label><input id="tplName" value="Attestato Mantrailing">
+    <label>Versione modello</label><input id="tplVersion" value="1.0" readonly>
+    <label><input type="checkbox" id="modelLocked"> Blocca modello da modifiche accidentali</label>
+    <label>Cartella</label>
+    <select id="tplFolder">
+      <option>Attestati</option><option>Certificati</option><option>Diplomi</option>
+      <option>Badge</option><option>Tesserini</option><option>Locandine</option><option>Moduli</option><option>Altro</option>
+    </select>
+    <label>Orientamento certificato</label>
+    <select id="orientationMode">
+      <option value="auto" selected>Automatico</option>
+      <option value="landscape">Orizzontale A4</option>
+      <option value="portrait">Verticale A4</option>
+    </select>
+    <label>Formato PDF</label>
+    <select id="paperFormat">
+      <option value="a4" selected>A4</option>
+      <option value="a5">A5</option>
+      <option value="letter">Letter</option>
+    </select>
+    <div class="actions">
+      <button id="btnFitToCertificate" type="button">Adatta al certificato</button>
+    </div>
+    <div class="orientation-status" id="orientationStatus">Orientamento: automatico</div>
+    <label>1. Sfondo fisso / certificato pulito</label>
+    <input id="fileBase" type="file" accept="image/*">
+    <label>2. Riferimento testi</label>
+    <input id="fileTexts" type="file" accept="image/*">
+    <label>3. Riferimento grafica</label>
+    <input id="fileGraphics" type="file" accept="image/*">
+    <div class="actions">
+      <button id="btnDemo" type="button">Carica esempio</button>
+      <select id="modelSaveMode" style="min-width:220px"><option value="new">Nuovo modello</option><option value="update">Aggiorna versione corrente</option><option value="version">Salva come nuova versione</option></select><button id="btnSaveTemplate" class="green" type="button">Salva modello</button><button id="btnExportOneModel" type="button">Esporta modello</button><button id="btnImportModel" type="button">Importa modello</button><input id="importModelFile" type="file" accept="application/json,.json" style="display:none">
+    </div>
+    <div class="notice">Il documento finale mostra la base fissa e i contenuti generati. I riferimenti servono solo per logica, font, grandezze e posizioni.</div>
+
+    <hr class="divider">
+
+    <h2>Backup / Ripristino</h2>
+    <div class="actions">
+      <button id="btnBackupData" class="green" type="button">💾 Salva archivio</button>
+      <button id="btnRestoreData" type="button">📂 Ripristina archivio</button>
+    </div>
+    <input id="restoreFile" type="file" accept="application/json,.json" style="display:none">
+    <p class="small">Usa il backup per salvare modelli e certificati emessi fuori dal browser.</p>
+  </aside>
+
+  <main class="panel cert-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <h2>Certificato</h2>
+      <div class="actions" style="margin-top:0">
+        <button id="btnPng" class="green" type="button">PNG</button>
+        <button id="btnPdf" class="green" type="button">PDF</button>
+      </div>
+    </div>
+    <div class="stage"><canvas id="canvas"></canvas></div>
+    <div class="status" id="renderStatus"></div>
+  </main>
+
+  <aside class="panel side-panel">
+    <div class="tabs">
+      <button id="tabTexts" class="active" type="button">Testi</button>
+      <button id="tabGraphics" type="button">Grafica</button>
+      <button id="tabPreview" type="button">Anteprima</button>
+    </div>
+
+    <section id="panelTexts" class="tab-panel active">
+      <h2>Menu Testi</h2>
+      <div id="textCards"></div>
+
+      <h3>Data</h3>
+      <div class="logic-card">
+        <div class="caption"><b>Data certificato</b><span class="badge">automatica/calendario</span></div>
+        <select id="dateMode">
+          <option value="auto">Automatica oggi</option>
+          <option value="manual">Manuale da calendario</option>
+        </select>
+        <input id="manualDate" type="date" style="display:none;margin-top:8px">
+        <input id="dateDisplay" readonly placeholder="Data stampata sul certificato" style="margin-top:8px">
+      </div>
+
+      <div class="actions">
+        <button id="saveCurrentChanges" class="green" type="button">Salva modifiche modello</button>
+        <button id="saveIssuedDoc" class="green" type="button">Salva certificato emesso</button>
+      </div>
+      <h3>Sposta blocco testi</h3>
+      <label>Passo</label>
+      <select id="moveStepText"><option value="1">1 px</option><option value="3" selected>3 px</option><option value="5">5 px</option><option value="10">10 px</option><option value="20">20 px</option></select>
+      <div class="move-pad">
+        <span></span><button type="button" data-textmove="0,-1">↑</button><span></span>
+        <button type="button" data-textmove="-1,0">←</button><button id="resetTextBlock" class="reset" type="button">RESET</button><button type="button" data-textmove="1,0">→</button>
+        <span></span><button type="button" data-textmove="0,1">↓</button><span></span>
+      </div>
+    </section>
+
+    <section id="panelGraphics" class="tab-panel">
+      <h2>Menu Grafica</h2>
+
+      <div id="graphicCards"></div>
+
+      <h3>Sfondo in secondo piano</h3>
+      <div class="logic-card">
+        <div class="caption"><b>Immagine secondo piano</b><span class="badge">sfondo</span></div>
+        <select id="overlayChoice">
+          <option value="none">Nessuna</option>
+          <option value="gallery">Da galleria</option>
+          <option value="demo">Esempio</option>
+        </select>
+        <input id="fileOverlay" type="file" accept="image/*" style="margin-top:8px">
+        <label>Trasparenza</label>
+        <input type="range" id="overlayOpacity" min="5" max="100" value="45">
+        <div class="pills">
+          <button type="button" data-opacity="5">5%</button>
+          <button type="button" data-opacity="25">25%</button>
+          <button type="button" data-opacity="50">50%</button>
+          <button type="button" data-opacity="75">75%</button>
+          <button type="button" data-opacity="100">100%</button>
+        </div>
+        <div class="status">Trasparenza: <span id="overlayOpacityLabel">45%</span></div>
+        <label>Modalità fusione</label>
+        <select id="overlayBlend">
+          <option value="source-over">Normale</option>
+          <option value="multiply" selected>Moltiplica</option>
+          <option value="overlay">Overlay</option>
+          <option value="screen">Schiarisci</option>
+        </select>
+        <label><input type="checkbox" id="blurOverlay"> Offusca</label>
+        <label>Intensità offuscatura</label>
+        <input type="range" id="blurAmount" min="0" max="20" value="0">
+      </div>
+
+      <h3>Sposta blocco grafica</h3>
+      <label>Passo</label>
+      <select id="moveStepGraphic"><option value="1">1 px</option><option value="3" selected>3 px</option><option value="5">5 px</option><option value="10">10 px</option><option value="20">20 px</option></select>
+      <div class="move-pad">
+        <span></span><button type="button" data-gfxmove="0,-1">↑</button><span></span>
+        <button type="button" data-gfxmove="-1,0">←</button><button id="resetGraphicBlock" class="reset" type="button">RESET</button><button type="button" data-gfxmove="1,0">→</button>
+        <span></span><button type="button" data-gfxmove="0,1">↓</button><span></span>
+      </div>
+      <div class="advanced-box">
+        <h3>Sposta singolo elemento grafico</h3>
+        <label>Elemento</label>
+        <select id="singleGraphicTarget"></select>
+        <label>Passo</label>
+        <select id="singleGraphicStep"><option value="1">1 px</option><option value="3" selected>3 px</option><option value="5">5 px</option><option value="10">10 px</option></select>
+        <div class="move-pad">
+          <span></span><button type="button" data-singlegfx="0,-1">↑</button><span></span>
+          <button type="button" data-singlegfx="-1,0">←</button><button id="resetSingleGraphic" class="reset" type="button">RESET</button><button type="button" data-singlegfx="1,0">→</button>
+          <span></span><button type="button" data-singlegfx="0,1">↓</button><span></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="panelPreview" class="tab-panel">
+      <h2>Anteprima / Export</h2>
+      <div class="logic-card">
+        <div class="caption"><b>ID documento</b><span class="badge">progressivo</span></div>
+        <div class="grid2">
+          <div><label>Prefisso</label><input id="prefix" value="K9A"></div>
+          <div><label>Anno</label><input id="year" value="2026"></div>
+        </div>
+        <label>Progressivo</label><input id="progressive" type="number" value="1">
+        <label>ID generato</label><input id="docId" readonly>
+        <div class="actions"><button id="nextDoc" class="green" type="button">Nuovo +1</button></div>
+      </div>
+
+      <div class="logic-card">
+        <div class="caption"><b>Foto / soggetto</b><span class="badge">pulizia</span></div>
+        <p class="small">I comandi “Elimina sfondo” e “Offusca bordi” sono nel menu Grafica, dentro il riquadro “Foto / soggetto”.</p>
+      </div>
+
+      <div class="actions">
+        <button id="btnPng2" class="green" type="button">Esporta PNG</button>
+        <button id="btnPdf2" class="green" type="button">Esporta PDF</button>
+      </div>
+
+      <div class="logic-card">
+        <div class="caption"><b>Archivio certificati emessi</b><span class="badge">locale</span></div>
+        <input id="issuedSearch" class="search-input" placeholder="Cerca ID, nome, corso o data">
+        <div id="issuedList" class="small">Nessun certificato emesso salvato.</div>
+      </div>
+    </section>
+  </aside>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="js/archive.js"></script>
+<script src="js/photo.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
