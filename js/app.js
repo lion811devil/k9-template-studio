@@ -1,9 +1,8 @@
-(function(){
+(() => {
   "use strict";
-  window.K9App = {version:"2.0"};
-  window.addEventListener("load", () => {
+  window.addEventListener("load", async () => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+      try { await navigator.serviceWorker.register("./sw.js"); } catch (_) {}
     }
     if (window.K9Editor) window.K9Editor.init();
     if (window.K9Archive) window.K9Archive.init();
