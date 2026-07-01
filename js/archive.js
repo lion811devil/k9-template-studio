@@ -1,56 +1,17 @@
-(function(){
+(() => {
   "use strict";
-  const LS="k9_template_studio_v2";
-
-  function load(){try{return JSON.parse(localStorage.getItem(LS)||'{"models":[],"issued":[]}')}catch(e){return {models:[],issued:[]}}}
-  function save(data){localStorage.setItem(LS,JSON.stringify(data))}
-  function download(name,content,type="application/json"){
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([content],{type}));
-    a.download=name;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  }
-
-  function init(){renderStats()}
-
-  function renderStats(){
-    const box=document.getElementById("archiveStats");
-    if(!box)return;
-    const db=load();
-    const last=db.issued.length?db.issued[db.issued.length-1].id:"-";
-    box.innerHTML=`📁 Modelli: ${db.models.length}<br>🏅 Certificati emessi: ${db.issued.length}<br>🆔 Ultimo ID: ${last}`;
-  }
-
-  function addModel(model){
-    const db=load();
-    db.models.push({...model,id:"model-"+Date.now(),createdAt:new Date().toISOString()});
-    save(db);renderStats();renderList();
-  }
-
-  function addIssued(item){
-    const db=load();
-    db.issued.push({...item,id:"K9-"+new Date().getFullYear()+"-"+String(db.issued.length+1).padStart(5,"0"),createdAt:new Date().toISOString()});
-    save(db);renderStats();renderList();
-  }
-
-  function backup(){
-    const db=load();
-    download("k9-template-studio-backup.json",JSON.stringify(db,null,2));
-  }
-
-  function restore(file){
-    const r=new FileReader();
-    r.onload=()=>{try{save(JSON.parse(r.result));renderStats();renderList();alert("Archivio ripristinato.")}catch(e){alert("JSON non valido.")}};
-    r.readAsText(file);
-  }
-
-  function renderList(){
-    const box=document.getElementById("archiveList");
-    if(!box)return;
-    const db=load();
-    box.innerHTML=db.models.slice().reverse().map(m=>`<div class="archive-item"><b>${m.name||"Modello"}</b><br><small>${m.createdAt||""}</small></div>`).join("");
-  }
-
-  window.K9Archive={init,load,save,addModel,addIssued,backup,restore,renderStats,renderList};
+  const LS="k9-template-studio-v4-projects";
+  const $=id=>document.getElementById(id);
+  function all(){try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch{return[]}}
+  function write(list){localStorage.setItem(LS,JSON.stringify(list))}
+  function escape(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+  function saveProject(p){const list=all(),i=list.findIndex(x=>x.id===p.id);p.updatedAt=new Date().toISOString();if(i>=0)list[i]=p;else list.push(p);write(list);renderProjects();alert("Progetto salvato.")}
+  async function openProject(id){const p=all().find(x=>x.id===id);if(p&&window.K9Editor)await window.K9Editor.setProject(p)}
+  async function duplicateProject(id){const p=all().find(x=>x.id===id);if(!p)return;const c=JSON.parse(JSON.stringify(p));c.id="project-"+Date.now();c.name=(c.name||"Progetto")+" - copia";saveProject(c);if(window.K9Editor)await window.K9Editor.setProject(c)}
+  function deleteProject(id){if(!confirm("Eliminare progetto?"))return;write(all().filter(p=>p.id!==id));renderProjects()}
+  function renderProjects(){const box=$("projectList");if(!box)return;const q=($("projectSearch").value||"").toLowerCase();const list=all().filter(p=>JSON.stringify({n:p.name,c:p.clientName,d:p.dogName,co:p.course}).toLowerCase().includes(q)).reverse();if(!list.length){box.innerHTML='<p class="hint">Nessun progetto salvato.</p>';return}box.innerHTML=list.map(p=>`<div class="project-item"><h3>${escape(p.name)}</h3><p>${escape(p.clientName)} ${p.dogName?"· "+escape(p.dogName):""}<br>${escape(p.course)}</p><div class="project-actions"><button class="green" data-open="${p.id}">Apri</button><button data-dup="${p.id}">Duplica</button><button class="red" data-del="${p.id}">Elimina</button></div></div>`).join("");box.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openProject(b.dataset.open));box.querySelectorAll("[data-dup]").forEach(b=>b.onclick=()=>duplicateProject(b.dataset.dup));box.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>deleteProject(b.dataset.del))}
+  function exportBackup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(all(),null,2)],{type:"application/json"}));a.download="k9-template-studio-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+  function importBackup(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data))throw new Error();write(data);renderProjects();alert("Backup importato.")}catch{alert("File backup non valido.")}};r.readAsText(file)}
+  function init(){renderProjects()}
+  window.K9Archive={init,saveProject,renderProjects,exportBackup,importBackup,all};
 })();
