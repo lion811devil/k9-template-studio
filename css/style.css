@@ -1,127 +1,32 @@
 *{box-sizing:border-box}
-:root{--bg:#071018;--top:#050b11;--panel:#0d1b28;--panel2:#102536;--line:#29435e;--text:#f6f8fb;--muted:#b7c1ce;--gold:#d6b25f;--orange:#ff7a1a;--green:#25a86a;--red:#c83f3f}
+:root{--bg:#061018;--top:#03080d;--panel:#0b1a27;--line:#27425f;--text:#f7f9fb;--muted:#b9c3cf;--orange:#ff7a1a;--green:#25a86a;--red:#c83f3f;--blue:#0877d8;--gold:#d6b25f}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-.top{position:sticky;top:0;z-index:60;background:var(--top);border-bottom:1px solid var(--line);padding:12px 18px}
-.top h1{margin:0;font-size:28px}.top p{margin:4px 0 0;color:var(--orange);font-weight:800}
-.app{display:grid;grid-template-columns:minmax(320px,690px) minmax(320px,1fr);gap:16px;padding:16px}
-.preview,.card{background:linear-gradient(180deg,var(--panel),#091722);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 10px 34px rgba(0,0,0,.24)}
-.preview{position:sticky;top:82px;z-index:40}
-.preview-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h2{font-size:34px;line-height:1.05;margin:0 0 14px}
-.export-row,.quick-row,.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-row{grid-template-columns:1fr 1fr 1fr;margin-top:12px}
-button,input,select,textarea{width:100%;font-size:19px;border-radius:14px;border:1px solid var(--line);background:#07131d;color:var(--text);padding:13px}
-textarea{min-height:90px;resize:vertical}button{font-weight:900;cursor:pointer}.green{background:var(--green);border-color:var(--green);color:#fff}.red{background:var(--red);border-color:var(--red);color:#fff}
-.hidden{display:none!important}label{display:block;color:var(--muted);font-weight:900;margin:14px 0 7px}
-.canvas-box{background:#07131d;border:1px solid var(--line);border-radius:18px;padding:12px;touch-action:none}
-canvas{display:block;width:100%;height:auto;background:white;border-radius:12px;touch-action:none}
-#status{font-size:18px;color:#f2ca73;font-weight:700}.hint{border-left:4px solid var(--green);background:rgba(37,168,106,.09);padding:12px;margin-top:12px;color:#d8f2e7;font-size:17px;line-height:1.35}
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;position:sticky;top:82px;z-index:30;background:var(--bg);padding:8px 0}
-.tab{font-size:15px;padding:12px 6px;background:#0a1722}.tab.active{background:var(--orange);border-color:var(--orange);color:#111}
+.topbar{position:sticky;top:0;z-index:80;background:var(--top);border-bottom:1px solid var(--line);padding:10px 14px}
+.topbar h1{margin:0;font-size:24px}.topbar p{margin:4px 0 0;color:var(--orange);font-weight:800;font-size:15px}
+.app{padding:10px;max-width:1100px;margin:0 auto}
+.cert-sticky{position:sticky;top:65px;z-index:70;background:linear-gradient(180deg,var(--panel),#091722);border:1px solid var(--line);border-radius:18px;padding:10px;margin-bottom:12px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+.cert-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.cert-head h2{font-size:0;margin:0;width:0;overflow:hidden}
+.export-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:170px}
+.canvas-box{background:#07131d;border:1px solid var(--line);border-radius:14px;padding:7px;touch-action:none}
+canvas{display:block;width:100%;height:auto;background:#fff;border-radius:10px;touch-action:none}
+.action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+button,input,select,textarea{width:100%;font-size:18px;border-radius:14px;border:1px solid var(--line);background:#07131d;color:var(--text);padding:12px}
+button{font-weight:900;cursor:pointer}.green{background:var(--green);border-color:var(--green);color:#fff}.red{background:var(--red);border-color:var(--red);color:#fff}.blue{background:var(--blue);border-color:var(--blue);color:#fff}.orange{background:transparent;border-color:var(--orange);color:#fff}
+#status{margin:10px 0 0;color:#f2ca73;font-size:16px;font-weight:800}
+.work-area{position:relative;z-index:1}.tabs{display:grid;grid-template-columns:repeat(5,minmax(96px,1fr));gap:8px;overflow-x:auto;margin-bottom:10px;background:var(--bg);padding:6px 0}
+.tab{font-size:15px;background:#0a1722;white-space:nowrap}.tab.active{background:var(--orange);border-color:var(--orange);color:#111}
 .tab-panel{display:none}.tab-panel.active{display:block}
-.project-item{border:1px solid var(--line);border-radius:15px;padding:12px;margin:10px 0;background:rgba(255,255,255,.025)}
-.project-item h3{margin:0 0 6px;color:var(--gold)}.project-item p{margin:0 0 10px;color:var(--muted);line-height:1.35}
+.card{background:linear-gradient(180deg,var(--panel),#091722);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+h2{font-size:32px;margin:0 0 14px}h3{margin:0 0 8px;color:var(--gold)}
+label{display:block;color:var(--muted);font-weight:900;margin:14px 0 7px}textarea{min-height:90px;resize:vertical}
+.hidden{display:none!important}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.upload-label{display:block;border:1px dashed var(--orange);border-radius:14px;padding:18px;text-align:center;background:#07131d;color:#fff}.upload-label span{display:block;font-size:20px;font-weight:900}.upload-label small{display:block;color:var(--muted);margin-top:6px}
+.hint{border-left:4px solid var(--green);background:rgba(37,168,106,.09);padding:12px;color:#d8f2e7;line-height:1.35}
+.sliders input[type=range]{padding:12px 0}.nudge{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.nudge button{min-height:56px}
+input[type=color]{height:55px;padding:6px}
+.project-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:rgba(255,255,255,.03)}
+.project-item h3{margin:0 0 6px}.project-item p{margin:0 0 10px;color:var(--muted)}
 .project-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.nudge{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.nudge button{min-height:58px}
-input[type=range]{padding:12px 0}input[type=color]{height:56px;padding:6px}
-
-@media(max-width:900px){
-  body{padding-bottom:28px}
-  .top{padding:10px 16px}
-  .top h1{font-size:25px}
-  .top p{font-size:15px}
-
-  .app{display:block;padding:10px}
-
-  /* V4.1: resta bloccato SOLO il certificato/anteprima.
-     Pulsanti Salva, Duplica, Reset, status e menu scorrono sotto. */
-  .preview{
-    position:sticky;
-    top:69px;
-    z-index:45;
-    padding:10px;
-    margin-bottom:12px;
-    border-radius:18px;
-  }
-
-  .preview-title{
-    align-items:center;
-    margin-bottom:8px;
-  }
-
-  .preview-title h2{
-    font-size:0;
-    margin:0;
-    width:0;
-    overflow:hidden;
-  }
-
-  .export-row{
-    margin-left:auto;
-    width:178px;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-
-  .export-row button{
-    padding:10px 8px;
-    font-size:16px;
-    border-radius:12px;
-  }
-
-  .canvas-box{
-    padding:7px;
-    border-radius:14px;
-  }
-
-  .canvas-box canvas{
-    border-radius:10px;
-  }
-
-  .quick-row,
-  #status{
-    position:static;
-  }
-
-  /* Questi elementi NON rimangono bloccati: scorrono normalmente */
-  .preview .quick-row{
-    margin-top:10px;
-  }
-
-  .preview .quick-row button{
-    padding:11px;
-    font-size:17px;
-  }
-
-  #status{
-    margin:10px 0 0;
-    font-size:16px;
-  }
-
-  .tools{
-    position:relative;
-    z-index:10;
-  }
-
-  .tabs{
-    position:sticky;
-    top:calc(69px + 230px);
-    z-index:25;
-    overflow-x:auto;
-    grid-template-columns:repeat(5,minmax(92px,1fr));
-    padding:8px 0;
-  }
-
-  h2{font-size:30px}
-  .card{padding:16px;border-radius:18px}
-  .quick-row,.grid2{grid-template-columns:1fr}
-  button,input,select,textarea{font-size:18px}
-}
-
-@media(max-width:430px){
-  .preview{
-    top:68px;
-  }
-  .tabs{
-    top:calc(68px + 210px);
-  }
-}
+@media(min-width:900px){.app{display:grid;grid-template-columns:650px 1fr;gap:16px}.cert-sticky{top:76px}.cert-head h2{font-size:34px;width:auto;overflow:visible}.export-row{width:220px}}
+@media(max-width:430px){.topbar h1{font-size:22px}.topbar p{font-size:14px}.cert-sticky{top:62px}.export-row{width:155px}.export-row button{font-size:16px;padding:10px}.action-row button{font-size:15px;padding:10px}.card{padding:14px}h2{font-size:29px}.grid2{grid-template-columns:1fr}}
