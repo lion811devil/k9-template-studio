@@ -40,3 +40,9 @@ input[type=color]{height:55px;padding:6px}
 .template-item p{margin:0 0 10px;color:var(--muted)}
 .template-thumb{width:100%;max-height:170px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line);margin:8px 0}
 .template-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+
+/* V5.6 - Libreria elementi grafici */
+.element-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0 14px}
+.element-grid button{font-size:15px;padding:10px}
+.sep{border:0;border-top:1px solid var(--line);margin:18px 0}
