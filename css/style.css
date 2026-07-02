@@ -30,3 +30,5 @@ input[type=color]{height:55px;padding:6px}
 .project-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 @media(min-width:900px){.app{display:grid;grid-template-columns:650px 1fr;gap:16px}.cert-sticky{top:76px}.cert-head h2{font-size:34px;width:auto;overflow:visible}.export-row{width:220px}}
 @media(max-width:430px){.topbar h1{font-size:22px}.topbar p{font-size:14px}.cert-sticky{top:62px}.export-row{width:155px}.export-row button{font-size:16px;padding:10px}.action-row button{font-size:15px;padding:10px}.card{padding:14px}h2{font-size:29px}.grid2{grid-template-columns:1fr}}
+
+.sep{border:0;border-top:1px solid var(--line);margin:18px 0}
