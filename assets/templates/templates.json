@@ -1,0 +1,11 @@
+{
+  "templates": [
+    {
+      "id": "demo-default",
+      "name": "Base demo interna",
+      "category": "Generale",
+      "src": "",
+      "description": "Base grafica generata automaticamente dalla PWA."
+    }
+  ]
+}
