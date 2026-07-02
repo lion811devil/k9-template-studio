@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#061018">
+  <title>K9 Template Studio V5</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>K9 Template Studio</h1>
+    <p>V5.3 · libreria modelli · QR univoco</p>
+  </div>
+</header>
+
+<main class="app">
+  <section class="cert-sticky">
+    <div class="cert-head">
+      <h2>Certificato</h2>
+      <div class="export-row">
+        <button id="exportPng" class="green">PNG</button>
+        <button id="exportPdf" class="green">PDF</button>
+      </div>
+    </div>
+
+    <div class="canvas-box">
+      <canvas id="canvas" width="1600" height="1000"></canvas>
+    </div>
+
+    <div class="action-row">
+      <button id="saveProject" class="green">💾 Salva</button>
+      <button id="duplicateProject" class="blue">⧉ Duplica</button>
+      <button id="resetProject" class="red">🗑 Reset</button>
+    </div>
+
+    <p id="status">Pronto.</p>
+  </section>
+
+  <section class="work-area">
+    <nav class="tabs">
+      <button class="tab active" data-tab="foto">▧ Foto</button>
+      <button class="tab" data-tab="testi">T Testi</button>
+      <button class="tab" data-tab="modelli">▦ Modelli</button>
+      <button class="tab" data-tab="elementi">□ Elementi</button>
+      <button class="tab" data-tab="progetti">▣ Progetti</button>
+      <button class="tab" data-tab="muovi">↕ Muovi</button>
+    </nav>
+
+    <section id="tab-foto" class="tab-panel active">
+      <div class="card">
+        <h2>Foto soggetto</h2>
+        <label class="upload-label" for="subjectFile">
+          <span>＋ Carica foto / PNG trasparente</span>
+          <small>Consigliato: PNG già ritagliato</small>
+        </label>
+        <input id="subjectFile" type="file" accept="image/*" hidden>
+
+        <div class="grid2">
+          <button id="openCutout" class="orange">✣ Scegli programma ritaglio</button>
+          <button id="loadCutoutPng" class="blue">⬆ Carica PNG finito</button>
+        </div>
+
+        <label>Programma esterno</label>
+        <select id="cutoutTool">
+          <option value="removebg">remove.bg</option>
+          <option value="adobe">Adobe Express</option>
+          <option value="canva">Canva</option>
+          <option value="photoroom">PhotoRoom</option>
+          <option value="phoneapp">App già installata sul telefono</option>
+          <option value="custom">Altro link...</option>
+        </select>
+        <input id="customCutoutUrl" class="hidden" placeholder="https://..." inputmode="url">
+
+        <div class="grid2">
+          <button id="fitPhoto">Adatta foto</button>
+          <button id="clearPhoto" class="red">Elimina foto</button>
+        </div>
+
+        <div class="sliders">
+          <label>Dimensione</label><input id="photoScale" type="range" min="20" max="240" value="100">
+          <label>Opacità</label><input id="photoOpacity" type="range" min="10" max="100" value="100">
+          <label>Sfuma bordi</label><input id="photoFeather" type="range" min="0" max="100" value="30">
+          <label>Rotazione</label><input id="photoRotate" type="range" min="-45" max="45" value="0">
+          <label>Integrazione</label>
+          <select id="photoEffect">
+            <option value="normal">Normale</option>
+            <option value="soft">Ombra morbida</option>
+            <option value="fade">Sfumata chiara</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-testi" class="tab-panel">
+      <div class="card">
+        <h2>Testi principali</h2>
+        <label>Nome cliente</label><input id="clientName" value="Mario Rossi">
+        <label>Nome cane</label><input id="dogName" value="Kira">
+        <label>Corso</label>
+        <select id="course">
+          <option>Dogsitter</option>
+          <option>Mantrailing Base</option>
+          <option>Mantrailing Avanzato</option>
+          <option>HRDD</option>
+          <option>Detection</option>
+          <option>Educazione Cinofila</option>
+          <option>Puppy Class</option>
+          <option>Dog Walking</option>
+          <option>Altro...</option>
+        </select>
+        <input id="courseCustom" class="hidden" placeholder="Scrivi corso personalizzato">
+
+        <label>Frase centrale</label>
+        <textarea id="mainText">hanno partecipato con successo al corso</textarea>
+
+        <label>Data</label>
+        <select id="dateMode">
+          <option value="auto">Oggi automatica</option>
+          <option value="manual">Manuale</option>
+        </select>
+        <input id="dateManual" type="date" class="hidden">
+
+        <label>Istruttore / firma</label><input id="instructor" value="Napoletano Giovanni">
+
+        <div class="grid2">
+          <button id="presetDogsitter">Preset Dogsitter</button>
+          <button id="presetMantrailing">Preset Mantrailing</button>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tab-modelli" class="tab-panel">
+      <div class="card">
+        <h2>Libreria modelli</h2>
+        <p class="hint">Puoi usare i modelli caricati nella cartella <b>assets/templates</b> oppure salvare un modello personalizzato direttamente dal telefono.</p>
+
+        <label>Cerca modello</label>
+        <input id="templateSearch" placeholder="Dogsitter, Mantrailing, HRDD...">
+
+        <div class="grid2">
+          <button id="refreshTemplates" class="blue">Aggiorna libreria</button>
+          <button id="useBlankTemplate">Base demo</button>
+        </div>
+
+        <label>Carica modello dal telefono</label>
+        <input id="templateFile" type="file" accept="image/*">
+
+        <label>Nome modello caricato</label>
+        <input id="templateName" placeholder="Es. Dogsitter Parco 01">
+
+        <label>Categoria</label>
+        <select id="templateCategory">
+          <option>Dogsitter</option>
+          <option>Mantrailing</option>
+          <option>HRDD</option>
+          <option>Educazione Cinofila</option>
+          <option>Puppy Class</option>
+          <option>Generale</option>
+          <option>Altro</option>
+        </select>
+
+        <div class="grid2">
+          <button id="saveTemplateLocal" class="green">Salva in libreria</button>
+          <button id="clearLocalTemplates" class="red">Svuota locali</button>
+        </div>
+
+        <h3>Modelli disponibili</h3>
+        <div id="templateList"></div>
+      </div>
+    </section>
+
+    <section id="tab-elementi" class="tab-panel">
+      <div class="card">
+        <h2>Elementi</h2>
+        <label>Attestato base / sfondo</label>
+        <button id="openTemplateTab" class="blue">Apri libreria modelli</button>
+        <input id="baseFile" type="file" accept="image/*">
+        <div class="grid2">
+          <button id="defaultBase">Base demo</button>
+          <button id="clearBase" class="red">Elimina base</button>
+        </div>
+
+        <label>Logo</label>
+        <input id="logoFile" type="file" accept="image/*">
+        <div class="grid2">
+          <button id="clearLogo" class="red">Elimina logo</button>
+          <button id="toggleQr">QR on/off</button>
+        </div>
+
+        <label>Testo QR / verifica</label>
+        <input id="qrText" value="K9 Template Studio - certificato">
+        <p class="hint">Il QR viene generato automaticamente con un ID univoco del certificato e i dati principali.</p>
+        <div class="grid2">
+          <button id="newQrId" class="blue">Nuovo ID QR</button>
+          <button id="copyQrPayload">Copia dati QR</button>
+        </div>
+
+        <label>Nome progetto</label>
+        <input id="projectName" value="Nuovo certificato">
+      </div>
+    </section>
+
+    <section id="tab-progetti" class="tab-panel">
+      <div class="card">
+        <h2>Progetti</h2>
+        <p class="hint">Salva un modello, duplicalo e cambia nome/foto in pochi secondi.</p>
+        <div class="grid2">
+          <button id="saveProject2" class="green">Salva progetto</button>
+          <button id="newProject">Nuovo</button>
+        </div>
+        <label>Cerca progetto</label>
+        <input id="projectSearch" placeholder="Nome, cane, corso...">
+        <div id="projectList"></div>
+
+        <label>Backup</label>
+        <div class="grid2">
+          <button id="exportBackup">Esporta backup</button>
+          <button id="importBackup">Importa backup</button>
+        </div>
+        <input id="backupFile" type="file" accept="application/json" hidden>
+      </div>
+    </section>
+
+    <section id="tab-muovi" class="tab-panel">
+      <div class="card">
+        <h2>Muovi / modifica</h2>
+        <label>Elemento</label>
+        <select id="selectedElement">
+          <option value="photo">Foto soggetto</option>
+          <option value="title">Titolo</option>
+          <option value="subtitle">Sottotitolo</option>
+          <option value="names">Nome cliente/cane</option>
+          <option value="text">Frase centrale</option>
+          <option value="course">Corso</option>
+          <option value="date">Data</option>
+          <option value="signature">Firma</option>
+          <option value="logo">Logo</option>
+          <option value="qr">QR</option>
+        </select>
+
+        <label>Passo</label>
+        <select id="moveStep">
+          <option value="1">1 px</option><option value="3">3 px</option>
+          <option value="5" selected>5 px</option><option value="10">10 px</option>
+          <option value="25">25 px</option>
+        </select>
+
+        <div class="nudge">
+          <span></span><button data-nudge="up">↑</button><span></span>
+          <button data-nudge="left">←</button><button id="resetElement">RESET</button><button data-nudge="right">→</button>
+          <span></span><button data-nudge="down">↓</button><span></span>
+        </div>
+
+        <label>Dimensione elemento selezionato</label>
+        <input id="elementScale" type="range" min="20" max="240" value="100">
+
+        <label>Dimensione testo selezionato</label>
+        <input id="textSize" type="range" min="10" max="95" value="36">
+
+        <label>Colore testo selezionato</label>
+        <input id="textColor" type="color" value="#123d28">
+
+        <hr class="sep">
+
+        <h3>Blocco testi</h3>
+        <p class="hint">Muove insieme titolo, sottotitolo, nomi, frase, corso, data e firma.</p>
+
+        <label>Passo blocco testi</label>
+        <select id="textBlockStep">
+          <option value="1">1 px</option>
+          <option value="3">3 px</option>
+          <option value="5" selected>5 px</option>
+          <option value="10">10 px</option>
+          <option value="25">25 px</option>
+        </select>
+
+        <div class="nudge">
+          <span></span><button data-text-block="up">↑</button><span></span>
+          <button data-text-block="left">←</button><button id="resetTextBlock">RESET</button><button data-text-block="right">→</button>
+          <span></span><button data-text-block="down">↓</button><span></span>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/archive.js"></script>
+</body>
+</html>
