@@ -8,3 +8,4 @@ Correzione V8.3:
 - versione visibile aggiornata.
 
 Caricare questi file nella root del repository sostituendo quelli esistenti.
+ok
