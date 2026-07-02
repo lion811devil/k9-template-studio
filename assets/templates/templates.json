@@ -1,0 +1,10 @@
+{
+  "templates": [
+    {
+      "id": "blank",
+      "name": "Bianco pulito",
+      "category": "Base",
+      "src": ""
+    }
+  ]
+}
