@@ -14,7 +14,7 @@ canvas{display:block;width:100%;height:auto;background:#fff;border-radius:10px;t
 button,input,select,textarea{width:100%;font-size:18px;border-radius:14px;border:1px solid var(--line);background:#07131d;color:var(--text);padding:12px}
 button{font-weight:900;cursor:pointer}.green{background:var(--green);border-color:var(--green);color:#fff}.red{background:var(--red);border-color:var(--red);color:#fff}.blue{background:var(--blue);border-color:var(--blue);color:#fff}.orange{background:transparent;border-color:var(--orange);color:#fff}
 #status{margin:10px 0 0;color:#f2ca73;font-size:16px;font-weight:800}
-.work-area{position:relative;z-index:1}.tabs{display:grid;grid-template-columns:repeat(5,minmax(96px,1fr));gap:8px;overflow-x:auto;margin-bottom:10px;background:var(--bg);padding:6px 0}
+.work-area{position:relative;z-index:1}.tabs{display:grid;grid-template-columns:repeat(6,minmax(96px,1fr));gap:8px;overflow-x:auto;margin-bottom:10px;background:var(--bg);padding:6px 0}
 .tab{font-size:15px;background:#0a1722;white-space:nowrap}.tab.active{background:var(--orange);border-color:var(--orange);color:#111}
 .tab-panel{display:none}.tab-panel.active{display:block}
 .card{background:linear-gradient(180deg,var(--panel),#091722);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
@@ -32,3 +32,11 @@ input[type=color]{height:55px;padding:6px}
 @media(max-width:430px){.topbar h1{font-size:22px}.topbar p{font-size:14px}.cert-sticky{top:62px}.export-row{width:155px}.export-row button{font-size:16px;padding:10px}.action-row button{font-size:15px;padding:10px}.card{padding:14px}h2{font-size:29px}.grid2{grid-template-columns:1fr}}
 
 .sep{border:0;border-top:1px solid var(--line);margin:18px 0}
+
+
+/* V5.3 - Libreria modelli */
+.template-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:rgba(255,255,255,.03)}
+.template-item h3{margin:0 0 6px;color:var(--gold)}
+.template-item p{margin:0 0 10px;color:var(--muted)}
+.template-thumb{width:100%;max-height:170px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line);margin:8px 0}
+.template-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
