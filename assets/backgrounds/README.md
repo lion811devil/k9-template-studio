@@ -1,1 +1,1 @@
-Cartella sfondi.
+Cartella Sfondi.
