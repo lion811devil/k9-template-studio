@@ -1,0 +1,22 @@
+{
+  "elements": [
+    {
+      "id": "badge-gold",
+      "name": "Coccarda Gold",
+      "category": "Sigilli",
+      "type": "badge"
+    },
+    {
+      "id": "line-gold",
+      "name": "Linea Gold",
+      "category": "Decorazioni",
+      "type": "line"
+    },
+    {
+      "id": "qr",
+      "name": "QR Code",
+      "category": "QR",
+      "type": "qr"
+    }
+  ]
+}
