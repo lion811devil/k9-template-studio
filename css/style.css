@@ -61,3 +61,15 @@ input[type=color]{height:55px;padding:6px}
 
 /* V5.8 - fonti gratuite */
 .element-grid button[id^="open"]{border-color:var(--gold)}
+
+
+/* V5.9 - palette colori testo */
+.color-palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:8px 0 12px}
+.color-palette button{min-height:44px;border:2px solid var(--line);border-radius:12px;padding:0}
+.color-palette button[data-color="#ffffff"]{border-color:#777}
+
+
+/* V6 - libreria free con cartelle */
+.folder-help{font-size:14px;line-height:1.45;color:var(--muted)}
+.folder-element-item small{color:var(--muted)}
+.folder-element-item .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;margin:4px 0;color:var(--gold);font-size:12px}
