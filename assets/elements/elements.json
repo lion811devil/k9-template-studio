@@ -1,0 +1,19 @@
+{
+  "elements": [
+    {
+      "id": "sample-rosette",
+      "name": "Coccarda oro",
+      "category": "coccarde",
+      "type": "rosette",
+      "src": ""
+    },
+    {
+      "id": "sample-frame",
+      "name": "Cornice oro/verde",
+      "category": "cornici",
+      "type": "frame",
+      "src": ""
+    }
+  ],
+  "instructions": "Carica PNG in assets/elements e aggiungi qui: {\"id\":\"nome-unico\",\"name\":\"Nome visibile\",\"category\":\"coccarde\",\"type\":\"image\",\"src\":\"assets/elements/file.png\"}"
+}
