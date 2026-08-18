@@ -13,13 +13,19 @@
     bodyText: "ha partecipato con profitto al percorso formativo",
     courseName: "CORSO DOGSITTER",
     place: "San Giuliano Milanese",
+    leftSignatureRole: "Il Docente",
+    leftSignatureName: "Nome Cognome",
     signatureRole: "Il Responsabile del Corso",
     signatureName: "Giovanni Napoletano",
     backgroundOpacity: 100,
     backgroundScale: 100,
+    backgroundX: W / 2,
+    backgroundY: H / 2,
+    backgroundLocked: false,
     logoScale: 100,
     logoX: W / 2,
-    logoY: 150
+    logoY: 145,
+    logoLocked: false
   };
 
   const state = {
@@ -29,7 +35,7 @@
     backgroundFitScale: 1
   };
 
-  const textIds = ["recipientName", "bodyText", "courseName", "place", "signatureRole", "signatureName"];
+  const textIds = ["recipientName", "bodyText", "courseName", "place", "leftSignatureRole", "leftSignatureName", "signatureRole", "signatureName"];
 
   function todayISO() {
     const d = new Date();
@@ -41,6 +47,34 @@
     $("status").textContent = text;
     clearTimeout(setStatus.timer);
     setStatus.timer = setTimeout(() => { $("status").textContent = "Pronto"; }, 1800);
+  }
+
+  function applyBackgroundLockUI() {
+    const locked = !!state.backgroundLocked;
+    ["backgroundOpacity","backgroundScale","backgroundX","backgroundY","fitBackground"].forEach(id => {
+      const el = $(id);
+      if (el) el.disabled = locked;
+    });
+    const btn = $("lockBackground");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(locked));
+      btn.textContent = locked ? "Sblocca sfondo" : "Blocca sfondo";
+      btn.classList.toggle("is-locked", locked);
+    }
+  }
+
+  function applyLogoLockUI() {
+    const locked = !!state.logoLocked;
+    ["logoScale","logoX","logoY"].forEach(id => {
+      const el = $(id);
+      if (el) el.disabled = locked;
+    });
+    const btn = $("lockLogo");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(locked));
+      btn.textContent = locked ? "Sblocca logo" : "Blocca logo";
+      btn.classList.toggle("is-locked", locked);
+    }
   }
 
   function escapeStored(value, fallback = "") {
@@ -75,22 +109,22 @@
     return Math.max(W / img.naturalWidth, H / img.naturalHeight);
   }
 
-  function drawImageCentered(img, scale, opacity = 1) {
+  function drawImagePositioned(img, scale, opacity = 1, centerX = W / 2, centerY = H / 2) {
     const iw = img.naturalWidth * scale;
     const ih = img.naturalHeight * scale;
     ctx.save();
     ctx.globalAlpha = opacity;
-    ctx.drawImage(img, (W - iw) / 2, (H - ih) / 2, iw, ih);
+    ctx.drawImage(img, centerX - iw / 2, centerY - ih / 2, iw, ih);
     ctx.restore();
   }
 
   function drawBase() {
-    ctx.fillStyle = "#fffdfa";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, W, H);
 
     if (state.backgroundImage) {
       const scale = state.backgroundFitScale * (state.backgroundScale / 100);
-      drawImageCentered(state.backgroundImage, scale, state.backgroundOpacity / 100);
+      drawImagePositioned(state.backgroundImage, scale, state.backgroundOpacity / 100, state.backgroundX, state.backgroundY);
     }
 
     // Cornice predefinita elegante e leggera.
@@ -139,51 +173,123 @@
     return lines.slice(0, 3);
   }
 
+  function fitItalicFont(text, maxWidth, startSize, minSize, weight = "600") {
+    const family = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
+    let size = startSize;
+    do {
+      ctx.font = `italic ${weight} ${size}px ${family}`;
+      if (ctx.measureText(text).width <= maxWidth) return size;
+      size -= 2;
+    } while (size > minSize);
+    return minSize;
+  }
+
+  function drawCenteredItalic(text, y, size, color, weight = "600", maxWidth = 1320) {
+    if (!text) return;
+    const family = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
+    size = fitItalicFont(text, maxWidth, size, Math.max(24, Math.round(size * .55)), weight);
+    ctx.font = `italic ${weight} ${size}px ${family}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, W / 2, y);
+  }
+
+  function fitSignatureFont(text, maxWidth, startSize, minSize) {
+    const family = '"Brush Script MT", "Segoe Script", "Snell Roundhand", "URW Chancery L", cursive';
+    let size = startSize;
+    do {
+      ctx.font = `500 ${size}px ${family}`;
+      if (ctx.measureText(text).width <= maxWidth) return size;
+      size -= 2;
+    } while (size > minSize);
+    return minSize;
+  }
+
+  function drawSignatureBlock(centerX, role, name) {
+    const ink = "#25221d";
+    const lineHalf = 215;
+    const maxWidth = lineHalf * 2 - 18;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Qualifica professionale sopra il blocco firma.
+    ctx.fillStyle = "#55524c";
+    const roleSize = fitFont(role, maxWidth, 26, 20, 'Georgia, "Times New Roman", serif', "700");
+    ctx.font = `700 ${roleSize}px Georgia, "Times New Roman", serif`;
+    ctx.fillText(role, centerX, 900);
+
+    // Riga firma.
+    const lineY = 980;
+    ctx.strokeStyle = "rgba(50,45,36,.62)";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(centerX - lineHalf, lineY);
+    ctx.lineTo(centerX + lineHalf, lineY);
+    ctx.stroke();
+
+    if (name) {
+      // Lo stesso nome viene reso automaticamente come firma manoscritta sulla riga.
+      const signatureFamily = '"Brush Script MT", "Segoe Script", "Snell Roundhand", "URW Chancery L", cursive';
+      const sigSize = fitSignatureFont(name, maxWidth, 54, 32);
+      ctx.font = `500 ${sigSize}px ${signatureFamily}`;
+      ctx.fillStyle = ink;
+      ctx.fillText(name, centerX, lineY - 14);
+
+      // Nome leggibile sotto la firma: deriva dallo stesso campo, nessun doppio inserimento.
+      const printedFamily = 'Georgia, "Times New Roman", serif';
+      const printedSize = fitFont(name, maxWidth, 25, 19, printedFamily, "900");
+      ctx.font = `900 ${printedSize}px ${printedFamily}`;
+      ctx.fillStyle = "#3d3a35";
+      ctx.fillText(name, centerX, 1025);
+    }
+    ctx.restore();
+  }
+
   function drawTextLayout() {
     const [title, subtitle] = $("documentType").value.split("|");
-    const ink = "#25221d";
-    const gold = "#765d32";
+    const ink = "#26231f";
+    const gold = "#735a2f";
 
-    drawCentered(title, 250, 86, "Georgia, serif", gold, "700");
-    drawCentered(subtitle, 326, 42, "Arial, sans-serif", ink, "600");
+    // Fascia superiore ampia e realmente libera per il logo.
+    // I testi iniziano più in basso e con dimensioni equilibrate da attestato.
+    drawCentered(title, 370, 82, 'Georgia, "Times New Roman", serif', gold, "900", 1380);
+    drawCentered(subtitle, 438, 40, 'Georgia, "Times New Roman", serif', ink, "700", 1260);
 
     ctx.save();
-    ctx.strokeStyle = "rgba(118,93,50,.55)";
+    ctx.strokeStyle = "rgba(115,90,47,.55)";
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(550, 375); ctx.lineTo(1050, 375); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(560, 482);
+    ctx.lineTo(1124, 482);
+    ctx.stroke();
     ctx.restore();
 
-    drawCentered($("recipientName").value.trim(), 475, 68, "Georgia, serif", ink, "700", 1250);
+    const recipient = $("recipientName").value.trim().toUpperCase();
+    drawCentered(recipient, 555, 72, 'Georgia, "Times New Roman", serif', ink, "900", 1340);
 
-    const bodyFont = "400 31px Arial, sans-serif";
-    const lines = wrapLines($("bodyText").value, 1120, bodyFont);
-    ctx.font = bodyFont; ctx.fillStyle = "#4b4a46"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    lines.forEach((line, i) => ctx.fillText(line, W / 2, 560 + i * 40));
+    const bodyFont = '500 32px Georgia, "Times New Roman", serif';
+    const lines = wrapLines($("bodyText").value, 1220, bodyFont);
+    ctx.font = bodyFont;
+    ctx.fillStyle = "#4b4740";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    lines.forEach((line, i) => ctx.fillText(line, W / 2, 635 + i * 40));
 
-    drawCentered($("courseName").value.trim(), 700, 47, "Arial, sans-serif", gold, "800", 1240);
+    drawCentered($("courseName").value.trim().toUpperCase(), 745, 48, 'Georgia, "Times New Roman", serif', gold, "900", 1280);
 
     const locationDate = [$("place").value.trim(), formatDate($("certificateDate").value)].filter(Boolean).join(" · ");
-    drawCentered(locationDate, 807, 26, "Arial, sans-serif", "#5f5d58", "500", 1100);
+    drawCentered(locationDate, 812, 28, 'Georgia, "Times New Roman", serif', "#4c4841", "700", 1160);
 
-    // Firma predefinita a destra.
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#55524c";
-    ctx.font = "500 22px Arial, sans-serif";
-    ctx.fillText($("signatureRole").value.trim(), 1245, 900);
-    ctx.strokeStyle = "rgba(50,45,36,.50)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(1050, 954); ctx.lineTo(1440, 954); ctx.stroke();
-    const sig = $("signatureName").value.trim();
-    const sigSize = fitFont(sig, 390, 27, 19, "Georgia, serif", "600");
-    ctx.font = `600 ${sigSize}px Georgia, serif`;
-    ctx.fillStyle = ink;
-    ctx.fillText(sig, 1245, 992);
+    drawSignatureBlock(375, $("leftSignatureRole").value.trim(), $("leftSignatureName").value.trim());
+    drawSignatureBlock(1309, $("signatureRole").value.trim(), $("signatureName").value.trim());
   }
 
   function drawLogo() {
     if (!state.logoImage) return;
     const img = state.logoImage;
-    const baseWidth = 200;
+    const baseWidth = 180;
     const ratio = img.naturalHeight / img.naturalWidth;
     const width = baseWidth * (state.logoScale / 100);
     const height = width * ratio;
@@ -219,22 +325,36 @@
     state.backgroundFitScale = coverScale(img);
     state.backgroundScale = 100;
     state.backgroundOpacity = 100;
+    state.backgroundLocked = false;
+    state.backgroundX = W / 2;
+    state.backgroundY = H / 2;
     $("backgroundScale").value = 100;
     $("backgroundOpacity").value = 100;
     $("backgroundScaleValue").value = "100%";
     $("backgroundOpacityValue").value = "100%";
+    $("backgroundX").value = 50;
+    $("backgroundY").value = 50;
+    $("backgroundXValue").value = "50%";
+    $("backgroundYValue").value = "50%";
     $("backgroundTools").classList.remove("hidden");
+    applyBackgroundLockUI();
     setStatus("Sfondo caricato");
   }
 
   function setLogo(img) {
     state.logoImage = img;
     state.logoScale = 100;
+    state.logoLocked = false;
     state.logoX = W / 2;
     state.logoY = 150;
     $("logoScale").value = 100;
     $("logoScaleValue").value = "100%";
+    $("logoX").value = 50;
+    $("logoY").value = Math.round((state.logoY / H) * 100);
+    $("logoXValue").value = "50%";
+    $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
     $("logoTools").classList.remove("hidden");
+    applyLogoLockUI();
     setStatus("Logo caricato");
   }
 
@@ -307,32 +427,6 @@
     }
   }
 
-  function moveLogo(direction, amount = 18) {
-    if (!state.logoImage) return;
-    if (direction === "up") state.logoY -= amount;
-    if (direction === "down") state.logoY += amount;
-    if (direction === "left") state.logoX -= amount;
-    if (direction === "right") state.logoX += amount;
-    state.logoX = Math.max(0, Math.min(W, state.logoX));
-    state.logoY = Math.max(0, Math.min(H, state.logoY));
-    render();
-  }
-
-  function addPressMove(button) {
-    const direction = button.dataset.move;
-    let interval = null;
-    const start = e => {
-      e.preventDefault();
-      moveLogo(direction);
-      interval = setInterval(() => moveLogo(direction, 12), 85);
-    };
-    const stop = () => { clearInterval(interval); interval = null; };
-    button.addEventListener("pointerdown", start);
-    button.addEventListener("pointerup", stop);
-    button.addEventListener("pointerleave", stop);
-    button.addEventListener("pointercancel", stop);
-  }
-
   $("backgroundFile").addEventListener("change", e => loadImage(e.target.files[0], setBackground));
   $("logoFile").addEventListener("change", e => loadImage(e.target.files[0], setLogo));
 
@@ -346,14 +440,39 @@
     $("backgroundScaleValue").value = `${state.backgroundScale}%`;
     render();
   });
-  $("fitBackground").addEventListener("click", () => {
-    state.backgroundScale = 100;
-    $("backgroundScale").value = 100;
-    $("backgroundScaleValue").value = "100%";
+  $("backgroundX").addEventListener("input", e => {
+    const value = Number(e.target.value);
+    state.backgroundX = (value / 100) * W;
+    $("backgroundXValue").value = `${value}%`;
     render();
   });
+  $("backgroundY").addEventListener("input", e => {
+    const value = Number(e.target.value);
+    state.backgroundY = (value / 100) * H;
+    $("backgroundYValue").value = `${value}%`;
+    render();
+  });
+  $("fitBackground").addEventListener("click", () => {
+    state.backgroundScale = 100;
+    state.backgroundX = W / 2;
+    state.backgroundY = H / 2;
+    $("backgroundScale").value = 100;
+    $("backgroundScaleValue").value = "100%";
+    $("backgroundX").value = 50;
+    $("backgroundY").value = 50;
+    $("backgroundXValue").value = "50%";
+    $("backgroundYValue").value = "50%";
+    render();
+  });
+  $("lockBackground").addEventListener("click", () => {
+    state.backgroundLocked = !state.backgroundLocked;
+    applyBackgroundLockUI();
+    setStatus(state.backgroundLocked ? "Sfondo bloccato" : "Sfondo sbloccato");
+  });
+
   $("removeBackground").addEventListener("click", () => {
     state.backgroundImage = null;
+    state.backgroundLocked = false;
     $("backgroundFile").value = "";
     $("backgroundTools").classList.add("hidden");
     render();
@@ -364,10 +483,36 @@
     $("logoScaleValue").value = `${state.logoScale}%`;
     render();
   });
-  document.querySelectorAll("[data-move]").forEach(addPressMove);
-  $("centerLogo").addEventListener("click", () => { state.logoX = W / 2; state.logoY = 150; render(); });
+  $("logoX").addEventListener("input", e => {
+    const value = Number(e.target.value);
+    state.logoX = W * (value / 100);
+    $("logoXValue").value = `${value}%`;
+    render();
+  });
+  $("logoY").addEventListener("input", e => {
+    const value = Number(e.target.value);
+    state.logoY = H * (value / 100);
+    $("logoYValue").value = `${value}%`;
+    render();
+  });
+  $("centerLogo").addEventListener("click", () => {
+    state.logoX = W / 2;
+    state.logoY = 150;
+    $("logoX").value = 50;
+    $("logoY").value = Math.round((state.logoY / H) * 100);
+    $("logoXValue").value = "50%";
+    $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
+    render();
+  });
+  $("lockLogo").addEventListener("click", () => {
+    state.logoLocked = !state.logoLocked;
+    applyLogoLockUI();
+    setStatus(state.logoLocked ? "Logo bloccato" : "Logo sbloccato");
+  });
+
   $("removeLogo").addEventListener("click", () => {
     state.logoImage = null;
+    state.logoLocked = false;
     $("logoFile").value = "";
     $("logoTools").classList.add("hidden");
     render();
@@ -389,6 +534,9 @@
     state.backgroundImage = null; state.logoImage = null;
     state.backgroundScale = 100; state.backgroundOpacity = 100;
     state.logoScale = 100; state.logoX = W / 2; state.logoY = 150;
+    $("logoScale").value = 100; $("logoScaleValue").value = "100%";
+    $("logoX").value = 50; $("logoY").value = Math.round((state.logoY / H) * 100);
+    $("logoXValue").value = "50%"; $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
     $("backgroundTools").classList.add("hidden");
     $("logoTools").classList.add("hidden");
     $("backgroundFile").value = ""; $("logoFile").value = "";
