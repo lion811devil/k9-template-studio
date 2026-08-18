@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3eb">
+  <meta name="description" content="Generatore semplice di attestati e certificati K9">
+  <title>K9 Certificati</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">K9</span>
+      <div>
+        <h1>Certificati</h1>
+        <p>Crea il documento in pochi passaggi</p>
+      </div>
+    </div>
+    <button id="resetAll" class="button ghost small" type="button">Ripristina</button>
+  </header>
+
+  <main class="layout">
+    <section class="preview-panel preview-fixed" aria-label="Anteprima certificato bloccata">
+      <div class="preview-head">
+        <div>
+          <span class="eyebrow">ANTEPRIMA</span>
+          <strong>Anteprima A4 reale 297 × 210 mm · sempre visibile</strong>
+        </div>
+        <span id="status" class="status">Pronto</span>
+      </div>
+      <div class="canvas-wrap">
+        <div class="a4-stage">
+          <canvas id="certificateCanvas" width="1683" height="1190"></canvas>
+        </div>
+      </div>
+      <button id="downloadPdf" class="button primary pdf-button" type="button">Scarica PDF</button>
+    </section>
+
+    <section class="controls" aria-label="Modifica certificato">
+      <details class="panel" open>
+        <summary>
+          <span class="step">1</span>
+          <span><strong>Sfondo</strong><small>Carica la grafica del certificato</small></span>
+        </summary>
+        <div class="panel-body">
+          <label class="upload" for="backgroundFile">
+            <span>Carica immagine di sfondo</span>
+            <small>JPG, PNG o WEBP</small>
+          </label>
+          <input id="backgroundFile" type="file" accept="image/*" hidden>
+
+          <div id="backgroundTools" class="image-tools hidden">
+            <label class="range-row">
+              <span>Trasparenza <output id="backgroundOpacityValue">100%</output></span>
+              <input id="backgroundOpacity" type="range" min="10" max="100" value="100">
+            </label>
+            <label class="range-row">
+              <span>Dimensione <output id="backgroundScaleValue">100%</output></span>
+              <input id="backgroundScale" type="range" min="50" max="180" value="100">
+            </label>
+            <div class="position-controls" aria-label="Posizione sfondo">
+              <label class="range-row position-row">
+                <span>Posizione orizzontale <output id="backgroundXValue">50%</output></span>
+                <input id="backgroundX" type="range" min="0" max="100" value="50">
+                <small>Sinistra ↔ Destra</small>
+              </label>
+              <label class="range-row position-row">
+                <span>Posizione verticale <output id="backgroundYValue">50%</output></span>
+                <input id="backgroundY" type="range" min="0" max="100" value="50">
+                <small>Alto ↕ Basso</small>
+              </label>
+            </div>
+            <div class="two-buttons">
+              <button id="fitBackground" class="button secondary" type="button">Adatta al foglio</button>
+              <button id="lockBackground" class="button lock-button" type="button" aria-pressed="false">Blocca sfondo</button>
+              <button id="removeBackground" class="button danger-soft" type="button">Rimuovi</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>
+          <span class="step">2</span>
+          <span><strong>Testi</strong><small>Nome, data e firme si aggiornano in tempo reale</small></span>
+        </summary>
+        <div class="panel-body form-grid">
+          <label>Tipo documento
+            <select id="documentType">
+              <option value="ATTESTATO|DI PARTECIPAZIONE">Attestato di partecipazione</option>
+              <option value="ATTESTATO|DI FREQUENZA">Attestato di frequenza</option>
+              <option value="CERTIFICATO|DI PARTECIPAZIONE">Certificato di partecipazione</option>
+              <option value="CERTIFICATO|DI FREQUENZA">Certificato di frequenza</option>
+            </select>
+          </label>
+
+          <label class="wide">Nome e cognome
+            <input id="recipientName" value="Mario Rossi" autocomplete="off">
+          </label>
+
+          <label class="wide">Testo centrale
+            <textarea id="bodyText" rows="3">ha partecipato con profitto al percorso formativo</textarea>
+          </label>
+
+          <label class="wide">Corso / qualifica
+            <input id="courseName" value="CORSO DOGSITTER" autocomplete="off">
+          </label>
+
+          <label>Luogo
+            <input id="place" value="San Giuliano Milanese" autocomplete="off">
+          </label>
+
+          <label>Data
+            <input id="certificateDate" type="date">
+          </label>
+
+          <div class="signature-fields wide">
+            <div class="signature-fields-title">Firma sinistra</div>
+            <label>Ruolo / qualifica
+              <input id="leftSignatureRole" value="Il Docente" autocomplete="off">
+            </label>
+            <label>Nome e firma automatica
+              <input id="leftSignatureName" value="Nome Cognome" autocomplete="off">
+            </label>
+          </div>
+
+          <div class="signature-fields wide">
+            <div class="signature-fields-title">Firma destra</div>
+            <label>Ruolo / qualifica
+              <input id="signatureRole" value="Il Responsabile del Corso" autocomplete="off">
+            </label>
+            <label>Nome e firma automatica
+              <input id="signatureName" value="Giovanni Napoletano" autocomplete="off">
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>
+          <span class="step">3</span>
+          <span><strong>Loghi</strong><small>Usa sempre gli stessi comandi per ogni logo</small></span>
+        </summary>
+        <div class="panel-body">
+          <label class="upload" for="logoFile">
+            <span id="logoUploadLabel">Carica logo</span>
+            <small>Meglio PNG con sfondo trasparente</small>
+          </label>
+          <input id="logoFile" type="file" accept="image/*" hidden>
+
+          <div id="logoManager" class="logo-manager hidden">
+            <label>Logo attivo
+              <select id="logoSelector" aria-label="Seleziona logo da modificare"></select>
+            </label>
+            <small id="logoCount">0 loghi inseriti</small>
+          </div>
+
+          <div id="logoTools" class="image-tools hidden">
+            <label class="range-row">
+              <span>Dimensione <output id="logoScaleValue">100%</output></span>
+              <input id="logoScale" type="range" min="20" max="300" value="100">
+            </label>
+
+            <div class="position-controls" aria-label="Posizione logo">
+              <label class="range-row position-row">
+                <span>Posizione orizzontale <output id="logoXValue">50%</output></span>
+                <input id="logoX" type="range" min="0" max="100" value="50">
+                <small>Sinistra ↔ Destra</small>
+              </label>
+              <label class="range-row position-row">
+                <span>Posizione verticale <output id="logoYValue">13%</output></span>
+                <input id="logoY" type="range" min="0" max="100" value="13">
+                <small>Alto ↕ Basso</small>
+              </label>
+            </div>
+            <div class="two-buttons">
+              <button id="centerLogo" class="button secondary" type="button">Posizione iniziale</button>
+              <button id="removeLogo" class="button danger-soft" type="button">Rimuovi logo</button>
+              <button id="lockLogo" class="button lock-button" type="button" aria-pressed="false">Blocca logo</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <section class="finish-card">
+        <span class="step done">4</span>
+        <div>
+          <strong>Fatto</strong>
+          <p>Controlla l'anteprima e genera il PDF.</p>
+        </div>
+        <button id="downloadPdfBottom" class="button primary" type="button">Crea PDF</button>
+      </section>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
