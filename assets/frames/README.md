@@ -1,1 +1,0 @@
-Cartella cornici attestati.
