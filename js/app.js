@@ -31,8 +31,9 @@
   const state = {
     ...defaults,
     backgroundImage: null,
-    logoImage: null,
-    backgroundFitScale: 1
+    backgroundFitScale: 1,
+    logos: [],
+    activeLogoIndex: -1
   };
 
   const textIds = ["recipientName", "bodyText", "courseName", "place", "leftSignatureRole", "leftSignatureName", "signatureRole", "signatureName"];
@@ -63,18 +64,64 @@
     }
   }
 
+  function getActiveLogo() {
+    return state.activeLogoIndex >= 0 ? state.logos[state.activeLogoIndex] || null : null;
+  }
+
+  function updateLogoManagerUI() {
+    const selector = $("logoSelector");
+    const count = state.logos.length;
+    selector.innerHTML = "";
+    state.logos.forEach((logo, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = `Logo ${index + 1}${logo.locked ? " · bloccato" : ""}`;
+      selector.appendChild(option);
+    });
+    if (state.activeLogoIndex >= 0 && state.activeLogoIndex < count) {
+      selector.value = String(state.activeLogoIndex);
+    }
+    $("logoManager").classList.toggle("hidden", count === 0);
+    $("logoCount").textContent = count === 1 ? "1 logo inserito" : `${count} loghi inseriti`;
+    $("logoUploadLabel").textContent = count ? "Carica un altro logo" : "Carica logo";
+  }
+
+  function syncLogoControls() {
+    const logo = getActiveLogo();
+    if (!logo) {
+      $("logoTools").classList.add("hidden");
+      updateLogoManagerUI();
+      return;
+    }
+    $("logoScale").value = logo.scale;
+    $("logoScaleValue").value = `${Math.round(logo.scale)}%`;
+    const xPct = Math.round((logo.x / W) * 100);
+    const yPct = Math.round((logo.y / H) * 100);
+    $("logoX").value = xPct;
+    $("logoY").value = yPct;
+    $("logoXValue").value = `${xPct}%`;
+    $("logoYValue").value = `${yPct}%`;
+    $("logoTools").classList.remove("hidden");
+    updateLogoManagerUI();
+    applyLogoLockUI();
+  }
+
   function applyLogoLockUI() {
-    const locked = !!state.logoLocked;
-    ["logoScale","logoX","logoY"].forEach(id => {
+    const logo = getActiveLogo();
+    const locked = !!(logo && logo.locked);
+    ["logoScale","logoX","logoY","centerLogo"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked;
+      if (el) el.disabled = !logo || locked;
     });
     const btn = $("lockLogo");
     if (btn) {
+      btn.disabled = !logo;
       btn.setAttribute("aria-pressed", String(locked));
       btn.textContent = locked ? "Sblocca logo" : "Blocca logo";
       btn.classList.toggle("is-locked", locked);
     }
+    const removeBtn = $("removeLogo");
+    if (removeBtn) removeBtn.disabled = !logo;
   }
 
   function escapeStored(value, fallback = "") {
@@ -286,22 +333,24 @@
     drawSignatureBlock(1309, $("signatureRole").value.trim(), $("signatureName").value.trim());
   }
 
-  function drawLogo() {
-    if (!state.logoImage) return;
-    const img = state.logoImage;
-    const baseWidth = 180;
-    const ratio = img.naturalHeight / img.naturalWidth;
-    const width = baseWidth * (state.logoScale / 100);
-    const height = width * ratio;
-    ctx.save();
-    ctx.drawImage(img, state.logoX - width / 2, state.logoY - height / 2, width, height);
-    ctx.restore();
+  function drawLogos() {
+    state.logos.forEach(logo => {
+      if (!logo || !logo.image) return;
+      const img = logo.image;
+      const baseWidth = 180;
+      const ratio = img.naturalHeight / img.naturalWidth;
+      const width = baseWidth * (logo.scale / 100);
+      const height = width * ratio;
+      ctx.save();
+      ctx.drawImage(img, logo.x - width / 2, logo.y - height / 2, width, height);
+      ctx.restore();
+    });
   }
 
   function render() {
     drawBase();
     drawTextLayout();
-    drawLogo();
+    drawLogos();
   }
 
   function loadImage(file, onLoad) {
@@ -342,20 +391,18 @@
   }
 
   function setLogo(img) {
-    state.logoImage = img;
-    state.logoScale = 100;
-    state.logoLocked = false;
-    state.logoX = W / 2;
-    state.logoY = 150;
-    $("logoScale").value = 100;
-    $("logoScaleValue").value = "100%";
-    $("logoX").value = 50;
-    $("logoY").value = Math.round((state.logoY / H) * 100);
-    $("logoXValue").value = "50%";
-    $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
-    $("logoTools").classList.remove("hidden");
-    applyLogoLockUI();
-    setStatus("Logo caricato");
+    const logo = {
+      image: img,
+      scale: 100,
+      x: W / 2,
+      y: 150,
+      locked: false
+    };
+    state.logos.push(logo);
+    state.activeLogoIndex = state.logos.length - 1;
+    $("logoFile").value = "";
+    syncLogoControls();
+    setStatus(`Logo ${state.activeLogoIndex + 1} caricato`);
   }
 
   function safeFilename() {
@@ -479,42 +526,65 @@
   });
 
   $("logoScale").addEventListener("input", e => {
-    state.logoScale = Number(e.target.value);
-    $("logoScaleValue").value = `${state.logoScale}%`;
+    const logo = getActiveLogo();
+    if (!logo || logo.locked) return;
+    logo.scale = Number(e.target.value);
+    $("logoScaleValue").value = `${logo.scale}%`;
     render();
   });
+
   $("logoX").addEventListener("input", e => {
+    const logo = getActiveLogo();
+    if (!logo || logo.locked) return;
     const value = Number(e.target.value);
-    state.logoX = W * (value / 100);
+    logo.x = (value / 100) * W;
     $("logoXValue").value = `${value}%`;
     render();
   });
+
   $("logoY").addEventListener("input", e => {
+    const logo = getActiveLogo();
+    if (!logo || logo.locked) return;
     const value = Number(e.target.value);
-    state.logoY = H * (value / 100);
+    logo.y = (value / 100) * H;
     $("logoYValue").value = `${value}%`;
     render();
   });
+
   $("centerLogo").addEventListener("click", () => {
-    state.logoX = W / 2;
-    state.logoY = 150;
-    $("logoX").value = 50;
-    $("logoY").value = Math.round((state.logoY / H) * 100);
-    $("logoXValue").value = "50%";
-    $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
+    const logo = getActiveLogo();
+    if (!logo || logo.locked) return;
+    logo.x = W / 2;
+    logo.y = 150;
+    syncLogoControls();
     render();
   });
+
   $("lockLogo").addEventListener("click", () => {
-    state.logoLocked = !state.logoLocked;
-    applyLogoLockUI();
-    setStatus(state.logoLocked ? "Logo bloccato" : "Logo sbloccato");
+    const logo = getActiveLogo();
+    if (!logo) return;
+    logo.locked = !logo.locked;
+    syncLogoControls();
+    setStatus(logo.locked ? `Logo ${state.activeLogoIndex + 1} bloccato` : `Logo ${state.activeLogoIndex + 1} sbloccato`);
   });
 
   $("removeLogo").addEventListener("click", () => {
-    state.logoImage = null;
-    state.logoLocked = false;
-    $("logoFile").value = "";
-    $("logoTools").classList.add("hidden");
+    if (!getActiveLogo()) return;
+    const removedNumber = state.activeLogoIndex + 1;
+    state.logos.splice(state.activeLogoIndex, 1);
+    if (!state.logos.length) {
+      state.activeLogoIndex = -1;
+    } else {
+      state.activeLogoIndex = Math.min(state.activeLogoIndex, state.logos.length - 1);
+    }
+    syncLogoControls();
+    render();
+    setStatus(`Logo ${removedNumber} rimosso`);
+  });
+
+  $("logoSelector").addEventListener("change", e => {
+    state.activeLogoIndex = Number(e.target.value);
+    syncLogoControls();
     render();
   });
 
@@ -531,15 +601,14 @@
     $("documentType").value = defaults.documentType;
     textIds.forEach(id => { $(id).value = defaults[id]; });
     $("certificateDate").value = todayISO();
-    state.backgroundImage = null; state.logoImage = null;
+    state.backgroundImage = null;
     state.backgroundScale = 100; state.backgroundOpacity = 100;
-    state.logoScale = 100; state.logoX = W / 2; state.logoY = 150;
-    $("logoScale").value = 100; $("logoScaleValue").value = "100%";
-    $("logoX").value = 50; $("logoY").value = Math.round((state.logoY / H) * 100);
-    $("logoXValue").value = "50%"; $("logoYValue").value = `${Math.round((state.logoY / H) * 100)}%`;
+    state.logos = []; state.activeLogoIndex = -1;
     $("backgroundTools").classList.add("hidden");
     $("logoTools").classList.add("hidden");
+    $("logoManager").classList.add("hidden");
     $("backgroundFile").value = ""; $("logoFile").value = "";
+    updateLogoManagerUI();
     render(); setStatus("Modello ripristinato");
   });
 
