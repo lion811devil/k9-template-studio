@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101e35">
+  <meta name="description" content="Generatore semplice di attestati e certificati K9">
+  <title>K9 Certificati</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="mode-quick">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">K9</span>
+      <div>
+        <h1>Certificati</h1>
+        <p>Studio attestati · Edizione 4.2.6 · modalità rapida e completa</p>
+      </div>
+    </div>
+    <div class="header-actions"><span class="release-tag">STUDIO 4.2.6</span><button id="resetAll" class="button ghost small" type="button">Ripristina</button></div>
+  </header>
+
+  <main class="layout">
+    <section class="preview-panel preview-fixed" aria-label="Anteprima certificato bloccata">
+      <div class="preview-head">
+        <div>
+          <span class="eyebrow">ANTEPRIMA</span>
+          <strong id="previewHeading">Anteprima A4 297 × 210 mm · sempre visibile</strong>
+        </div>
+        <div class="preview-meta"><span id="saveIndicator" class="save-indicator" aria-live="polite">Archivio locale</span><span id="status" class="status" role="status" aria-live="polite">Pronto</span></div>
+      </div>
+      <div class="preview-toolbar">
+        <span id="previewMeasure" class="preview-measure">A4 ORIZZONTALE · 297 × 210 MM</span>
+        <label class="orientation-picker" for="pageOrientation">Formato
+          <select id="pageOrientation" aria-label="Orientamento A4 del progetto">
+            <option value="landscape">A4 orizzontale</option>
+            <option value="portrait">A4 verticale</option>
+          </select>
+        </label>
+        <div class="preview-tools"><label class="guide-label"><input id="showGuides" type="checkbox"> Guide di sicurezza</label><button id="openPreview" type="button" class="button ghost small">Ingrandisci</button></div>
+      </div>
+      <div class="canvas-wrap">
+        <div class="a4-stage">
+          <canvas id="certificateCanvas" width="1683" height="1190" aria-label="Anteprima del certificato"></canvas>
+        </div>
+      </div>
+      <div id="layoutWarning" class="layout-warning hidden" role="alert"></div>
+      <div id="printCheck" class="print-check" aria-live="polite">Verifica del documento in corso…</div>
+      <button id="downloadPdf" class="button primary pdf-button" type="button">Scarica PDF</button>
+    </section>
+
+    <section class="controls" aria-label="Modifica certificato">
+      <div class="mode-switch" role="group" aria-label="Modalità di lavoro">
+        <div class="mode-switch-title"><strong>Come vuoi lavorare?</strong><small>Le funzioni e i dati restano gli stessi</small></div>
+        <div class="mode-buttons">
+          <button id="modeQuick" type="button" class="mode-button" aria-pressed="true">Rapida</button>
+          <button id="modeFull" type="button" class="mode-button" aria-pressed="false">Completa</button>
+        </div>
+      </div>
+      <section class="quick-workflow" id="quickWorkflow" aria-label="Creazione rapida attestato">
+        <div class="quick-title"><span class="quick-icon" aria-hidden="true">K9</span><div><strong>Crea un attestato</strong><small>Compila i campi essenziali. Il resto viene dal modello.</small></div></div>
+        <div class="quick-fields">
+          <label>Disciplina
+            <select id="quickDiscipline">
+              <option value="">Scegli la disciplina</option>
+              <option value="DETECTION">Detection</option>
+              <option value="MANTRAILING">Mantrailing</option>
+              <option value="HRDD">HRDD</option>
+              <option value="DOGSITTER">Dogsitter</option>
+              <option value="NOSEWORK">Nosework</option>
+              <option value="EDUCAZIONE_CINOFILA">Educazione cinofila</option>
+              <option value="OBEDIENCE">Obedience</option>
+              <option value="RECUPERO_COMPORTAMENTALE">Recupero comportamentale</option>
+              <option value="PROTEZIONE_CIVILE">Protezione civile</option>
+              <option value="ALTRO">Altra disciplina (personalizzabile)</option>
+            </select>
+          </label>
+          <label id="quickCustomDisciplineLabel" class="hidden">Nome altra disciplina
+            <input id="quickCustomDiscipline" type="text" maxlength="70" placeholder="Es. RICERCA OLFATTIVA">
+          </label>
+          <label>Corso / qualifica
+            <input id="quickCourseName" type="text" autocomplete="off" placeholder="Es. CORSO DETECTION">
+          </label>
+          <label>Nome e cognome
+            <input id="quickRecipientName" type="text" autocomplete="off" placeholder="Es. Mario Rossi">
+          </label>
+          <label>Data dell'attestato
+            <input id="quickCertificateDate" type="date">
+          </label>
+        </div>
+        <div id="quickCode" class="quick-code"><span id="quickCodeMode">Codice automatico</span><output id="quickCodePreview" aria-live="polite">Inserisci disciplina, data e nominativo</output><button id="quickEnableAuto" type="button" class="button secondary small hidden">Attiva codice automatico</button></div>
+        <div class="quick-template">
+          <div><strong>Modello per disciplina</strong><small id="quickTemplateInfo" aria-live="polite">Scegli una disciplina per verificarne il modello salvato</small></div>
+          <div class="quick-template-buttons">
+            <button id="quickLoadTemplate" type="button" class="button secondary">Carica modello</button>
+            <button id="quickSaveTemplate" type="button" class="button ghost">Salva come modello</button>
+          </div>
+          <small>Un modello conserva formato A4, grafica, loghi, firme e testi. Caricandolo mantieni il nominativo e la data attuali.</small>
+        </div>
+        <div class="quick-pdf-actions">
+          <button id="quickDownloadPdf" type="button" class="button primary">Crea PDF attestato</button>
+          <button id="quickOpenBatch" type="button" class="button secondary">Più corsisti</button>
+        </div>
+        <details class="quick-batch" id="quickBatchPanel">
+          <summary>PDF multipagina · elenco corsisti</summary>
+          <div class="quick-batch-inner">
+            <label>Un nominativo per riga (massimo 30)<textarea id="quickBatchNames" rows="4" placeholder="Mario Rossi&#10;Anna Bianchi"></textarea></label>
+            <button id="quickDownloadBatch" type="button" class="button primary">Prepara PDF multipagina</button>
+            <a id="quickReadyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
+            <p class="quick-batch-help">Dopo la preparazione apparirà qui il collegamento per scaricare il documento.</p>
+          </div>
+        </details>
+        <button id="quickCustomize" class="quick-customize" type="button">Apri tutte le personalizzazioni</button>
+      </section>
+      <div class="controls-header"><span>PERSONALIZZA IL CERTIFICATO</span><button type="button" class="button ghost small" id="collapseSections">Chiudi pannelli</button></div>
+      <nav class="quick-nav" aria-label="Accesso rapido ai pannelli">
+        <button class="quick-link" type="button" data-panel-index="0">Progetti</button>
+        <button class="quick-link" type="button" data-panel-index="1">Stile</button>
+        <button class="quick-link" type="button" data-panel-index="3">Testi</button>
+        <button class="quick-link" type="button" data-panel-index="4">Loghi</button>
+        <button class="quick-link" type="button" data-panel-index="5">Multipli</button>
+      </nav>
+      <details class="panel" open>
+        <summary><span class="step">P</span><span><strong>Progetti</strong><small>Salvataggio automatico, backup protetti e archivio</small></span></summary>
+        <div class="panel-body project-area">
+          <label>Nome progetto
+            <input id="projectName" type="text" maxlength="100" placeholder="Es. Attestato Dogsitter 2026" autocomplete="off">
+          </label>
+          <div class="two-buttons">
+            <button id="saveProject" type="button" class="button primary">Salva progetto</button>
+            <button id="duplicateProject" type="button" class="button secondary">Duplica come nuovo</button>
+          </div>
+          <label>Progetti salvati su questo dispositivo
+            <select id="projectSelector"><option value="">Seleziona un progetto salvato</option></select>
+          </label>
+          <small>Seleziona e apri un progetto già salvato: ritroverai impaginazione, testi, loghi e orientamento A4. Non serve crearne uno nuovo.</small>
+          <div class="two-buttons">
+            <button id="openProject" type="button" class="button secondary">Apri progetto</button>
+            <button id="deleteProject" type="button" class="button danger-soft">Elimina salvato</button>
+          </div>
+          <div class="two-buttons">
+            <button id="exportProject" type="button" class="button ghost">Esporta progetto</button>
+            <label class="button ghost import-button" for="importProject">Importa progetto</label>
+            <input id="importProject" type="file" accept="application/json,.json" hidden>
+          </div>
+          <div class="archive-actions">
+            <button id="exportArchive" type="button" class="button secondary">Backup di tutti i progetti</button>
+            <label class="button ghost import-button" for="importArchive">Ripristina archivio</label>
+            <input id="importArchive" type="file" accept="application/json,.json" hidden>
+          </div>
+          <p class="help-text"><strong>Salvataggio automatico:</strong> le modifiche sono conservate nel progetto aperto. Se cambi tra A4 verticale e orizzontale su un progetto già salvato, puoi confermare la creazione di una copia indipendente senza sovrascrivere l’originale. La copia di lavoro viene comunque salvata.</p>
+          <div class="backup-protection">
+            <label class="backup-check"><input id="encryptBackup" type="checkbox" checked> Proteggi i nuovi backup JSON con password</label>
+            <label>Password dei backup <input id="backupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+            <small>La password non viene conservata. Se la perdi, non sarà possibile riaprire il backup cifrato. I backup V2–V4 non protetti rimangono importabili.</small>
+          </div>
+          <div class="registry-panel">
+            <strong>Registro locale delle esportazioni</strong>
+            <p id="exportsSummary" class="help-text" aria-live="polite">Caricamento registro…</p>
+            <ul id="exportsList" class="registry-list"></ul>
+            <button id="exportRegistry" class="button secondary" type="button">Esporta registro CSV</button>
+            <small>Registro solo su questo dispositivo, non sincronizzato. Un codice già utilizzato attiva una richiesta di conferma, non un blocco permanente.</small>
+          </div>
+          <p class="help-text">I progetti e le immagini restano su questo dispositivo. Il file di backup può contenere nominativi e firme: usa la password e conserva il file in modo sicuro.</p>
+        </div>
+      </details>
+      <details class="panel" open>
+        <summary><span class="step step-design">D</span><span><strong>Design e stile</strong><small>Temi, cornice, colori e proporzioni dei testi</small></span></summary>
+        <div class="panel-body design-area">
+          <p class="mini-heading">Scegli uno stile grafico</p>
+          <div class="theme-grid" role="group" aria-label="Temi grafici">
+            <button type="button" class="theme-choice" data-theme="classic" aria-pressed="true"><span class="theme-preview theme-classic"></span><strong>Classico</strong><small>Oro</small></button>
+            <button type="button" class="theme-choice" data-theme="navy" aria-pressed="false"><span class="theme-preview theme-navy"></span><strong>Istituzionale</strong><small>Blu</small></button>
+            <button type="button" class="theme-choice" data-theme="forest" aria-pressed="false"><span class="theme-preview theme-forest"></span><strong>Naturale</strong><small>Verde</small></button>
+            <button type="button" class="theme-choice" data-theme="burgundy" aria-pressed="false"><span class="theme-preview theme-burgundy"></span><strong>Prestigio</strong><small>Bordeaux</small></button>
+            <button type="button" class="theme-choice" data-theme="minimal" aria-pressed="false"><span class="theme-preview theme-minimal"></span><strong>Minimal</strong><small>Grafite</small></button>
+          </div>
+          <div class="design-settings">
+            <label>Colore principale <input id="accentColor" type="color" value="#735a2f" aria-label="Colore titolo, corso e cornice"></label>
+            <label>Colore testi <input id="inkColor" type="color" value="#26231f" aria-label="Colore principale dei testi"></label>
+            <label class="full-field">Cornice
+              <select id="frameStyle"><option value="double">Doppia classica</option><option value="single">Singola sottile</option><option value="corners">Angoli moderni</option><option value="none">Senza cornice</option></select>
+            </label>
+            <label class="full-field range-row">
+              <span>Dimensione dei testi <output id="fontScaleValue">100%</output></span>
+              <input id="fontScale" type="range" min="85" max="110" value="100" step="1">
+            </label>
+          </div>
+          <p class="help-text">I colori, la cornice e le dimensioni vengono salvati con il progetto e riprodotti nel PDF.</p>
+        </div>
+      </details>
+      <details class="panel" open>
+        <summary>
+          <span class="step">1</span>
+          <span><strong>Sfondo</strong><small>Carica la grafica del certificato</small></span>
+        </summary>
+        <div class="panel-body">
+          <label class="upload" for="backgroundFile">
+            <span>Carica immagine di sfondo</span>
+            <small>JPG, PNG o WEBP</small>
+          </label>
+          <input id="backgroundFile" type="file" accept="image/*" hidden>
+
+          <div id="backgroundTools" class="image-tools hidden">
+            <label class="range-row">
+              <span>Trasparenza <output id="backgroundOpacityValue">100%</output></span>
+              <input id="backgroundOpacity" type="range" min="10" max="100" value="100">
+            </label>
+            <label class="range-row">
+              <span>Dimensione <output id="backgroundScaleValue">100%</output></span>
+              <input id="backgroundScale" type="range" min="50" max="180" value="100">
+            </label>
+            <div class="position-controls" aria-label="Posizione sfondo">
+              <label class="range-row position-row">
+                <span>Posizione orizzontale <output id="backgroundXValue">50%</output></span>
+                <input id="backgroundX" type="range" min="0" max="100" value="50">
+                <small>Sinistra ↔ Destra</small>
+              </label>
+              <label class="range-row position-row">
+                <span>Posizione verticale <output id="backgroundYValue">50%</output></span>
+                <input id="backgroundY" type="range" min="0" max="100" value="50">
+                <small>Alto ↕ Basso</small>
+              </label>
+            </div>
+            <div class="two-buttons">
+              <button id="fitBackground" class="button secondary" type="button">Adatta al foglio</button>
+              <button id="lockBackground" class="button lock-button" type="button" aria-pressed="false">Blocca sfondo</button>
+              <button id="removeBackground" class="button danger-soft" type="button">Rimuovi</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>
+          <span class="step">2</span>
+          <span><strong>Testi</strong><small>Nome, data e firme si aggiornano in tempo reale</small></span>
+        </summary>
+        <div class="panel-body form-grid">
+          <label>Tipo documento
+            <select id="documentType">
+              <option value="ATTESTATO|DI PARTECIPAZIONE">Attestato di partecipazione</option>
+              <option value="ATTESTATO|DI FREQUENZA">Attestato di frequenza</option>
+              <option value="CERTIFICATO|DI PARTECIPAZIONE">Certificato di partecipazione</option>
+              <option value="CERTIFICATO|DI FREQUENZA">Certificato di frequenza</option>
+              <option value="ATTESTATO|DI IDONEITÀ">Attestato di idoneità</option>
+              <option value="ATTESTATO|DI MERITO">Attestato di merito</option>
+              <option value="CERTIFICATO|DI COMPLETAMENTO">Certificato di completamento</option>
+              <option value="ATTESTATO|DI QUALIFICA">Attestato di qualifica</option>
+            </select>
+          </label>
+
+          <label class="wide">Nome e cognome
+            <input id="recipientName" value="Mario Rossi" autocomplete="off">
+          </label>
+
+          <label class="wide">Testo centrale
+            <textarea id="bodyText" rows="3">ha partecipato con profitto al percorso formativo</textarea>
+          </label>
+
+          <label class="wide">Corso / qualifica
+            <input id="courseName" value="CORSO DOGSITTER" autocomplete="off">
+          </label>
+
+          <label>Luogo
+            <input id="place" value="San Giuliano Milanese" autocomplete="off">
+          </label>
+
+          <label>Data
+            <input id="certificateDate" type="date">
+          </label>
+          <div class="extra-fields wide">
+            <div class="extra-fields-intro"><strong>Dati aggiuntivi <span>(facoltativi)</span></strong><small>Appaiono solo se compilati e sono salvati nel progetto.</small></div>
+            <label class="wide">Disciplina per il codice (facoltativa se riconoscibile dal corso)
+              <input id="certificateDiscipline" list="disciplinaSuggerimenti" maxlength="70" placeholder="Es. DETECTION, MANTRAILING, HRDD" autocomplete="off">
+              <datalist id="disciplinaSuggerimenti"><option value="DETECTION"></option><option value="MANTRAILING"></option><option value="HRDD"></option><option value="DOGSITTER"></option><option value="NOSEWORK"></option><option value="EDUCAZIONE_CINOFILA"></option><option value="OBEDIENCE"></option><option value="RECUPERO_COMPORTAMENTALE"></option><option value="PROTEZIONE_CIVILE"></option></datalist>
+            </label>
+            <label class="wide batch-number-label"><input id="autoCertificateCode" type="checkbox" checked><span>Genera automaticamente il codice da disciplina, data e iniziali (senza numeri progressivi)</span></label>
+            <label class="wide">Codice identificativo dell’attestato
+              <input id="certificateCode" maxlength="100" placeholder="K9_DETECTION_06112006_M.R." autocomplete="off" readonly>
+              <small id="certificateCodeHelp">Codice generato automaticamente dal corso, dalla data e da tutte le iniziali del corsista.</small>
+            </label>
+            <label>Durata del corso
+              <input id="courseHours" maxlength="36" placeholder="Es. 16 ore" autocomplete="off">
+            </label>
+            <label class="wide">Esito / valutazione
+              <select id="courseOutcome"><option value="">Non indicato</option><option value="Idoneo">Idoneo</option><option value="Non idoneo">Non idoneo</option><option value="Superato">Superato</option><option value="Con profitto">Con profitto</option><option value="Completato">Completato</option></select>
+            </label>
+          </div>
+
+          <div class="signature-fields wide">
+            <div class="signature-fields-title">Firma sinistra</div>
+            <label>Ruolo / qualifica
+              <input id="leftSignatureRole" value="Il Docente" autocomplete="off">
+            </label>
+            <label>Nome del firmatario
+              <input id="leftSignatureName" value="Nome Cognome" autocomplete="off">
+            </label>
+            <label class="wide">Modalità firma
+              <select id="leftSignatureMode">
+                <option value="auto">Nome in corsivo (grafico)</option>
+                <option value="image">Immagine firma autorizzata</option>
+                <option value="none">Solo riga, senza firma</option>
+              </select>
+            </label>
+            <label class="upload wide signature-upload" for="leftSignatureFile">Carica immagine firma sinistra (PNG/JPG)</label>
+            <input id="leftSignatureFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            <button id="removeLeftSignature" class="button danger-soft wide" type="button">Rimuovi immagine firma</button>
+          </div>
+
+          <div class="signature-fields wide">
+            <div class="signature-fields-title">Firma destra</div>
+            <label>Ruolo / qualifica
+              <input id="signatureRole" value="Il Responsabile del Corso" autocomplete="off">
+            </label>
+            <label>Nome del firmatario
+              <input id="signatureName" value="Giovanni Napoletano" autocomplete="off">
+            </label>
+            <label class="wide">Modalità firma
+              <select id="signatureMode">
+                <option value="auto">Nome in corsivo (grafico)</option>
+                <option value="image">Immagine firma autorizzata</option>
+                <option value="none">Solo riga, senza firma</option>
+              </select>
+            </label>
+            <label class="upload wide signature-upload" for="signatureFile">Carica immagine firma destra (PNG/JPG)</label>
+            <input id="signatureFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            <button id="removeSignature" class="button danger-soft wide" type="button">Rimuovi immagine firma</button>
+          </div>
+          <p class="help-text wide">La firma con nome in corsivo è solo grafica; non equivale a una firma autografa o digitale.</p>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>
+          <span class="step">3</span>
+          <span><strong>Loghi</strong><small>Usa sempre gli stessi comandi per ogni logo</small></span>
+        </summary>
+        <div class="panel-body">
+          <label class="upload" for="logoFile">
+            <span id="logoUploadLabel">Carica logo</span>
+            <small>Meglio PNG con sfondo trasparente</small>
+          </label>
+          <input id="logoFile" type="file" accept="image/*" hidden>
+
+          <div id="logoManager" class="logo-manager hidden">
+            <label>Logo attivo
+              <select id="logoSelector" aria-label="Seleziona logo da modificare"></select>
+            </label>
+            <small id="logoCount">0 loghi inseriti</small>
+          </div>
+
+          <div id="logoTools" class="image-tools hidden">
+            <label class="range-row">
+              <span>Dimensione <output id="logoScaleValue">100%</output></span>
+              <input id="logoScale" type="range" min="20" max="300" value="100">
+            </label>
+
+            <div class="position-controls" aria-label="Posizione logo">
+              <label class="range-row position-row">
+                <span>Posizione orizzontale <output id="logoXValue">50%</output></span>
+                <input id="logoX" type="range" min="0" max="100" value="50">
+                <small>Sinistra ↔ Destra</small>
+              </label>
+              <label class="range-row position-row">
+                <span>Posizione verticale <output id="logoYValue">13%</output></span>
+                <input id="logoY" type="range" min="0" max="100" value="13">
+                <small>Alto ↕ Basso</small>
+              </label>
+            </div>
+            <div class="two-buttons">
+              <button id="centerLogo" class="button secondary" type="button">Posizione iniziale</button>
+              <button id="removeLogo" class="button danger-soft" type="button">Rimuovi logo</button>
+              <button id="lockLogo" class="button lock-button" type="button" aria-pressed="false">Blocca logo</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary><span class="step">4</span><span><strong>Attestati multipli</strong><small>Un solo PDF con una pagina per corsista</small></span></summary>
+        <div class="panel-body batch-area">
+          <label>Elenco corsisti (uno per riga)
+            <textarea id="batchNames" rows="6" placeholder="Mario Rossi&#10;Anna Bianchi&#10;Luca Verdi"></textarea>
+          </label>
+          <div class="roster-tools">
+            <label class="button ghost import-button" for="rosterFile">Importa elenco CSV / TXT</label>
+            <input id="rosterFile" type="file" accept=".csv,.txt,text/csv,text/plain" hidden>
+            <button id="clearRoster" class="button secondary" type="button">Svuota elenco</button>
+          </div>
+          <p id="batchCount" class="help-text">0 corsisti inseriti · massimo 30 per PDF</p>
+          <div id="batchValidation" class="batch-validation hidden" role="status" aria-live="polite"></div>
+          <p class="help-text">Codici automatici per corsista, ad esempio <strong>K9_DETECTION_06112006_M.R.</strong> e <strong>K9_DETECTION_06112006_A.B.</strong>. Nessuna numerazione 001/002. Se due corsisti hanno le stesse iniziali, compare un avviso.</p>
+          <button id="downloadBatch" class="button primary" type="button">Prepara PDF multipagina</button>
+          <a id="readyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
+          <p class="help-text">Il nome in ogni pagina sostituisce il nominativo del modello. Ogni pagina riceve il codice relativo alle iniziali del proprio corsista (se il codice automatico è attivo). Corso, data, firme, loghi e grafica restano invariati. I file CSV possono contenere colonne “Nome” e “Cognome”. Tutto rimane sul dispositivo.</p>
+        </div>
+      </details>
+      <section class="finish-card">
+        <span class="step done">5</span>
+        <div>
+          <strong>Fatto</strong>
+          <p>Controlla l'anteprima e genera il PDF.</p>
+        </div>
+        <div class="finish-actions"><button id="downloadPdfBottom" class="button primary" type="button">Crea PDF</button><button id="downloadPng" class="button secondary" type="button">Esporta PNG 300 DPI</button></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="zoomDialog" class="zoom-dialog" aria-label="Anteprima ingrandita">
+    <div class="zoom-head"><strong id="zoomOrientationTitle">Anteprima attestato · A4 orizzontale</strong><button id="closePreview" type="button" class="button secondary small">Chiudi</button></div>
+    <div class="zoom-scroll"><canvas id="zoomCanvas" width="1683" height="1190" aria-label="Certificato ingrandito"></canvas></div>
+    <p>Ingrandisci con lo zoom del browser per controllare i dettagli. Le guide non vengono esportate.</p>
+  </dialog>
+
+  <script src="js/pdf-vector.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
