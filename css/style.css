@@ -553,3 +553,16 @@ body{min-height:0}
   .layout>.preview-panel{--paper-max-height:max(40px,min(36vh,calc(100vh - 135px)));--paper-max-height:max(40px,min(36dvh,calc(100dvh - 135px)));}
   .preview-panel .preview-feedback{max-height:32px}
 }
+
+/* 4.9.0: menu a tendina indipendenti nell'archivio stili, anteprima principale invariata. */
+.theme-search-only{grid-template-columns:minmax(0,1fr)}
+.theme-menus{display:grid;gap:7px;min-width:0}
+.theme-discipline{min-width:0;border:1px solid #cbd9e5;border-radius:10px;background:#fff;overflow:hidden}
+.theme-discipline>summary{display:flex;align-items:center;gap:9px;cursor:pointer;list-style:none;padding:10px 12px;color:#213e56;font-size:13px;background:#f3f7fb;min-height:42px;box-sizing:border-box}
+.theme-discipline>summary::-webkit-details-marker{display:none}
+.theme-discipline>summary::before{content:'›';font-size:20px;line-height:1;transition:transform .15s}
+.theme-discipline[open]>summary::before{transform:rotate(90deg)}
+.theme-discipline>summary span{margin-left:auto;font-size:11px;color:#5b7185;white-space:nowrap}
+.theme-discipline[open]>summary{background:#e7eff7;border-bottom:1px solid #d4e1ed}
+.theme-group-grid{border:0;border-radius:0;max-height:380px;padding:7px;overscroll-behavior:contain}
+@media(max-width:620px){.theme-group-grid{max-height:300px}.theme-discipline>summary{padding:8px 10px}}
