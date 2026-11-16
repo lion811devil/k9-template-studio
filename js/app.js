@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.8.3";
+  const STUDIO_VERSION = "4.9.0";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -238,6 +238,144 @@
     tessera: {"label": "Tessera", "detail": "Ametista e argento", "category": "Creativi", "accent": "#9a8bb5", "ink": "#4b4160", "frame": "none", "ornament": "tesseraPro", "profile": "modern"},
     lacquer: {"label": "Lacca", "detail": "Rubino e grafite", "category": "Premium", "accent": "#ac725d", "ink": "#3d2f3d", "frame": "none", "ornament": "lacquerPro", "profile": "editorial"},
     halftone: {"label": "Mezzatinta", "detail": "Acciaio e blu", "category": "Professionali", "accent": "#7794a9", "ink": "#2b465e", "frame": "none", "ornament": "halftonePro", "profile": "modern"},
+
+    sigApex: {"label": "Apex Command", "detail": "Grafite, bronzo e corazza geometrica", "category": "K9 operativo", "accent": "#97632F", "ink": "#263238", "frame": "none", "ornament": "sigApex", "profile": "tactical"},
+    sigTrail: {"label": "K9 Trace", "detail": "Verde bosco, ottone e traccia olfattiva", "category": "K9 operativo", "accent": "#826B37", "ink": "#263E35", "frame": "none", "ornament": "sigTrail", "profile": "tactical"},
+    sigRescue: {"label": "Rescue Beacon", "detail": "Rosso segnale, blu ardesia e fasci di ricerca", "category": "K9 operativo", "accent": "#A13C36", "ink": "#23394D", "frame": "none", "ornament": "sigRescue", "profile": "tactical"},
+    sigForensic: {"label": "Forensic Evidence", "detail": "Petrolio, rame e stratigrafia", "category": "K9 operativo", "accent": "#94623F", "ink": "#24454E", "frame": "none", "ornament": "sigForensic", "profile": "tactical"},
+    sigNight: {"label": "Night Recon", "detail": "Acciaio blu e telemetria notturna", "category": "K9 operativo", "accent": "#456B86", "ink": "#182A3D", "frame": "none", "ornament": "sigNight", "profile": "tactical"},
+    sigAurum: {"label": "Aurum Intaglio", "detail": "Oro antico, avorio e incisione a bulino", "category": "Premium", "accent": "#927039", "ink": "#342C24", "frame": "none", "ornament": "sigAurum", "profile": "classic"},
+    sigChateau: {"label": "Château", "detail": "Bordeaux, oro e volute architettoniche", "category": "Cerimoniali", "accent": "#9D743B", "ink": "#552D3D", "frame": "none", "ornament": "sigChateau", "profile": "ceremony"},
+    sigLumiere: {"label": "Lumière", "detail": "Blu imperiale e raggiera déco", "category": "Premium", "accent": "#8D6E36", "ink": "#203955", "frame": "none", "ornament": "sigLumiere", "profile": "editorial"},
+    sigPorcelain: {"label": "Porcellana", "detail": "Cobalto e ornato dipinto", "category": "Eleganti", "accent": "#345B89", "ink": "#283D57", "frame": "none", "ornament": "sigPorcelain", "profile": "ceremony"},
+    sigEclipse: {"label": "Eclisse", "detail": "Nero inchiostro, rame e archi orbitali", "category": "Premium", "accent": "#9A6247", "ink": "#23252B", "frame": "none", "ornament": "sigEclipse", "profile": "editorial"},
+    sigDiplomat: {"label": "Diplomat", "detail": "Verde petrolio, oro e fregio diplomatico", "category": "Accademici", "accent": "#8A713C", "ink": "#213F42", "frame": "none", "ornament": "sigDiplomat", "profile": "classic"},
+    sigAlma: {"label": "Alma Mater", "detail": "Blu accademico e rame, architettura gotica", "category": "Accademici", "accent": "#976747", "ink": "#243D64", "frame": "none", "ornament": "sigAlma", "profile": "classic"},
+    sigMonograph: {"label": "Monograph", "detail": "Nero editoriale e rosso ossido", "category": "Professionali", "accent": "#963F35", "ink": "#26282C", "frame": "none", "ornament": "sigMonograph", "profile": "editorial"},
+    sigHelix: {"label": "Helix Research", "detail": "Indaco e teal, struttura elicoidale", "category": "Professionali", "accent": "#34746E", "ink": "#324165", "frame": "none", "ornament": "sigHelix", "profile": "modern"},
+    sigMarble: {"label": "Marmo di Carrara", "detail": "Grafite, ottone e venature minerali", "category": "Eleganti", "accent": "#8B703E", "ink": "#343B43", "frame": "none", "ornament": "sigMarble", "profile": "editorial"},
+    sigHorizon: {"label": "Horizon Relief", "detail": "Blu oceano e incisioni a onde profonde", "category": "Professionali", "accent": "#386E82", "ink": "#1E4556", "frame": "none", "ornament": "sigHorizon", "profile": "modern"},
+
+    k9mt01: {"label": "Trail Command", "detail": "Mantrailing · piastre angolari", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt01", "profile": "tactical", "discipline": "Mantrailing", "layout": 0},
+    k9mt02: {"label": "Urban Track", "detail": "Mantrailing · doppio binario", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt02", "profile": "tactical", "discipline": "Mantrailing", "layout": 1},
+    k9mt03: {"label": "Night Scent", "detail": "Mantrailing · arco inciso", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt03", "profile": "ceremony", "discipline": "Mantrailing", "layout": 2},
+    k9mt04: {"label": "Forest Line", "detail": "Mantrailing · pannelli sfaccettati", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt04", "profile": "tactical", "discipline": "Mantrailing", "layout": 3},
+    k9mt05: {"label": "Compass Elite", "detail": "Mantrailing · cartiglio a rombo", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt05", "profile": "tactical", "discipline": "Mantrailing", "layout": 4},
+    k9mt06: {"label": "Route of Honor", "detail": "Mantrailing · medaglioni laterali", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt06", "profile": "ceremony", "discipline": "Mantrailing", "layout": 5},
+    k9mt07: {"label": "Alpine Pursuit", "detail": "Mantrailing · fasce oblique", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt07", "profile": "tactical", "discipline": "Mantrailing", "layout": 6},
+    k9mt08: {"label": "Trail Atlas", "detail": "Mantrailing · reticolo agli angoli", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt08", "profile": "tactical", "discipline": "Mantrailing", "layout": 7},
+    k9mt09: {"label": "Scent Corridor", "detail": "Mantrailing · corridoio asimmetrico", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt09", "profile": "editorial", "discipline": "Mantrailing", "layout": 8},
+    k9mt10: {"label": "Operational Track", "detail": "Mantrailing · doppia fascia scanalata", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt10", "profile": "tactical", "discipline": "Mantrailing", "layout": 9},
+    k9mt11: {"label": "Pathfinder", "detail": "Mantrailing · cornice a scalini", "category": "Mantrailing", "accent": "#496B4C", "ink": "#263445", "frame": "none", "ornament": "k9mt11", "profile": "tactical", "discipline": "Mantrailing", "layout": 10},
+    k9mt12: {"label": "K9 Meridian", "detail": "Mantrailing · medaglione centrale", "category": "Mantrailing", "accent": "#37596A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt12", "profile": "ceremony", "discipline": "Mantrailing", "layout": 11},
+    k9mt13: {"label": "Silent Trail", "detail": "Mantrailing · parentesi sottili", "category": "Mantrailing", "accent": "#3E536F", "ink": "#273B32", "frame": "none", "ornament": "k9mt13", "profile": "editorial", "discipline": "Mantrailing", "layout": 12},
+    k9mt14: {"label": "Trail Heritage", "detail": "Mantrailing · fregio classico", "category": "Mantrailing", "accent": "#80623A", "ink": "#283742", "frame": "none", "ornament": "k9mt14", "profile": "ceremony", "discipline": "Mantrailing", "layout": 13},
+    k9mt15: {"label": "Waypoint", "detail": "Mantrailing · quattro sigilli", "category": "Mantrailing", "accent": "#916A34", "ink": "#263445", "frame": "none", "ornament": "k9mt15", "profile": "ceremony", "discipline": "Mantrailing", "layout": 14},
+    k9mt16: {"label": "Terra Incognita", "detail": "Mantrailing · curve organiche", "category": "Mantrailing", "accent": "#496456", "ink": "#3D372E", "frame": "none", "ornament": "k9mt16", "profile": "tactical", "discipline": "Mantrailing", "layout": 15},
+    k9mt17: {"label": "Street Grid", "detail": "Mantrailing · tessere geometriche", "category": "Mantrailing", "accent": "#627B55", "ink": "#273B32", "frame": "none", "ornament": "k9mt17", "profile": "tactical", "discipline": "Mantrailing", "layout": 16},
+    k9mt18: {"label": "Ridge Patrol", "detail": "Mantrailing · binari interrotti", "category": "Mantrailing", "accent": "#406D69", "ink": "#283742", "frame": "none", "ornament": "k9mt18", "profile": "tactical", "discipline": "Mantrailing", "layout": 17},
+    k9mt19: {"label": "Trail Compass", "detail": "Mantrailing · rosa radiale", "category": "Mantrailing", "accent": "#69523B", "ink": "#263445", "frame": "none", "ornament": "k9mt19", "profile": "tactical", "discipline": "Mantrailing", "layout": 18},
+    k9mt20: {"label": "Scent Navigator", "detail": "Mantrailing · percorso a nodi", "category": "Mantrailing", "accent": "#53643E", "ink": "#3D372E", "frame": "none", "ornament": "k9mt20", "profile": "tactical", "discipline": "Mantrailing", "layout": 19},
+    k9mt21: {"label": "Field Notes", "detail": "Mantrailing · registro a tacche", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt21", "profile": "editorial", "discipline": "Mantrailing", "layout": 20},
+    k9mt22: {"label": "Trail Ribbon", "detail": "Mantrailing · nastri ripiegati", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt22", "profile": "tactical", "discipline": "Mantrailing", "layout": 21},
+    k9mt23: {"label": "Map of Merit", "detail": "Mantrailing · cartigli a scudo", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt23", "profile": "ceremony", "discipline": "Mantrailing", "layout": 22},
+    k9mt24: {"label": "Olfactory Journey", "detail": "Mantrailing · onde parallele", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt24", "profile": "tactical", "discipline": "Mantrailing", "layout": 23},
+    k9mt25: {"label": "Search Horizon", "detail": "Mantrailing · orizzonte stratificato", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt25", "profile": "editorial", "discipline": "Mantrailing", "layout": 24},
+    k9mt26: {"label": "Trail Expedition", "detail": "Mantrailing · moduli alternati", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt26", "profile": "tactical", "discipline": "Mantrailing", "layout": 25},
+    k9mt27: {"label": "Trace & Honor", "detail": "Mantrailing · rosette incise", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt27", "profile": "ceremony", "discipline": "Mantrailing", "layout": 26},
+    k9mt28: {"label": "K9 Cartographer", "detail": "Mantrailing · trama reticolare", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt28", "profile": "tactical", "discipline": "Mantrailing", "layout": 27},
+    k9mt29: {"label": "Trail Vanguard", "detail": "Mantrailing · cornice a cuspidi", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt29", "profile": "tactical", "discipline": "Mantrailing", "layout": 28},
+    k9mt30: {"label": "Mantrailing Laureate", "detail": "Mantrailing · ghirlanda ornamentale", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt30", "profile": "ceremony", "discipline": "Mantrailing", "layout": 29},
+    k9hr01: {"label": "Forensic Command", "detail": "HRDD · cornice a righello e reticolo", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr01", "profile": "tactical", "discipline": "HRDD", "layout": 0},
+    k9hr02: {"label": "Evidence Archive", "detail": "HRDD · dorso archivistico", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr02", "profile": "tactical", "discipline": "HRDD", "layout": 1},
+    k9hr03: {"label": "Recovery Grid", "detail": "HRDD · marker a griglia", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr03", "profile": "ceremony", "discipline": "HRDD", "layout": 2},
+    k9hr04: {"label": "Stratigraphy", "detail": "HRDD · stratigrafia ondulata", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr04", "profile": "tactical", "discipline": "HRDD", "layout": 3},
+    k9hr05: {"label": "Forensic Meridian", "detail": "HRDD · piastre di rilievo diagonali", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr05", "profile": "tactical", "discipline": "HRDD", "layout": 4},
+    k9hr06: {"label": "Site Survey", "detail": "HRDD · campioni inquadrati", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr06", "profile": "ceremony", "discipline": "HRDD", "layout": 5},
+    k9hr07: {"label": "Silent Recovery", "detail": "HRDD · pannelli con diagonali", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr07", "profile": "tactical", "discipline": "HRDD", "layout": 6},
+    k9hr08: {"label": "Forensic Atlas", "detail": "HRDD · angoli a squadre concentriche", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr08", "profile": "tactical", "discipline": "HRDD", "layout": 7},
+    k9hr09: {"label": "Evidence Corridor", "detail": "HRDD · sezioni stratificate laterali", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr09", "profile": "editorial", "discipline": "HRDD", "layout": 8},
+    k9hr10: {"label": "Scene Documentation", "detail": "HRDD · cartigli di rilievo", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr10", "profile": "tactical", "discipline": "HRDD", "layout": 9},
+    k9hr11: {"label": "Ground Recon", "detail": "HRDD · bande a tasselli", "category": "HRDD", "accent": "#79533A", "ink": "#253D41", "frame": "none", "ornament": "k9hr11", "profile": "tactical", "discipline": "HRDD", "layout": 10},
+    k9hr12: {"label": "Recovery Protocol", "detail": "HRDD · reticolo di riferimento", "category": "HRDD", "accent": "#4D6571", "ink": "#41464C", "frame": "none", "ornament": "k9hr12", "profile": "ceremony", "discipline": "HRDD", "layout": 11},
+    k9hr13: {"label": "Forensic Ledger", "detail": "HRDD · dorso a registri sfalsati", "category": "HRDD", "accent": "#4D7070", "ink": "#343C42", "frame": "none", "ornament": "k9hr13", "profile": "editorial", "discipline": "HRDD", "layout": 12},
+    k9hr14: {"label": "HRDD Honor", "detail": "HRDD · fasce con marker concentrici", "category": "HRDD", "accent": "#745E4C", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr14", "profile": "ceremony", "discipline": "HRDD", "layout": 13},
+    k9hr15: {"label": "Site Marker", "detail": "HRDD · cornici a settori", "category": "HRDD", "accent": "#917044", "ink": "#253D41", "frame": "none", "ornament": "k9hr15", "profile": "ceremony", "discipline": "HRDD", "layout": 14},
+    k9hr16: {"label": "Layer Analysis", "detail": "HRDD · strati paralleli", "category": "HRDD", "accent": "#53616B", "ink": "#41464C", "frame": "none", "ornament": "k9hr16", "profile": "tactical", "discipline": "HRDD", "layout": 15},
+    k9hr17: {"label": "Sector Survey", "detail": "HRDD · mosaico di rilievo", "category": "HRDD", "accent": "#755347", "ink": "#343C42", "frame": "none", "ornament": "k9hr17", "profile": "tactical", "discipline": "HRDD", "layout": 16},
+    k9hr18: {"label": "Forensic Field", "detail": "HRDD · placche documentali", "category": "HRDD", "accent": "#526B64", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr18", "profile": "tactical", "discipline": "HRDD", "layout": 17},
+    k9hr19: {"label": "Recovery Compass", "detail": "HRDD · marcatori circolari", "category": "HRDD", "accent": "#776453", "ink": "#253D41", "frame": "none", "ornament": "k9hr19", "profile": "tactical", "discipline": "HRDD", "layout": 18},
+    k9hr20: {"label": "Evidence Path", "detail": "HRDD · campioni collegati", "category": "HRDD", "accent": "#455C75", "ink": "#41464C", "frame": "none", "ornament": "k9hr20", "profile": "tactical", "discipline": "HRDD", "layout": 19},
+    k9hr21: {"label": "Field Register", "detail": "HRDD · scala metrica", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr21", "profile": "editorial", "discipline": "HRDD", "layout": 20},
+    k9hr22: {"label": "Forensic Insignia", "detail": "HRDD · rilievi a strisce diagonali", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr22", "profile": "tactical", "discipline": "HRDD", "layout": 21},
+    k9hr23: {"label": "Archive of Merit", "detail": "HRDD · angoli di evidenza", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr23", "profile": "ceremony", "discipline": "HRDD", "layout": 22},
+    k9hr24: {"label": "Subsurface", "detail": "HRDD · linee di scansione", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr24", "profile": "tactical", "discipline": "HRDD", "layout": 23},
+    k9hr25: {"label": "Recovery Horizon", "detail": "HRDD · stratigrafia orizzontale", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr25", "profile": "editorial", "discipline": "HRDD", "layout": 24},
+    k9hr26: {"label": "Search Sector", "detail": "HRDD · cartigli trapezoidali", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr26", "profile": "tactical", "discipline": "HRDD", "layout": 25},
+    k9hr27: {"label": "Forensic Distinction", "detail": "HRDD · rombi di riferimento", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr27", "profile": "ceremony", "discipline": "HRDD", "layout": 26},
+    k9hr28: {"label": "Evidence Matrix", "detail": "HRDD · trama a croci", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr28", "profile": "tactical", "discipline": "HRDD", "layout": 27},
+    k9hr29: {"label": "HRDD Vanguard", "detail": "HRDD · angoli smussati", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr29", "profile": "tactical", "discipline": "HRDD", "layout": 28},
+    k9hr30: {"label": "Recovery Laureate", "detail": "HRDD · fregio di marker", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr30", "profile": "ceremony", "discipline": "HRDD", "layout": 29},
+    k9dt01: {"label": "Detection Command", "detail": "Detection · pannelli di comando e segnale", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt01", "profile": "tactical", "discipline": "Detection", "layout": 0},
+    k9dt02: {"label": "Target Scent", "detail": "Detection · bersagli e nodi", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt02", "profile": "tactical", "discipline": "Detection", "layout": 1},
+    k9dt03: {"label": "Olfactory Precision", "detail": "Detection · array di sensori", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt03", "profile": "ceremony", "discipline": "Detection", "layout": 2},
+    k9dt04: {"label": "Scent Dynamics", "detail": "Detection · onde olfattive", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt04", "profile": "tactical", "discipline": "Detection", "layout": 3},
+    k9dt05: {"label": "Sensor Elite", "detail": "Detection · angoli a circuito", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt05", "profile": "tactical", "discipline": "Detection", "layout": 4},
+    k9dt06: {"label": "Detection Honors", "detail": "Detection · medaglioni esagonali", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt06", "profile": "ceremony", "discipline": "Detection", "layout": 5},
+    k9dt07: {"label": "Signal Vector", "detail": "Detection · vettori diagonali", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt07", "profile": "tactical", "discipline": "Detection", "layout": 6},
+    k9dt08: {"label": "Detection Atlas", "detail": "Detection · reticolo esagonale", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt08", "profile": "tactical", "discipline": "Detection", "layout": 7},
+    k9dt09: {"label": "Scent Channel", "detail": "Detection · fascia a segnali", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt09", "profile": "editorial", "discipline": "Detection", "layout": 8},
+    k9dt10: {"label": "Alert Response", "detail": "Detection · fregio a chevron", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt10", "profile": "tactical", "discipline": "Detection", "layout": 9},
+    k9dt11: {"label": "Precision Array", "detail": "Detection · matrice angolare", "category": "Detection", "accent": "#286A83", "ink": "#273C43", "frame": "none", "ornament": "k9dt11", "profile": "tactical", "discipline": "Detection", "layout": 10},
+    k9dt12: {"label": "Detection Meridian", "detail": "Detection · impulsi radiali", "category": "Detection", "accent": "#355A88", "ink": "#283345", "frame": "none", "ornament": "k9dt12", "profile": "ceremony", "discipline": "Detection", "layout": 11},
+    k9dt13: {"label": "Silent Signal", "detail": "Detection · sensori a ventaglio", "category": "Detection", "accent": "#4F637D", "ink": "#21384C", "frame": "none", "ornament": "k9dt13", "profile": "editorial", "discipline": "Detection", "layout": 12},
+    k9dt14: {"label": "Detection Heritage", "detail": "Detection · circuito con bersagli", "category": "Detection", "accent": "#346E64", "ink": "#293A51", "frame": "none", "ornament": "k9dt14", "profile": "ceremony", "discipline": "Detection", "layout": 13},
+    k9dt15: {"label": "Target Lock", "detail": "Detection · archi di precisione", "category": "Detection", "accent": "#866137", "ink": "#273C43", "frame": "none", "ornament": "k9dt15", "profile": "ceremony", "discipline": "Detection", "layout": 14},
+    k9dt16: {"label": "Scent Spectrum", "detail": "Detection · spettro di intensità", "category": "Detection", "accent": "#34627A", "ink": "#283345", "frame": "none", "ornament": "k9dt16", "profile": "tactical", "discipline": "Detection", "layout": 15},
+    k9dt17: {"label": "Detection Matrix", "detail": "Detection · celle esagonali", "category": "Detection", "accent": "#435484", "ink": "#21384C", "frame": "none", "ornament": "k9dt17", "profile": "tactical", "discipline": "Detection", "layout": 16},
+    k9dt18: {"label": "Signal Field", "detail": "Detection · bande alternate", "category": "Detection", "accent": "#246B76", "ink": "#293A51", "frame": "none", "ornament": "k9dt18", "profile": "tactical", "discipline": "Detection", "layout": 17},
+    k9dt19: {"label": "Olfactory Compass", "detail": "Detection · rosa sensoriale", "category": "Detection", "accent": "#7B5145", "ink": "#273C43", "frame": "none", "ornament": "k9dt19", "profile": "tactical", "discipline": "Detection", "layout": 18},
+    k9dt20: {"label": "Scent Navigator", "detail": "Detection · nodi esagonali", "category": "Detection", "accent": "#3A6479", "ink": "#283345", "frame": "none", "ornament": "k9dt20", "profile": "tactical", "discipline": "Detection", "layout": 19},
+    k9dt21: {"label": "Detection Log", "detail": "Detection · grafico di intensità", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt21", "profile": "editorial", "discipline": "Detection", "layout": 20},
+    k9dt22: {"label": "Detection Insignia", "detail": "Detection · fascia di segnale diagonale", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt22", "profile": "tactical", "discipline": "Detection", "layout": 21},
+    k9dt23: {"label": "Precision Merit", "detail": "Detection · sigilli esagonali", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt23", "profile": "ceremony", "discipline": "Detection", "layout": 22},
+    k9dt24: {"label": "Scent Flow", "detail": "Detection · flusso sinusoidale", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt24", "profile": "tactical", "discipline": "Detection", "layout": 23},
+    k9dt25: {"label": "Signal Horizon", "detail": "Detection · spettro a barre", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt25", "profile": "editorial", "discipline": "Detection", "layout": 24},
+    k9dt26: {"label": "Detection Lab", "detail": "Detection · celle sensoriali", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt26", "profile": "tactical", "discipline": "Detection", "layout": 25},
+    k9dt27: {"label": "Alert & Honor", "detail": "Detection · esagoni concentrici", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt27", "profile": "ceremony", "discipline": "Detection", "layout": 26},
+    k9dt28: {"label": "Sensor Network", "detail": "Detection · rete di nodi", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt28", "profile": "tactical", "discipline": "Detection", "layout": 27},
+    k9dt29: {"label": "Detection Vanguard", "detail": "Detection · angoli a vettore", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt29", "profile": "tactical", "discipline": "Detection", "layout": 28},
+    k9dt30: {"label": "Detection Laureate", "detail": "Detection · fregio di sensori", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt30", "profile": "ceremony", "discipline": "Detection", "layout": 29},
+    k9ds01: {"label": "Canine Care", "detail": "Dogsitter · angoli botanici e impronte", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds01", "profile": "modern", "discipline": "Dogsitter", "layout": 0},
+    k9ds02: {"label": "Companion Atelier", "detail": "Dogsitter · nastro fluido e medaglioni", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds02", "profile": "modern", "discipline": "Dogsitter", "layout": 1},
+    k9ds03: {"label": "Trusted Paws", "detail": "Dogsitter · impronte sfalsate", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds03", "profile": "ceremony", "discipline": "Dogsitter", "layout": 2},
+    k9ds04: {"label": "Garden of Care", "detail": "Dogsitter · rami ornamentali", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds04", "profile": "modern", "discipline": "Dogsitter", "layout": 3},
+    k9ds05: {"label": "Care Signature", "detail": "Dogsitter · volute e sigillo", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds05", "profile": "modern", "discipline": "Dogsitter", "layout": 4},
+    k9ds06: {"label": "Companion Honor", "detail": "Dogsitter · medaglioni con foglie", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds06", "profile": "ceremony", "discipline": "Dogsitter", "layout": 5},
+    k9ds07: {"label": "Paw Heritage", "detail": "Dogsitter · angoli a petalo", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds07", "profile": "modern", "discipline": "Dogsitter", "layout": 6},
+    k9ds08: {"label": "Canine Atelier", "detail": "Dogsitter · medaglioni e smerli", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds08", "profile": "modern", "discipline": "Dogsitter", "layout": 7},
+    k9ds09: {"label": "Gentle Walk", "detail": "Dogsitter · percorso di impronte", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds09", "profile": "editorial", "discipline": "Dogsitter", "layout": 8},
+    k9ds10: {"label": "Care & Trust", "detail": "Dogsitter · fregio foglie e impronte", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds10", "profile": "modern", "discipline": "Dogsitter", "layout": 9},
+    k9ds11: {"label": "Paw & Leaf", "detail": "Dogsitter · rami a ventaglio", "category": "Dogsitter", "accent": "#8A614C", "ink": "#493B46", "frame": "none", "ornament": "k9ds11", "profile": "modern", "discipline": "Dogsitter", "layout": 10},
+    k9ds12: {"label": "Companion House", "detail": "Dogsitter · curve e fiori", "category": "Dogsitter", "accent": "#55776B", "ink": "#474632", "frame": "none", "ornament": "k9ds12", "profile": "ceremony", "discipline": "Dogsitter", "layout": 11},
+    k9ds13: {"label": "Tender Care", "detail": "Dogsitter · angoli morbidi", "category": "Dogsitter", "accent": "#73556B", "ink": "#443A34", "frame": "none", "ornament": "k9ds13", "profile": "editorial", "discipline": "Dogsitter", "layout": 12},
+    k9ds14: {"label": "Canine Heritage", "detail": "Dogsitter · fregio floreale", "category": "Dogsitter", "accent": "#796B39", "ink": "#334C45", "frame": "none", "ornament": "k9ds14", "profile": "ceremony", "discipline": "Dogsitter", "layout": 13},
+    k9ds15: {"label": "Paw Jewel", "detail": "Dogsitter · rosoni con impronta", "category": "Dogsitter", "accent": "#9A703F", "ink": "#493B46", "frame": "none", "ornament": "k9ds15", "profile": "ceremony", "discipline": "Dogsitter", "layout": 14},
+    k9ds16: {"label": "Garden Companion", "detail": "Dogsitter · tralci vegetali", "category": "Dogsitter", "accent": "#466E69", "ink": "#474632", "frame": "none", "ornament": "k9ds16", "profile": "modern", "discipline": "Dogsitter", "layout": 15},
+    k9ds17: {"label": "Care Mosaic", "detail": "Dogsitter · mosaico floreale", "category": "Dogsitter", "accent": "#7C5750", "ink": "#443A34", "frame": "none", "ornament": "k9ds17", "profile": "modern", "discipline": "Dogsitter", "layout": 16},
+    k9ds18: {"label": "Walking Club", "detail": "Dogsitter · ovali con impronte", "category": "Dogsitter", "accent": "#536C82", "ink": "#334C45", "frame": "none", "ornament": "k9ds18", "profile": "modern", "discipline": "Dogsitter", "layout": 17},
+    k9ds19: {"label": "Companion Compass", "detail": "Dogsitter · archi botanici", "category": "Dogsitter", "accent": "#927250", "ink": "#493B46", "frame": "none", "ornament": "k9ds19", "profile": "modern", "discipline": "Dogsitter", "layout": 18},
+    k9ds20: {"label": "Paw Journey", "detail": "Dogsitter · sentiero sinuoso", "category": "Dogsitter", "accent": "#606F49", "ink": "#474632", "frame": "none", "ornament": "k9ds20", "profile": "modern", "discipline": "Dogsitter", "layout": 19},
+    k9ds21: {"label": "Care Journal", "detail": "Dogsitter · fiori e medaglioni", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds21", "profile": "editorial", "discipline": "Dogsitter", "layout": 20},
+    k9ds22: {"label": "Ribbon of Trust", "detail": "Dogsitter · nastri e rametti", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds22", "profile": "modern", "discipline": "Dogsitter", "layout": 21},
+    k9ds23: {"label": "Care Merit", "detail": "Dogsitter · cartigli morbidi", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds23", "profile": "ceremony", "discipline": "Dogsitter", "layout": 22},
+    k9ds24: {"label": "Gentle Flow", "detail": "Dogsitter · onde sottili e fiori", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds24", "profile": "modern", "discipline": "Dogsitter", "layout": 23},
+    k9ds25: {"label": "Companion Horizon", "detail": "Dogsitter · fascia morbida e impronte", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds25", "profile": "editorial", "discipline": "Dogsitter", "layout": 24},
+    k9ds26: {"label": "Canine Wellness", "detail": "Dogsitter · capsule arrotondate", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds26", "profile": "modern", "discipline": "Dogsitter", "layout": 25},
+    k9ds27: {"label": "Paw Distinction", "detail": "Dogsitter · rosette e foglie", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds27", "profile": "ceremony", "discipline": "Dogsitter", "layout": 26},
+    k9ds28: {"label": "Care Collective", "detail": "Dogsitter · fregio di foglie", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds28", "profile": "modern", "discipline": "Dogsitter", "layout": 27},
+    k9ds29: {"label": "Dogsitter Prestige", "detail": "Dogsitter · angoli a petalo scuro", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds29", "profile": "modern", "discipline": "Dogsitter", "layout": 28},
+    k9ds30: {"label": "Companion Laureate", "detail": "Dogsitter · ghirlanda cinofila", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds30", "profile": "ceremony", "discipline": "Dogsitter", "layout": 29},
   };
   // Stili storici conservati per i progetti esistenti, esclusi dalla nuova galleria.
   const archivedThemeIds = new Set(["emerald", "navy", "burgundy", "academic", "sage", "coral", "alpine", "olive", "moss", "dusk", "bark", "lavender", "ice", "coastal", "copper", "ocean", "imperialNavy", "baroqueRuby", "artDecoTeal", "academyCrimson", "executiveTeal", "corporateGraphite", "k9Urban", "sarField", "hrddPro", "editorialBlue", "honorBlue", "diplomaSilver"]);
@@ -605,14 +743,21 @@
   profileByOrnament.aureole = "ceremony";
   Object.assign(profileByOrnament, {"magistraleUHD": "classic", "senatoUHD": "ceremony", "noirUHD": "classic", "atlasUHD": "modern", "dogeUHD": "classic", "vellumUHD": "editorial", "orbitaleUHD": "modern", "sentinelUHD": "tactical", "triageUHD": "tactical", "forenseUHD": "tactical", "heliosUHD": "classic", "mintUHD": "editorial", "spectrumUHD": "modern", "vettaUHD": "tactical", "mareaUHD": "modern", "opaleUHD": "modern", "florealeUHD": "editorial", "palinsestoUHD": "editorial", "incisioneUHD": "classic", "prismaUHD": "editorial", "notarileUHD": "ceremony"});
   Object.assign(profileByOrnament, {"ducalPro": "classic", "silhouettePro": "editorial", "arcTriomphePro": "ceremony", "mosaicPro": "classic", "engravedVinePro": "ceremony", "fleurPro": "classic", "crownRibbonPro": "ceremony", "quillPro": "editorial", "laureatePro": "ceremony", "crestPro": "classic", "terracesPro": "modern", "vectorCutPro": "modern", "foldedPagePro": "editorial", "crescentPro": "editorial", "modularPro": "modern", "contourFieldPro": "tactical", "rescueBandPro": "tactical", "trackRoutePro": "tactical", "sensorPro": "tactical", "coordinateLPro": "tactical", "cedarPro": "ceremony", "tesseraPro": "modern", "lacquerPro": "editorial", "halftonePro": "modern"});
+  Object.assign(profileByOrnament, {"sigApex": "tactical", "sigTrail": "tactical", "sigRescue": "tactical", "sigForensic": "tactical", "sigNight": "tactical", "sigAurum": "classic", "sigChateau": "ceremony", "sigLumiere": "editorial", "sigPorcelain": "ceremony", "sigEclipse": "editorial", "sigDiplomat": "classic", "sigAlma": "classic", "sigMonograph": "editorial", "sigHelix": "modern", "sigMarble": "editorial", "sigHorizon": "modern"});
+  const signatureThemeIds = new Set(["sigApex", "sigTrail", "sigRescue", "sigForensic", "sigNight", "sigAurum", "sigChateau", "sigLumiere", "sigPorcelain", "sigEclipse", "sigDiplomat", "sigAlma", "sigMonograph", "sigHelix", "sigMarble", "sigHorizon"]);
+  const specialK9Ids = new Set(["k9mt01", "k9mt02", "k9mt03", "k9mt04", "k9mt05", "k9mt06", "k9mt07", "k9mt08", "k9mt09", "k9mt10", "k9mt11", "k9mt12", "k9mt13", "k9mt14", "k9mt15", "k9mt16", "k9mt17", "k9mt18", "k9mt19", "k9mt20", "k9mt21", "k9mt22", "k9mt23", "k9mt24", "k9mt25", "k9mt26", "k9mt27", "k9mt28", "k9mt29", "k9mt30", "k9hr01", "k9hr02", "k9hr03", "k9hr04", "k9hr05", "k9hr06", "k9hr07", "k9hr08", "k9hr09", "k9hr10", "k9hr11", "k9hr12", "k9hr13", "k9hr14", "k9hr15", "k9hr16", "k9hr17", "k9hr18", "k9hr19", "k9hr20", "k9hr21", "k9hr22", "k9hr23", "k9hr24", "k9hr25", "k9hr26", "k9hr27", "k9hr28", "k9hr29", "k9hr30", "k9dt01", "k9dt02", "k9dt03", "k9dt04", "k9dt05", "k9dt06", "k9dt07", "k9dt08", "k9dt09", "k9dt10", "k9dt11", "k9dt12", "k9dt13", "k9dt14", "k9dt15", "k9dt16", "k9dt17", "k9dt18", "k9dt19", "k9dt20", "k9dt21", "k9dt22", "k9dt23", "k9dt24", "k9dt25", "k9dt26", "k9dt27", "k9dt28", "k9dt29", "k9dt30", "k9ds01", "k9ds02", "k9ds03", "k9ds04", "k9ds05", "k9ds06", "k9ds07", "k9ds08", "k9ds09", "k9ds10", "k9ds11", "k9ds12", "k9ds13", "k9ds14", "k9ds15", "k9ds16", "k9ds17", "k9ds18", "k9ds19", "k9ds20", "k9ds21", "k9ds22", "k9ds23", "k9ds24", "k9ds25", "k9ds26", "k9ds27", "k9ds28", "k9ds29", "k9ds30"]);
+  Object.assign(profileByOrnament, {"k9mt01": "tactical", "k9mt02": "tactical", "k9mt03": "ceremony", "k9mt04": "tactical", "k9mt05": "tactical", "k9mt06": "ceremony", "k9mt07": "tactical", "k9mt08": "tactical", "k9mt09": "editorial", "k9mt10": "tactical", "k9mt11": "tactical", "k9mt12": "ceremony", "k9mt13": "editorial", "k9mt14": "ceremony", "k9mt15": "ceremony", "k9mt16": "tactical", "k9mt17": "tactical", "k9mt18": "tactical", "k9mt19": "tactical", "k9mt20": "tactical", "k9mt21": "editorial", "k9mt22": "tactical", "k9mt23": "ceremony", "k9mt24": "tactical", "k9mt25": "editorial", "k9mt26": "tactical", "k9mt27": "ceremony", "k9mt28": "tactical", "k9mt29": "tactical", "k9mt30": "ceremony", "k9hr01": "tactical", "k9hr02": "tactical", "k9hr03": "ceremony", "k9hr04": "tactical", "k9hr05": "tactical", "k9hr06": "ceremony", "k9hr07": "tactical", "k9hr08": "tactical", "k9hr09": "editorial", "k9hr10": "tactical", "k9hr11": "tactical", "k9hr12": "ceremony", "k9hr13": "editorial", "k9hr14": "ceremony", "k9hr15": "ceremony", "k9hr16": "tactical", "k9hr17": "tactical", "k9hr18": "tactical", "k9hr19": "tactical", "k9hr20": "tactical", "k9hr21": "editorial", "k9hr22": "tactical", "k9hr23": "ceremony", "k9hr24": "tactical", "k9hr25": "editorial", "k9hr26": "tactical", "k9hr27": "ceremony", "k9hr28": "tactical", "k9hr29": "tactical", "k9hr30": "ceremony", "k9dt01": "tactical", "k9dt02": "tactical", "k9dt03": "ceremony", "k9dt04": "tactical", "k9dt05": "tactical", "k9dt06": "ceremony", "k9dt07": "tactical", "k9dt08": "tactical", "k9dt09": "editorial", "k9dt10": "tactical", "k9dt11": "tactical", "k9dt12": "ceremony", "k9dt13": "editorial", "k9dt14": "ceremony", "k9dt15": "ceremony", "k9dt16": "tactical", "k9dt17": "tactical", "k9dt18": "tactical", "k9dt19": "tactical", "k9dt20": "tactical", "k9dt21": "editorial", "k9dt22": "tactical", "k9dt23": "ceremony", "k9dt24": "tactical", "k9dt25": "editorial", "k9dt26": "tactical", "k9dt27": "ceremony", "k9dt28": "tactical", "k9dt29": "tactical", "k9dt30": "ceremony", "k9ds01": "modern", "k9ds02": "modern", "k9ds03": "ceremony", "k9ds04": "modern", "k9ds05": "modern", "k9ds06": "ceremony", "k9ds07": "modern", "k9ds08": "modern", "k9ds09": "editorial", "k9ds10": "modern", "k9ds11": "modern", "k9ds12": "ceremony", "k9ds13": "editorial", "k9ds14": "ceremony", "k9ds15": "ceremony", "k9ds16": "modern", "k9ds17": "modern", "k9ds18": "modern", "k9ds19": "modern", "k9ds20": "modern", "k9ds21": "editorial", "k9ds22": "modern", "k9ds23": "ceremony", "k9ds24": "modern", "k9ds25": "editorial", "k9ds26": "modern", "k9ds27": "ceremony", "k9ds28": "modern", "k9ds29": "modern", "k9ds30": "ceremony"});
   const professionalOrnaments = new Set(Object.keys(profileByOrnament));
 
 
   // Catalogo locale: nessun asset esterno e nessun progetto creato automaticamente.
   // Ogni anteprima applica lo stile solo con un tocco esplicito dell'utente.
-  const galleryGroups = ["Top professionali", "K9 operativi", "Cerimoniali", "Accademici", "Eleganti e creativi", "Classici"];
+  const galleryGroups = ["Mantrailing", "HRDD", "Detection", "Dogsitter", "K9 operativi", "Top professionali", "Cerimoniali", "Accademici", "Eleganti e creativi", "Classici"];
+  const existingDiscipline = {fieldMap:"Mantrailing",compass:"Mantrailing",trace:"Mantrailing",trackRoute:"Mantrailing",contourField:"Mantrailing",sigTrail:"Mantrailing",sigNight:"Mantrailing",scanline:"HRDD",forense:"HRDD",coordinateL:"HRDD",sigForensic:"HRDD",detectionPro:"Detection",radar:"Detection",sensor:"Detection",hexTech:"Detection",pulse:"Detection"};
   const topThemeIds = new Set(["imperialGold","artDeco","academyBlue","executiveNavy","corporateBlue","guilloche","engraved","minimalLux","magistrale","prestigioNoir","atlasPrime","doge","orbitale","prismaNobile","notarile","florealeNobile","incisioneBlu","ducal","silhouette","mosaic","vectorCut","laureate","trackRoute"]);
   function galleryGroup(id, theme) {
+    if (theme.discipline) return theme.discipline;
+    if (existingDiscipline[id]) return existingDiscipline[id];
     if (theme.category === "K9 operativo" || theme.category === "Natura e K9") return "K9 operativi";
     if (theme.category === "Cerimoniali") return "Cerimoniali";
     if (theme.category === "Accademici") return "Accademici";
@@ -631,58 +776,40 @@
     if(thumbnailCache.size>32){const oldest=thumbnailCache.keys().next().value;const old=thumbnailCache.get(oldest);old.width=1;old.height=1;thumbnailCache.delete(oldest);}
   }
   let thumbnailObserver=null;
+  let openedThemeGroup=null;
   function populateThemeGallery() {
     if(thumbnailObserver)thumbnailObserver.disconnect();
+    const grid=$("themeGrid"), query=($("themeSearch").value||"").trim().toLocaleLowerCase("it");
+    const visible=catalogThemes.filter(([id,t])=>`${t.label} ${t.detail} ${t.category} ${galleryGroup(id,t)}`.toLocaleLowerCase("it").includes(query));
+    const groups=new Map(galleryGroups.map(g=>[g,[]]));
+    for(const item of visible) groups.get(galleryGroup(...item)).push(item);
+    if(openedThemeGroup===null)openedThemeGroup=galleryGroup(selectedTheme,themePalettes[selectedTheme]||themePalettes.classic);
+    const fragment=document.createDocumentFragment();
     thumbnailObserver=typeof IntersectionObserver==="function"?new IntersectionObserver((entries,observer)=>{
-      for(const e of entries)if(e.isIntersecting){const c=e.target;observer.unobserve(c);if(c.isConnected){const theme=themePalettes[c.dataset.themeId];if(theme)renderCachedThumbnail(c,theme,c.dataset.themeId);}}
+      for(const e of entries)if(e.isIntersecting){const c=e.target;observer.unobserve(c);if(c.isConnected){const t=themePalettes[c.dataset.themeId];if(t)renderCachedThumbnail(c,t,c.dataset.themeId);}}
     },{rootMargin:"120px"}):null;
-    const grid = $("themeGrid");
-    const query = ($("themeSearch").value || "").trim().toLocaleLowerCase("it");
-    const category = $("themeCategory").value;
-    const visible = catalogThemes.filter(([id, theme]) =>
-      (category === "all" || (category === "featured" ? topThemeIds.has(id) : galleryGroup(id,theme) === category)) &&
-      `${theme.label} ${theme.detail} ${theme.category} ${galleryGroup(id,theme)}`.toLocaleLowerCase("it").includes(query));
-    visible.sort((a,b)=>galleryGroups.indexOf(galleryGroup(...a))-galleryGroups.indexOf(galleryGroup(...b)) || Number(topThemeIds.has(b[0]))-Number(topThemeIds.has(a[0])));
-    const fragment = document.createDocumentFragment();
-    let previousGroup = "";
-    for (const [id, theme] of visible) {
-      const group = galleryGroup(id,theme);
-      if(group !== previousGroup) {
-        const heading = document.createElement("div");
-        heading.className = "theme-group-heading";
-        heading.textContent = group;
-        fragment.appendChild(heading);
-        previousGroup = group;
-      }
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "theme-choice";
-      button.dataset.theme = id;
-      button.setAttribute("aria-label", `Carica stile ${theme.label}, ${theme.detail}`);
-      button.setAttribute("aria-pressed", String(selectedTheme === id));
-      if (selectedTheme === id) button.classList.add("selected");
-      const preview = document.createElement("canvas");
-      preview.className = "theme-preview";
-      preview.dataset.ornament = theme.ornament;
-      preview.dataset.frame = theme.frame;
-      preview.style.setProperty("--preset-accent", theme.accent);
-      preview.style.setProperty("--preset-ink", theme.ink);
-      preview.setAttribute("aria-hidden", "true");
-      preview.dataset.themeId=id;
-      // Conserva le proporzioni anche prima del rendering, senza allocare 121 canvas UHD.
-      const portrait=currentOrientation()==="portrait";
-      preview.width=1;preview.height=1;preview.style.aspectRatio=portrait?"210 / 297":"297 / 210";
-      if(thumbnailObserver)thumbnailObserver.observe(preview);else renderCachedThumbnail(preview,theme,id);
-      const title = document.createElement("strong");
-      title.textContent = theme.label;
-      const detail = document.createElement("small");
-      detail.textContent = theme.detail;
-      button.append(preview, title, detail);
-      fragment.appendChild(button);
+    function fillGroup(panel,items){
+      if(panel.dataset.built==="yes")return;panel.dataset.built="yes";
+      const inner=panel.querySelector('.theme-group-grid'),cards=document.createDocumentFragment();
+      items.sort((a,b)=>Number(specialK9Ids.has(b[0]))-Number(specialK9Ids.has(a[0]))||Number(signatureThemeIds.has(b[0]))-Number(signatureThemeIds.has(a[0]))||Number(topThemeIds.has(b[0]))-Number(topThemeIds.has(a[0])));
+      for(const [id,t] of items){
+        const button=document.createElement("button");button.type="button";button.className="theme-choice";button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(selectedTheme===id));if(selectedTheme===id)button.classList.add("selected");
+        const preview=document.createElement("canvas");preview.className="theme-preview";preview.dataset.ornament=t.ornament;preview.dataset.frame=t.frame;preview.dataset.themeId=id;preview.style.setProperty("--preset-accent",t.accent);preview.style.setProperty("--preset-ink",t.ink);preview.setAttribute("aria-hidden","true");preview.width=1;preview.height=1;preview.style.aspectRatio=currentOrientation()==="portrait"?"210 / 297":"297 / 210";
+        if(thumbnailObserver)thumbnailObserver.observe(preview);else renderCachedThumbnail(preview,t,id);
+        const title=document.createElement("strong"),detail=document.createElement("small");title.textContent=t.label;detail.textContent=t.detail;button.append(preview,title,detail);cards.appendChild(button);
+      } inner.appendChild(cards);
     }
-    grid.replaceChildren(fragment);
-    $("themeCount").textContent = `${visible.length} stili su ${catalogThemes.length}`;
-    $("themeEmpty").classList.toggle("hidden", visible.length !== 0);
+    let defaultOpen=groups.get(openedThemeGroup)?.length?openedThemeGroup:(openedThemeGroup===""&&!query?null:galleryGroups.find(g=>groups.get(g).length));
+    for(const [group,items] of groups){if(!items.length)continue;
+      const panel=document.createElement("details");panel.className="theme-discipline";panel.dataset.group=group;
+      const heading=document.createElement("summary"),label=document.createElement("strong"),count=document.createElement("span");label.textContent=group;count.textContent=`${items.length} temi`;heading.append(label,count);
+      const inner=document.createElement("div");inner.className="theme-grid theme-group-grid";panel.append(heading,inner);
+      panel.open=group===defaultOpen;if(panel.open)fillGroup(panel,items);
+      heading.addEventListener("click",()=>{if(!panel.open){openedThemeGroup=group;for(const other of grid.querySelectorAll(".theme-discipline"))if(other!==panel)other.open=false;fillGroup(panel,items);}else if(openedThemeGroup===group)openedThemeGroup="";});
+      panel.addEventListener("toggle",()=>{if(panel.open)fillGroup(panel,items);});
+      fragment.appendChild(panel);
+    }
+    grid.replaceChildren(fragment);$("themeCount").textContent=`${visible.length} stili su ${catalogThemes.length}`;$("themeEmpty").classList.toggle("hidden",visible.length!==0);
   }
 
   function applyCatalogTheme(id) {
@@ -711,6 +838,8 @@
   // Sono disegnati anche in drawGraphics(), quindi compaiono in PDF e PNG.
   function drawCatalogOrnament(ornament = $("ornamentStyle").value, color = designColor("accentColor", "#735a2f"), ink = designColor("inkColor", "#26231f")) {
     if (!ornament || ornament === "none") return;
+    if (specialK9Ids.has(ornament)) { drawSpecialK9(ornament,color,ink); return; }
+    if (signatureThemeIds.has(ornament)) { drawSignatureCollection(ornament,color,ink); return; }
     if (professionalOrnaments.has(ornament)) { drawProfessionalOrnament(ornament,color,ink); return; }
     const m = Math.max(34, Math.min(W, H) * .042);
     const a = Math.min(W, H) * .14;
@@ -823,6 +952,413 @@
   }
 
   // Grafica originale procedurale, in coordinate A4: tutte le decorazioni restano ai bordi.
+  // Signature Collection: original decorative artwork in stage coordinates, not bitmap templates.
+  // Keep central field unobstructed; the same drawing path is used for preview and UHD output.
+  // Native-resolution artwork. Edge-only architecture keeps the certificate text area clear.
+  function drawSpecialK9(id,A,D){
+    const t=themePalettes[id], n=t.layout, discipline=t.discipline, dog=discipline==='Dogsitter', hr=discipline==='HRDD', dt=discipline==='Detection', mt=discipline==='Mantrailing';
+    const u=Math.min(W,H)/1190, w=W/u,h=H/u, T=Math.PI*2, paper='#ffffff';
+    ctx.save();ctx.scale(u,u);ctx.lineCap='round';ctx.lineJoin='round';
+    const stroke=(c,z,f,alpha=1)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=z;ctx.globalAlpha=alpha;ctx.beginPath();f(ctx);ctx.stroke();ctx.restore();};
+    const shape=(c,f,alpha=1)=>{ctx.save();ctx.fillStyle=c;ctx.globalAlpha=alpha;ctx.beginPath();f(ctx);ctx.fill();ctx.restore();};
+    const rect=(c,x,y,X,Y,a=1)=>shape(c,q=>q.rect(x,y,X,Y),a);
+    const line=(c,x,y,X,Y,z=1,a=1)=>stroke(c,z,q=>{q.moveTo(x,y);q.lineTo(X,Y);},a);
+    const poly=(c,pts,a=1)=>shape(c,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},a);
+    const outline=(c,pts,z=2,a=1)=>stroke(c,z,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},a);
+    const circle=(c,x,y,r,z=1,a=1)=>stroke(c,z,q=>q.arc(x,y,r,0,T),a);
+    const dot=(c,x,y,r,a=1)=>shape(c,q=>q.arc(x,y,r,0,T),a);
+    const at=(x,y,sx,sy,f)=>{ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);try{f();}finally{ctx.restore();}};
+    const corners=f=>{for(const [x,y,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]])at(x,y,sx,sy,f);};
+    const sides=f=>{at(0,0,1,1,f);at(w,0,-1,1,f);};
+    const ends=f=>{at(0,0,1,1,f);at(0,h,1,-1,f);};
+    const border=(m,z=2,c=A)=>stroke(c,z,q=>q.rect(m,m,w-2*m,h-2*m));
+    const diamond=(x,y,r,c=A)=>outline(c,[[x-r,y],[x,y-r],[x+r,y],[x,y+r]],1.8);
+    const leaf=(x,y,r,angle,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);shape(c,q=>{q.moveTo(-r,0);q.quadraticCurveTo(0,-r*.9,r,0);q.quadraticCurveTo(0,r*.9,-r,0);},.8);line(paper,-r*.7,0,r*.7,0,.8,.8);ctx.restore();};
+    const rosette=(x,y,r,k,c=A)=>stroke(c,1.5,q=>{for(let i=0;i<=180;i++){const a=i*T/180,rr=r*(.79+.21*Math.cos(k*a));const X=x+rr*Math.cos(a),Y=y+rr*Math.sin(a);i?q.lineTo(X,Y):q.moveTo(X,Y);}q.closePath();});
+    // Distinct engraved visual languages: a route with waypoints, an evidence grid,
+    // concentric olfactory waves, or a paw with four digital pads and a leaf.
+    function emblem(x,y,r,c=A,variant=n){at(x,y,r/25,r/25,()=>{
+      if(mt){stroke(c,2.4,q=>{q.moveTo(-20,16);q.bezierCurveTo(-12,2,4,21,3,0);q.bezierCurveTo(2,-15,16,-7,20,-19);});for(const [X,Y] of [[-20,16],[3,0],[20,-19]]){circle(c,X,Y,3.5,1.5);dot(c,X,Y,1.1);}if(variant%3===0){line(c,-14,-17,-14,-7,1.2);line(c,-19,-12,-9,-12,1.2);}}
+      else if(hr){outline(c,[[-19,-19],[19,-19],[19,19],[-19,19]],1.7);for(let j=-9;j<=9;j+=9){line(c,j,-18,j,18,1,.7);line(c,-18,j,18,j,1,.7);}outline(c,[[-9,-8],[10,-8],[10,8],[-9,8]],2);dot(c,0,0,2);if(variant%2===0){line(c,-24,-24,-14,-24,1.5);line(c,-24,-24,-24,-14,1.5);}}
+      else if(dt){for(let j=1;j<=3;j++)stroke(c,1.8,q=>q.arc(0,0,j*7,Math.PI*.12,Math.PI*1.83));dot(c,0,0,3);line(c,0,0,22,-10,1.5);circle(c,22,-10,2.6,1.3);}
+      else {shape(c,q=>{q.moveTo(-13,12);q.bezierCurveTo(-20,3,-8,-6,0,-3);q.bezierCurveTo(8,-6,20,3,13,12);q.bezierCurveTo(9,18,4,10,0,12);q.bezierCurveTo(-4,10,-9,18,-13,12);});for(const [X,Y,R] of [[-15,-7,-.5],[-6,-15,-.18],[6,-15,.18],[15,-7,.5]])shape(c,q=>q.ellipse(X,Y,4.4,6.4,R,0,T));}
+    });}
+    // Fine pattern repeated within the edge only. Each discipline has a different topology.
+    function edgePattern(x,y,X,Y,step=48,c=A){let L=Math.hypot(X-x,Y-y);if(!L)return;let a=Math.atan2(Y-y,X-x);ctx.save();ctx.translate(x,y);ctx.rotate(a);try{for(let z=step/2;z<L-step/3;z+=step){if(mt){stroke(c,1.4,q=>{q.moveTo(z-20,0);q.bezierCurveTo(z-8,-10,z+8,10,z+20,0);});dot(c,z,0,2);}else if(hr){line(c,z-17,-7,z+17,-7,1);line(c,z-17,7,z+17,7,1);for(let j=-12;j<=12;j+=6)line(c,z+j,-7,z+j+4,7,1,.8);diamond(z,0,3,c);}else if(dt){for(let j=0;j<3;j++)stroke(c,1.4,q=>q.arc(z-11,0,5+j*5,-.75,.75));dot(c,z-11,0,1.9);}else{leaf(z-6,0,8,-.65,c);leaf(z+6,0,8,.65,c);dot(c,z,0,1.3);}}}finally{ctx.restore();}}
+    function plaque(x,y,r,form=0){if(form===0){circle(D,x,y,r,2);circle(A,x,y,r-5,1);emblem(x,y,r*.54);}else if(form===1){diamond(x,y,r,D);diamond(x,y,r-5);emblem(x,y,r*.48);}else{outline(D,[[x-r,y-r*.68],[x+r,y-r*.68],[x+r,y+r*.24],[x,y+r],[x-r,y+r*.24]],2);emblem(x,y,r*.48);}}
+    // Dedicated border architectures, not palette variants of the Mantrailing line.
+    function drawForensic(){
+      const mark=(x,y,r=26)=>{outline(D,[[x-r,y-r],[x+r,y-r],[x+r,y+r],[x-r,y+r]],2.2);for(let i=1;i<=3;i++){line(A,x-r+i*r/2,y-r,x-r+i*r/2,y+r,1,.65);line(A,x-r,y-r+i*r/2,x+r,y-r+i*r/2,1,.65);}diamond(x,y,r*.43,D);dot(A,x,y,3);};
+      const ticks=(x,y,X,Y,space=22)=>{let L=Math.hypot(X-x,Y-y),a=Math.atan2(Y-y,X-x);ctx.save();ctx.translate(x,y);ctx.rotate(a);line(D,0,0,L,0,1.7);for(let i=0,z=0;z<=L;z+=space,i++)line(A,z,0,z,i%5===0?15:6,i%5===0?2:1);ctx.restore();};
+      const strata=(x,y,X,Y,amp=8)=>{for(let k=0;k<5;k++)stroke(k%2?A:D,k===0?2.5:1.2,q=>{for(let i=0;i<=50;i++){let z=i/50,xx=x+(X-x)*z,yy=y+(Y-y)*z+(k-2)*7+amp*Math.sin(z*T*2+k*.45);i?q.lineTo(xx,yy):q.moveTo(xx,yy);}},.85);};
+      const tab=(x,y,sx=1,sy=1)=>at(x,y,sx,sy,()=>{poly(D,[[0,0],[132,0],[111,33],[58,33],[58,90],[0,90]],.95);line(A,8,8,116,8,2);mark(29,43,16);});
+      const specimen=(x,y,r=24)=>{circle(A,x,y,r,1.6);circle(D,x,y,r-5,2);line(D,x-r-7,y,x+r+7,y,1);line(D,x,y-r-7,x,y+r+7,1);dot(A,x,y,3);};
+      switch(n){
+      case 0: rect(D,0,0,w,27);rect(A,0,28,w,6);corners(()=>{stroke(D,3,q=>{q.moveTo(18,180);q.lineTo(18,52);q.lineTo(132,52);});mark(50,83,26);});ends(()=>ticks(165,47,w-165,47,32));break;
+      case 1: rect(D,0,0,48,h);for(let y=45;y<h-30;y+=84){rect(paper,11,y,25,48,.85);mark(24,y+24,9);}rect(A,49,0,5,h);ends(()=>{line(D,92,27,w-90,27,3);line(A,92,40,w*.55,40,2);});break;
+      case 2: ends(()=>{for(let x=90;x<w-85;x+=85){mark(x,29,22);line(A,x+27,29,x+58,29,1);}});sides(()=>ticks(28,70,28,h-70,24));break;
+      case 3: ends(()=>strata(0,38,w,38,12));sides(()=>{for(let y=110;y<h-60;y+=118){strata(12,y,83,y+18,5);dot(A,46,y+32,3);}});break;
+      case 4: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.31,0],[w*.24,35],[75,35],[75,142],[0,142]]);ticks(88,47,w*.24,47,16);mark(37,70,23);});for(const [x,y] of [[w-45,45],[45,h-45]])specimen(x,y,28);break;
+      case 5: border(16,1,D);corners(()=>{for(let k=0;k<5;k++)line(A,20,20+k*13,98,20+k*13,1);mark(54,54,22);});sides(()=>{line(D,53,120,53,h-120,1.6);for(let y=165;y<h-130;y+=115)specimen(53,y,23);});break;
+      case 6: sides(()=>{rect(D,0,0,18,h);rect(A,22,0,5,h);for(let y=60;y<h-25;y+=102){outline(A,[[35,y],[72,y],[72,y+53],[35,y+53]],1.5);line(D,35,y+53,72,y,1.5);dot(D,53,y+27,4);}});break;
+      case 7: corners(()=>{for(let k=0;k<6;k++)stroke(A,1.4,q=>{q.moveTo(12+k*14,120);q.lineTo(12+k*14,12+k*14);q.lineTo(120,12+k*14);});mark(32,32,15);});ends(()=>{ticks(150,31,w-150,31,25);});break;
+      case 8: for(const [x,s] of [[0,1],[w,-1]])at(x,0,s,1,()=>{for(let i=0,y=0;y<h;y+=h/7,i++){poly(i%2?A:D,[[0,y],[60,y+14],[46,y+h/7-14],[0,y+h/7]],.86);if(i%2)mark(24,y+h/14,14);}});break;
+      case 9: corners(()=>tab(0,0));sides(()=>{for(let y=150;y<h-110;y+=75){line(D,25,y,76,y,1.5);line(A,25,y+7,52,y+7,3);}});break;
+      case 10: ends(()=>{for(let x=0,i=0;x<w;x+=w/14,i++)poly(i%2?A:D,[[x,0],[x+w/14,0],[x+w/14-16,24],[x+16,24]],.9);});sides(()=>{ticks(34,75,34,h-75,21);for(let y=130;y<h-70;y+=150)mark(71,y,19);});break;
+      case 11: border(39,1,A);corners(()=>{line(D,18,18,126,18,4);line(D,18,18,18,126,4);specimen(56,56,25);});ends(()=>{line(D,w*.26,19,w*.74,19,2);mark(w/2,43,23);});break;
+      case 12: rect(D,0,0,12,h);rect(D,w-12,0,12,h);for(let y=80,i=0;y<h-65;y+=85,i++){rect(A,21,y,44,7);rect(D,w-65,y+13,44,7);if(i%3===0){mark(43,y+38,15);mark(w-43,y+38,15);}}ends(()=>{line(A,89,19,w-89,19,2);});break;
+      case 13: ends(()=>{rect(A,24,24,w-48,39,.11);for(let x=72;x<w-65;x+=66)specimen(x,43,15);});sides(()=>{line(D,22,105,22,h-105,2);line(A,31,105,31,h-105,1);});break;
+      case 14: corners(()=>{outline(D,[[18,18],[119,18],[119,55],[55,55],[55,119],[18,119]],2.5);mark(37,37,15);});sides(()=>{for(let y=155;y<h-130;y+=103){outline(A,[[24,y],[63,y],[63,y+42],[24,y+42]],1.5);line(D,24,y+42,63,y,1);}});break;
+      case 15: ends(()=>{for(let j=0;j<5;j++)stroke(j%2?D:A,1.5,q=>{q.moveTo(0,12+j*9);q.bezierCurveTo(w*.25,4+j*9,w*.56,24+j*9,w,12+j*9);});});sides(()=>{for(let y=120;y<h-85;y+=99){strata(8,y,70,y+20,6);specimen(37,y+30,13);}});break;
+      case 16: corners(()=>{for(let i=0;i<4;i++)for(let j=0;j<4;j++){let x=20+i*25,y=20+j*25;rect((i+j)%2?A:D,x,y,20,20,(i+j)%2?.45:.9);}mark(69,69,13);});ends(()=>ticks(138,22,w-138,22,20));break;
+      case 17: sides(()=>{for(let y=32,i=0;y<h-45;y+=64,i++){const x=i%2?31:13;poly(i%2?A:D,[[x,y],[x+42,y],[x+42,y+32],[x+9,y+47],[x,y+47]],.9);line(paper,x+10,y+8,x+10,y+32,1.4);}});ends(()=>line(D,100,24,w-100,24,2));break;
+      case 18: ends(()=>{for(const x of [w*.16,w*.5,w*.84]){specimen(x,36,26);line(A,x-90,36,x-36,36,1.5);line(A,x+36,36,x+90,36,1.5);}});sides(()=>ticks(37,105,37,h-105,30));break;
+      case 19: sides(()=>{for(let y=70,i=0;y<h-40;y+=90,i++){let x=i%2?70:28;mark(x,y,17);if(y+90<h-40)line(D,x,y+19,i%2?28:70,y+71,1.8);}});ends(()=>{line(A,w*.30,30,w*.70,30,4);});break;
+      case 20: ends(()=>{rect(D,0,0,w,15);ticks(30,27,w-30,27,20);});sides(()=>{for(let y=95;y<h-60;y+=130){rect(A,18,y,46,24,.23);mark(41,y+12,9);line(D,18,y+35,63,y+35,2);line(A,18,y+45,48,y+45,1);}});break;
+      case 21: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(A,[[0,0],[w*.35,0],[w*.27,47],[0,47]],.8);poly(D,[[0,0],[w*.28,0],[w*.2,34],[0,34]]);for(let x=25;x<w*.2;x+=26)line(paper,x,6,x+13,26,1.5);});sides(()=>{line(D,30,95,30,h-95,2);for(let y=135;y<h-110;y+=110)mark(55,y,15);});break;
+      case 22: corners(()=>{poly(D,[[0,0],[117,0],[117,41],[64,41],[64,117],[0,117]],.85);outline(A,[[8,8],[105,8],[105,30],[54,30],[54,105],[8,105]],2);specimen(31,31,19);});ends(()=>ticks(150,30,w-150,30,27));break;
+      case 23: sides(()=>{for(let j=0;j<4;j++)stroke(j%2?D:A,1.7,q=>{for(let i=0;i<=100;i++){let y=h*i/100,x=22+j*10+8*Math.sin(y/h*T*5+j*.4);i?q.lineTo(x,y):q.moveTo(x,y);}});});ends(()=>{for(let x=135;x<w-100;x+=110)mark(x,31,18);});break;
+      case 24: ends(()=>{for(let i=0;i<5;i++){let Y=4+i*9;rect(i%2?D:A,0,Y,w*.42-i*25,6,.84);rect(i%2?A:D,w-(w*.42-i*25),Y,w*.42-i*25,6,.84);}specimen(w/2,31,18);});sides(()=>ticks(24,100,24,h-100,21));break;
+      case 25: sides(()=>{for(let y=45,i=0;y<h-40;y+=78,i++){outline(i%2?A:D,[[12,y],[77,y],[68,y+48],[12,y+48]],2.4);rect(A,12,y,7,48,.85);mark(44,y+24,14);}});break;
+      case 26: border(19,1,A);corners(()=>{for(let i=0;i<4;i++)diamond(50,50,18+i*11,i%2?D:A);specimen(50,50,13);});ends(()=>{line(D,112,19,w-112,19,2);edgePattern(125,36,w-125,36,54);});break;
+      case 27: ends(()=>{for(let x=90;x<w-85;x+=54){line(D,x,10,x+30,46,1.6);line(A,x+30,10,x,46,1.6);}line(A,30,50,w-30,50,2);});sides(()=>{for(let y=95;y<h-75;y+=85)mark(32,y,20);});break;
+      case 28: corners(()=>{stroke(D,7,q=>{q.moveTo(14,158);q.lineTo(14,73);q.lineTo(73,14);q.lineTo(158,14);});stroke(A,2,q=>{q.moveTo(29,158);q.lineTo(29,80);q.lineTo(80,29);q.lineTo(158,29);});mark(60,60,18);});break;
+      case 29: border(28,1,D);ends(()=>{for(let x=115;x<w-100;x+=76){diamond(x,45,19);mark(x,45,9);}});sides(()=>{line(A,43,100,43,h-100,2);for(let y=125;y<h-90;y+=74){diamond(43,y,24,D);specimen(43,y,11);}});break;
+      }
+    }
+    function drawDetection(){
+      const wave=(x,y,r,c=A,count=4,angle=0)=>at(x,y,1,1,()=>{ctx.save();ctx.rotate(angle);for(let j=1;j<=count;j++)stroke(c,1.9,q=>q.arc(0,0,r*j/count,-Math.PI*.72,Math.PI*.72),1-j*.11);dot(c,0,0,3);ctx.restore();});
+      const hex=(x,y,r,c=A,z=2)=>outline(c,Array.from({length:6},(_,i)=>[x+r*Math.cos(i*T/6),y+r*Math.sin(i*T/6)]),z);
+      const signal=(x,y,X,Y,amp=12,c=A)=>stroke(c,2.1,q=>{for(let i=0;i<=100;i++){let t=i/100,xx=x+(X-x)*t,yy=y+(Y-y)*t+amp*Math.sin(t*T*5)*(.35+.65*Math.sin(t*Math.PI));i?q.lineTo(xx,yy):q.moveTo(xx,yy);}});
+      const nodes=(x,y,X,Y,step=70)=>{const L=Math.hypot(X-x,Y-y);line(D,x,y,X,Y,1.4);for(let z=step/2;z<L;z+=step){let f=z/L,xx=x+(X-x)*f,yy=y+(Y-y)*f;dot(paper,xx,yy,7);circle(A,xx,yy,6,2);dot(D,xx,yy,2);}};
+      const target=(x,y,r=25)=>{for(let i=1;i<=3;i++)circle(i%2?D:A,x,y,r*i/3,1.7);line(A,x-r-6,y,x+r+6,y,1);line(A,x,y-r-6,x,y+r+6,1);dot(D,x,y,2.5);};
+      switch(n){
+      case 0: ends(()=>{poly(D,[[0,0],[w*.44,0],[w*.39,28],[95,28],[0,100]]);poly(A,[[w,0],[w*.67,0],[w*.71,19],[w,19]]);signal(w*.44,43,w*.94,43,9);});sides(()=>{for(let y=130;y<h-80;y+=95)wave(29,y,25,A,3);});break;
+      case 1: corners(()=>{target(50,50,33);line(D,50,90,50,170,3);line(D,90,50,170,50,3);});ends(()=>nodes(190,29,w-190,29,57));break;
+      case 2: sides(()=>{for(let y=45;y<h-30;y+=83){for(let i=1;i<=3;i++)circle(i%2?A:D,31,y,7*i,1.8);line(A,31,y,69,y-16,1.7);dot(D,69,y-16,3);}});ends(()=>{line(D,105,26,w-105,26,3);signal(w*.30,42,w*.70,42,9);});break;
+      case 3: ends(()=>{for(let j=0;j<4;j++)signal(0,11+j*10,w,11+j*10,5+j,A);});sides(()=>{line(D,29,90,29,h-90,3);for(let y=125;y<h-80;y+=95)target(49,y,16);});break;
+      case 4: corners(()=>{poly(D,[[0,0],[151,0],[151,28],[67,28],[28,67],[28,151],[0,151]]);wave(29,29,56,paper,4);line(A,35,161,35,210,3);line(A,161,35,210,35,3);});break;
+      case 5: ends(()=>{line(D,100,30,w-100,30,2);for(const x of [w*.18,w*.5,w*.82]){dot(paper,x,30,23);hex(x,30,23,D,2.3);target(x,30,12);}});sides(()=>{for(let y=120;y<h-80;y+=103)hex(35,y,25,A,1.8);});break;
+      case 6: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.33,0],[w*.26,37],[72,37],[0,112]]);poly(A,[[0,8],[w*.23,8],[w*.2,23],[62,23],[0,85]]);});sides(()=>{for(let y=155;y<h-100;y+=60)poly(A,[[18,y],[46,y+16],[18,y+32],[18,y+23],[34,y+16],[18,y+9]]);});break;
+      case 7: corners(()=>{for(let i=0;i<3;i++)for(let j=0;j<3-i;j++){let x=25+i*35,y=25+j*39;hex(x,y,20,(i+j)%2?D:A,2);dot(D,x,y,2.5);}});ends(()=>nodes(150,29,w-150,29,53));break;
+      case 8: rect(A,w-55,0,55,h,.15);rect(D,w-12,0,12,h);for(let y=50;y<h-35;y+=65)wave(w-38,y,25,D,4,Math.PI);ends(()=>{line(D,25,20,w-75,20,4);signal(75,43,w-95,43,8);});break;
+      case 9: ends(()=>{for(let x=15;x<w-15;x+=58){poly(D,[[x,0],[x+22,0],[x+41,22],[x+19,22]],.9);poly(A,[[x+26,0],[x+42,0],[x+59,22],[x+45,22]],.9);}});sides(()=>{nodes(32,80,32,h-80,75);});break;
+      case 10: corners(()=>{for(let j=0;j<3;j++)stroke(j%2?A:D,2.6,q=>{q.moveTo(12+j*15,122);q.lineTo(12+j*15,60-j*10);q.lineTo(60-j*10,12+j*15);q.lineTo(122,12+j*15);});target(63,63,22);});break;
+      case 11: ends(()=>{for(let x=90;x<w-75;x+=110)wave(x,28,29,A,3,Math.PI*.5);line(D,22,12,w-22,12,1.7);});sides(()=>{line(A,40,110,40,h-110,2);for(let y=145;y<h-110;y+=115)hex(40,y,24,D);});break;
+      case 12: sides(()=>{line(D,17,0,17,h,5);for(let y=110;y<h-75;y+=120){wave(22,y,56,A,4);dot(D,22,y,3);}});break;
+      case 13: border(16,1,D);ends(()=>{for(let j=0;j<3;j++)line(A,70,26+j*9,w-70,26+j*9,1.3);for(const x of [w*.22,w*.5,w*.78]){dot(paper,x,35,21);target(x,35,18);}});sides(()=>nodes(31,80,31,h-80,72));break;
+      case 14: corners(()=>{stroke(D,3,q=>{q.moveTo(15,120);q.lineTo(15,15);q.lineTo(120,15);});stroke(A,4,q=>q.arc(15,15,100,0,Math.PI/2));target(15,15,27);});ends(()=>signal(150,33,w-150,33,9));break;
+      case 15: ends(()=>{const grad=ctx.createLinearGradient(0,0,w,0);grad.addColorStop(0,D);grad.addColorStop(.5,A);grad.addColorStop(1,D);rect(grad,0,0,w,24);for(let x=60;x<w-50;x+=72){for(let k=0;k<4;k++)rect(k%2?A:D,x+k*7,35,4,6+k*4,.85);}});sides(()=>{for(let y=120;y<h-80;y+=110)wave(28,y,28);});break;
+      case 16: sides(()=>{for(let y=30;y<h-25;y+=51){hex(22,y,24,D,1.8);hex(58,y+26,24,A,1.8);dot(A,22,y,3);}});ends(()=>line(D,110,25,w-110,25,3));break;
+      case 17: ends(()=>{for(let x=0,i=0;x<w;x+=w/10,i++){const Y=i%2?18:0;poly(i%2?A:D,[[x,Y],[x+w/10-8,Y],[x+w/10-22,Y+22],[x,Y+22]],.88);}});sides(()=>{for(let y=85;y<h-65;y+=92)target(35,y,22);});break;
+      case 18: ends(()=>{target(w/2,35,26);line(A,80,35,w*.43,35,2);line(A,w*.57,35,w-80,35,2);});corners(()=>{for(let a=0;a<=Math.PI/2;a+=Math.PI/12)line(D,Math.cos(a)*32,Math.sin(a)*32,Math.cos(a)*125,Math.sin(a)*125,1.4,.75);wave(12,12,91,A,5);});break;
+      case 19: sides(()=>{for(let y=45,i=0;y<h-40;y+=81,i++){const x=i%2?70:20;hex(x,y,18,A,2);dot(D,x,y,4);if(y+81<h-40)line(D,x,y+18,i%2?20:70,y+63,2);}});ends(()=>signal(w*.22,30,w*.78,30,13));break;
+      case 20: rect(D,0,0,w,17);rect(A,0,h-17,w,17);sides(()=>{for(let y=65,i=0;y<h-50;y+=80,i++){for(let j=0;j<5;j++)rect((i+j)%2?A:D,20+j*10,y+36-(j+1)*6,6,(j+1)*6,.8);}});break;
+      case 21: for(const [x,y,sx,sy] of [[w,0,-1,1],[0,h,1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.30,0],[w*.24,51],[0,51]]);poly(A,[[0,35],[w*.24,35],[w*.21,51],[0,51]]);for(let x=28;x<w*.18;x+=40)wave(x,23,18,paper,3);});sides(()=>{nodes(33,105,33,h-105,68);});break;
+      case 22: corners(()=>{hex(50,50,44,D,3);hex(50,50,34,A,1.6);wave(50,50,21,A,3);line(D,50,96,50,155,2);line(D,96,50,155,50,2);});ends(()=>line(A,180,23,w-180,23,2));break;
+      case 23: sides(()=>{for(let j=0;j<5;j++)stroke(j%2?D:A,1.8,q=>{for(let i=0;i<=120;i++){let y=h*i/120,x=15+j*12+9*Math.sin(y/h*T*4+j*.7);i?q.lineTo(x,y):q.moveTo(x,y);}});});ends(()=>{signal(100,23,w-100,23,7);});break;
+      case 24: ends(()=>{rect(D,0,0,w,10);for(let x=30;x<w-20;x+=27){let z=8+18*(.5+.5*Math.sin(x/w*T*4));rect(A,x,14,8,z,.88);}});sides(()=>{for(let y=110;y<h-80;y+=105)hex(34,y,24,D);});break;
+      case 25: ends(()=>{for(let x=60;x<w-45;x+=82){hex(x,27,25,A,2);wave(x,27,12,D,3);}});sides(()=>{line(D,23,75,23,h-75,2);line(A,63,75,63,h-75,2);for(let y=100;y<h-60;y+=79)line(A,23,y,63,y+25,1.5);});break;
+      case 26: corners(()=>{for(let i=0;i<4;i++)hex(49,49,15+i*12,i%2?A:D,1.5);wave(49,49,18,A,3);});ends(()=>{line(D,125,20,w-125,20,2);nodes(155,42,w-155,42,60);});break;
+      case 27: sides(()=>{for(let y=25;y<h-20;y+=70){line(D,14,y,62,y+40,1.7);line(A,62,y+40,14,y+70,1.7);dot(A,14,y,3);dot(D,62,y+40,3);}});ends(()=>{for(let x=100;x<w-85;x+=75)hex(x,30,19,A);});break;
+      case 28: corners(()=>{poly(D,[[0,0],[176,0],[126,45],[45,126],[0,176],[0,132],[31,88],[88,31],[132,0]],.9);stroke(A,2.6,q=>{q.moveTo(14,144);q.lineTo(65,68);q.lineTo(144,14);});wave(26,26,26,paper,3);});break;
+      case 29: border(25,1,D);ends(()=>{for(let x=120;x<w-110;x+=75){wave(x,38,20,A,3,Math.PI/2);dot(D,x,38,2);}});sides(()=>{for(let y=105;y<h-80;y+=66){hex(40,y,21,A,1.7);target(40,y,12);}});break;
+      }
+    }
+    function drawCare(){
+      const paw=(x,y,r=24,c=A)=>emblem(x,y,r,c);
+      const sprig=(x,y,len,angle=0,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);stroke(c,1.7,q=>{q.moveTo(0,0);q.quadraticCurveTo(8,-len*.55,0,-len);});for(let i=1;i<=5;i++){let Y=-len*i/6,X=4*Math.sin(i/6*Math.PI);leaf(X-6,Y,10+i*.7,-.65,c);leaf(X+7,Y-5,10+i*.7,.55,c);}ctx.restore();};
+      const scallop=(x,y,X,Y,period=64,c=A)=>{const L=Math.hypot(X-x,Y-y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(Y-y,X-x));stroke(c,2.1,q=>{q.moveTo(0,0);for(let a=0;a<L;a+=period){const b=Math.min(period,L-a);q.quadraticCurveTo(a+b/2,18,a+b,0);}});ctx.restore();};
+      const flower=(x,y,r=18)=>{rosette(x,y,r,5,A);rosette(x,y,r*.72,5,D);dot(A,x,y,3);};
+      const ribbon=(x,y,span,c=A)=>shape(c,q=>{q.moveTo(x,y);q.bezierCurveTo(x+span*.25,y+23,x+span*.75,y-15,x+span,y);q.lineTo(x+span,y+15);q.bezierCurveTo(x+span*.75,y,x+span*.25,y+38,x,y+15);q.closePath();},.72);
+      const med=(x,y,r=33)=>{circle(A,x,y,r,1.8);circle(D,x,y,r-6,1);paw(x,y,r*.55);};
+      const soft=(x,y,span,sy)=>at(x,y,1,sy,()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(span,0);q.bezierCurveTo(span*.55,55,30,12,0,105);q.closePath();},.23);stroke(A,2.4,q=>{q.moveTo(0,105);q.bezierCurveTo(30,12,span*.55,55,span,0);});});
+      switch(n){
+      case 0: corners(()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(210,0);q.bezierCurveTo(100,24,50,65,0,175);q.closePath();},.24);sprig(30,120,80,.45);sprig(145,18,75,-1.3);paw(44,44,25);});break;
+      case 1: border(23,1,A);ends(()=>{ribbon(60,17,w-120);for(const x of [w*.2,w*.5,w*.8]){dot(paper,x,32,21);med(x,32,19);}});break;
+      case 2: sides(()=>{for(let y=60,i=0;y<h-30;y+=95,i++){paw(i%2?56:30,y,23);stroke(A,1.2,q=>q.arc(43,y,33,Math.PI*.7,Math.PI*1.55),.55);}});ends(()=>line(A,110,24,w-110,24,1.5));break;
+      case 3: corners(()=>{sprig(35,150,127,.15);sprig(145,35,123,-Math.PI/2);flower(37,37,22);paw(78,78,19);});ends(()=>{line(D,185,26,w-185,26,1);});break;
+      case 4: ends(()=>{for(const [x,sx] of [[0,1],[w,-1]])at(x,0,sx,1,()=>{stroke(A,2.5,q=>{q.moveTo(24,98);q.bezierCurveTo(13,10,86,10,185,30);});sprig(120,30,83,-1.3);});med(w/2,38,31);});sides(()=>line(A,21,118,21,h-118,1.3));break;
+      case 5: border(33,1,D);corners(()=>{med(62,62,35);for(let i=0;i<4;i++){leaf(38+i*17,109,11,-.55);leaf(109,38+i*17,11,.55);}});ends(()=>{line(A,130,22,w-130,22,1.6);});break;
+      case 6: soft(0,0,w*.28,1);soft(0,h,w*.28,-1);for(const [x,y] of [[45,45],[45,h-45]])paw(x,y,25);sides(()=>{scallop(18,115,18,h-115,72);});break;
+      case 7: sides(()=>{rect(A,15,0,52,h,.12);for(let y=65;y<h-40;y+=90){med(41,y,22);flower(41,y+38,9);}});ends(()=>scallop(95,26,w-95,26,70));break;
+      case 8: rect(A,0,0,28,h,.25);stroke(D,1.7,q=>{q.moveTo(41,0);q.bezierCurveTo(89,h*.3,8,h*.65,41,h);});for(let y=60,i=0;y<h-35;y+=100,i++)paw(49+15*Math.sin(i),y,19);ends(()=>{line(A,94,26,w-80,26,2);});break;
+      case 9: ends(()=>{for(let x=65;x<w-60;x+=65){leaf(x-10,27,13,-.55);paw(x+11,32,12);}});sides(()=>{line(A,31,72,31,h-72,1.6);for(let y=105;y<h-70;y+=130)sprig(31,y+30,45,.15);});break;
+      case 10: corners(()=>{sprig(48,151,112,.5);sprig(151,48,112,-1.9);paw(48,48,28);});ends(()=>scallop(180,23,w-180,23,80));break;
+      case 11: ends(()=>{stroke(A,2,q=>{q.moveTo(72,31);q.bezierCurveTo(w*.28,65,w*.35,4,w*.45,31);q.bezierCurveTo(w*.65,65,w*.73,4,w-72,31);});med(w/2,36,27);});sides(()=>{for(let y=100;y<h-70;y+=105)flower(32,y,20);});break;
+      case 12: corners(()=>{stroke(A,1.9,q=>{q.moveTo(28,145);q.bezierCurveTo(7,26,24,10,145,28);});stroke(D,1,q=>{q.moveTo(40,118);q.bezierCurveTo(25,40,38,25,118,40);});paw(46,46,23);});break;
+      case 13: border(19,1,D);border(58,1,A);ends(()=>{for(let x=75;x<w-65;x+=70)flower(x,38,15);});sides(()=>{for(let y=75;y<h-65;y+=70)flower(38,y,15);});break;
+      case 14: corners(()=>{rosette(65,65,48,8,A);rosette(65,65,36,8,D);paw(65,65,22);});ends(()=>{line(A,130,30,w-130,30,1.5);for(const x of [w*.35,w*.65])diamond(x,30,8);});break;
+      case 15: sides(()=>{stroke(A,2,q=>{q.moveTo(25,0);q.bezierCurveTo(90,h*.35,0,h*.65,25,h);});for(let y=70,i=0;y<h-45;y+=63,i++){let x=25+19*Math.sin(y/h*T);leaf(x+17,y,15,i%2?.75:-.75);if(i%3===0)flower(x+27,y+15,12);}});ends(()=>{for(let x=115;x<w-110;x+=120)sprig(x,52,39,-.25);});break;
+      case 16: corners(()=>{for(let i=0;i<3;i++)for(let j=0;j<3-i;j++){let x=35+i*41,y=35+j*41;flower(x,y,18);if((i+j)%2===0)paw(x,y,10);}});ends(()=>{ribbon(170,18,w-340);});break;
+      case 17: sides(()=>{for(let y=50,i=0;y<h-45;y+=90,i++){let x=i%2?54:27;stroke(A,2.2,q=>{q.ellipse(x,y,22,32,0,0,T);});paw(x,y,15);}});ends(()=>scallop(105,30,w-105,30,67));break;
+      case 18: corners(()=>{for(let i=0;i<3;i++)stroke(A,1.5,q=>q.arc(22,22,37+i*24,0,Math.PI/2));sprig(32,95,74,.35);paw(42,42,20);});ends(()=>{flower(w/2,28,18);line(D,135,28,w*.45,28,1);line(D,w*.55,28,w-135,28,1);});break;
+      case 19: sides(()=>{stroke(A,2.2,q=>{q.moveTo(39,0);for(let i=0;i<7;i++){let y=i*h/7;q.bezierCurveTo(5,y+h/21,80,y+2*h/21,39,y+h/7);}});for(let y=80,i=0;y<h-45;y+=h/9,i++)paw(39+18*Math.cos(i),y,17);});break;
+      case 20: ends(()=>{line(D,45,20,w-45,20,2);for(let x=70;x<w-60;x+=85){flower(x,40,13);leaf(x+23,40,11,.6);}});sides(()=>{for(let y=105;y<h-80;y+=115){med(39,y,24);}});break;
+      case 21: ends(()=>{ribbon(0,15,w*.36);ribbon(w*.64,15,w*.36);med(w/2,32,24);});sides(()=>{for(let y=100;y<h-75;y+=120)sprig(39,y+32,67,.25);});break;
+      case 22: corners(()=>{shape(A,q=>{q.moveTo(20,20);q.lineTo(105,20);q.bezierCurveTo(113,80,69,114,20,105);q.closePath();},.16);stroke(A,2,q=>{q.moveTo(20,20);q.lineTo(105,20);q.bezierCurveTo(113,80,69,114,20,105);q.closePath();});paw(55,55,24);});ends(()=>line(D,145,24,w-145,24,1.5));break;
+      case 23: ends(()=>{for(let j=0;j<4;j++)stroke(j%2?D:A,1.6,q=>{q.moveTo(0,12+j*9);q.bezierCurveTo(w*.30,45+j*5,w*.68,-7+j*5,w,12+j*9);});});sides(()=>{for(let y=110;y<h-75;y+=110)flower(36,y,23);});break;
+      case 24: ends(()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(w,0);q.bezierCurveTo(w*.73,45,w*.31,4,0,42);q.closePath();},.24);for(let x=115;x<w-100;x+=100)paw(x,28,16);});sides(()=>scallop(28,88,28,h-88,77));break;
+      case 25: sides(()=>{for(let y=40;y<h-30;y+=80){stroke(A,2,q=>{q.roundRect(14,y,59,59,24);});paw(44,y+30,22);}});ends(()=>{line(A,110,27,w-110,27,1);for(let x=150;x<w-130;x+=84)flower(x,27,11);});break;
+      case 26: border(22,1,D);corners(()=>{for(let i=0;i<3;i++)rosette(59,59,19+i*13,7+i,A);paw(59,59,17);});sides(()=>{for(let y=145;y<h-110;y+=90){flower(35,y,17);sprig(35,y+37,34,.45);}});break;
+      case 27: ends(()=>{for(let x=60;x<w-55;x+=55){leaf(x,28,17,.65);leaf(x+15,40,14,-.65);}});sides(()=>{for(let y=60;y<h-50;y+=65){leaf(31,y,16,.75);leaf(45,y+18,15,-.75);if(y%4===0)paw(34,y+33,10);}});break;
+      case 28: corners(()=>{shape(D,q=>{q.moveTo(0,0);q.lineTo(145,0);q.quadraticCurveTo(35,35,0,145);q.closePath();},.78);stroke(A,3,q=>{q.moveTo(8,131);q.quadraticCurveTo(42,42,131,8);});paw(32,32,24,paper);sprig(85,46,48,-1.3,paper);});break;
+      case 29: border(18,1,A);sides(()=>{for(let y=95,i=0;y<h-80;y+=74,i++){sprig(43,y+26,58,i%2?.4:-.4);if(i%2===0)paw(43,y-7,15);}});ends(()=>{for(let x=100;x<w-95;x+=76){flower(x,35,17);leaf(x+27,34,14,.65);}med(w/2,35,27);});break;
+      }
+    }
+
+    const fine=dog?1.4:2.2, heavy=dog?6:10;
+    try{
+      if(hr){drawForensic();return;}
+      if(dt){drawDetection();return;}
+      if(dog){drawCare();return;}
+      switch(n){
+      case 0: // chamfered corner plates
+        corners(()=>{poly(D,[[0,0],[190,0],[134,42],[56,42],[56,132],[0,188]],dog?.28:1);poly(A,[[0,0],[190,0],[165,12],[45,12],[12,46],[12,165],[0,188]]);emblem(31,32,18,dog?D:paper);line(A,67,61,140,61,2);});sides(()=>{line(A,26,204,26,h-204,3);edgePattern(47,220,47,h-220,70);});break;
+      case 1: // parallel rails, narrow technical longitudinal panels
+        sides(()=>{rect(D,14,0,36,h,dog?.2:1);line(A,57,20,57,h-20,3);line(A,70,20,70,h-20,1);edgePattern(32,85,32,h-85,63,dog?D:paper);});ends(()=>{line(D,95,32,w-95,32,2);line(A,95,43,w-95,43,1);});break;
+      case 2: // engraved arch corners
+        border(27,1,D);corners(()=>{for(let j=0;j<5;j++)stroke(A,1.6,q=>q.arc(30,30,36+j*15,0,Math.PI/2),.9-j*.1);emblem(57,57,18);});ends(()=>{line(A,160,37,w-160,37,2);edgePattern(w*.28,55,w*.72,55,55);});break;
+      case 3: // faceted relief panels, opposite orientation
+        for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.37,0],[w*.27,45],[90,45],[0,175]],dog?.28:.92);poly(A,[[0,0],[w*.30,0],[w*.21,26],[70,26],[0,133]],.85);for(let k=0;k<5;k++)line(paper,20+k*10,48,78+k*10,3,1,.7);emblem(36,35,15,paper);});for(const [x,y,sx,sy] of [[w,0,-1,1],[0,h,1,-1]])at(x,y,sx,sy,()=>{outline(A,[[25,25],[180,25],[25,180]],2);emblem(58,58,25);});break;
+      case 4: // diamond cartouches, open frame
+        sides(()=>{line(A,36,150,36,h*.36,2);line(A,36,h*.64,36,h-150,2);plaque(44,h/2,39,1);edgePattern(64,180,64,h*.36,60);edgePattern(64,h*.64,64,h-180,60);});ends(()=>{line(D,115,26,w*.45,26,2);line(D,w*.55,26,w-115,26,2);plaque(w/2,38,28,1);});corners(()=>diamond(35,35,17));break;
+      case 5: // side medals and understated border
+        border(23,1,D);border(34,1,A);sides(()=>{for(const y of [h*.21,h*.5,h*.79]){plaque(48,y,31);line(A,48,y-48,48,y-35,2);line(A,48,y+35,48,y+48,2);}});ends(()=>edgePattern(w*.32,24,w*.68,24,58));break;
+      case 6: // angled strip ribbons
+        corners(()=>{for(let j=0;j<3;j++)poly(j===1?D:A,[[0,30+j*19],[118+j*31,0],[143+j*31,0],[0,54+j*19]],dog?.45:.92);emblem(33,104,18);});sides(()=>{line(D,19,195,19,h-195,3);edgePattern(42,200,42,h-200,70);});break;
+      case 7: // atlas grid at four corners
+        corners(()=>{for(let i=0;i<6;i++){line(A,24+i*24,24,24+i*24,148,1,.8);line(A,24,24+i*24,148,24+i*24,1,.8);}rect(D,24,24,49,49,dog?.18:.85);emblem(48,48,20,dog?D:paper);line(D,24,149,149,149,2);line(D,149,24,149,149,2);});ends(()=>{line(A,175,24,w-175,24,1.7);});break;
+      case 8: // asymmetric corridor
+        rect(D,0,0,71,h,dog?.22:.94);rect(A,72,0,6,h);for(let y=65;y<h-35;y+=89){emblem(35,y,22,dog?D:paper);line(A,11,y+36,60,y+36,1.3);}line(A,w-35,90,w-35,h-90,2);ends(()=>{line(D,112,33,w-60,33,2);for(let i=0;i<5;i++)line(A,w-63-i*12,33,w-63-i*12,45,2);});break;
+      case 9: // segmented grooves, two horizontal bars
+        ends(()=>{rect(D,0,0,w,20,dog?.24:.95);rect(A,0,20,w,5);for(let x=85;x<w-85;x+=68){line(A,x,37,x+33,37,3);line(D,x,45,x+24,45,1);}});sides(()=>{for(let y=95;y<h-95;y+=76){line(D,24,y,24,y+45,heavy);emblem(48,y+22,16);}});break;
+      case 10: // stepped angular frame
+        corners(()=>{stroke(D,heavy,q=>{q.moveTo(25,184);q.lineTo(25,87);q.lineTo(58,87);q.lineTo(58,25);q.lineTo(185,25);});stroke(A,2.5,q=>{q.moveTo(42,185);q.lineTo(42,104);q.lineTo(75,104);q.lineTo(75,42);q.lineTo(185,42);});emblem(44,44,19);});sides(()=>edgePattern(28,215,28,h-215,62));ends(()=>line(A,210,24,w-210,24,1));break;
+      case 11: // central medals, twin vertical flourish
+        ends(()=>{line(A,100,32,w*.44,32,2);line(A,w*.56,32,w-100,32,2);plaque(w/2,40,34);rosette(w/2,40,30,8);});sides(()=>{line(D,33,135,33,h-135,2);for(let i=0;i<4;i++){let y=h*(i+1)/5;leaf(48,y,13,i%2?.9:-.9);emblem(35,y+20,12);}});break;
+      case 12: // editorial brackets, no full frame
+        corners(()=>{stroke(D,4,q=>{q.moveTo(35,140);q.lineTo(35,35);q.lineTo(140,35);});stroke(A,1.5,q=>{q.moveTo(48,118);q.lineTo(48,48);q.lineTo(118,48);});emblem(63,63,19);});sides(()=>{line(A,27,h*.37,27,h*.63,2);for(let j=0;j<3;j++)dot(D,27,h*.43+j*h*.07,3);});break;
+      case 13: // classic frieze
+        border(18,2,D);border(68,1,A);ends(()=>{rect(A,19,19,w-38,34,.10);edgePattern(83,36,w-83,36,47);});sides(()=>{edgePattern(41,83,41,h-83,48);});corners(()=>plaque(42,42,20,1));break;
+      case 14: // four embossed seals
+        border(25,1,D);corners(()=>{plaque(64,64,42,2);rosette(64,64,47,12);line(A,64,113,64,158,2);line(A,113,64,158,64,2);});ends(()=>{line(D,180,25,w-180,25,1);line(A,180,32,w-180,32,1);});break;
+      case 15: // organic sweeping bands
+        sides(()=>{shape(D,q=>{q.moveTo(0,0);q.lineTo(54,0);for(let i=0;i<=120;i++){let y=h*i/120;q.lineTo(34+23*Math.cos(y/h*T*2),y);}q.lineTo(0,h);q.closePath();},dog?.22:.82);for(let k=0;k<4;k++)stroke(A,1.8,q=>{for(let i=0;i<=120;i++){let y=h*i/120,x=63+k*8+13*Math.cos(y/h*T*2+k*.4);i?q.lineTo(x,y):q.moveTo(x,y);}});for(let y=110;y<h-70;y+=120)emblem(23,y,16,dog?D:paper);});break;
+      case 16: // mosaic corners with distinct tiles
+        corners(()=>{for(let i=0;i<5;i++)for(let j=0;j<5-i;j++){let X=17+i*28,Y=17+j*28;poly((i+j)%2?A:D,[[X,Y-13],[X+13,Y],[X,Y+13],[X-13,Y]],dog?.45:.88);}emblem(87,87,19);});ends(()=>{line(A,175,27,w-175,27,1);edgePattern(w*.30,45,w*.70,45,52);});break;
+      case 17: // alternating interrupted bars
+        sides(()=>{for(let y=45,i=0;y<h-40;y+=91,i++){let a=i%2;rect(a?A:D,18,y,a?20:43,56,dog?.4:.94);emblem(a?65:40,y+27,14,a?A:paper);}});ends(()=>{line(D,100,20,w-100,20,3);line(A,w*.25,35,w*.75,35,2);});break;
+      case 18: // radial instruments / rosettes
+        corners(()=>{for(let k=0;k<4;k++)stroke(A,1.4,q=>q.arc(0,0,40+k*26,0,Math.PI/2));for(let k=0;k<9;k++){let a=k*Math.PI/16;line(D,Math.cos(a)*35,Math.sin(a)*35,Math.cos(a)*115,Math.sin(a)*115,1,.7);}emblem(34,34,20);});ends(()=>{line(A,145,28,w-145,28,2);for(const x of [w*.25,w*.5,w*.75])diamond(x,28,6);});break;
+      case 19: // linked route or specimen / scent / care nodes
+        sides(()=>{stroke(D,3,q=>{q.moveTo(25,0);for(let i=1;i<=12;i++)q.lineTo(i%2?75:25,h*i/12);});for(let i=1;i<12;i++){let x=i%2?75:25,y=h*i/12;dot(paper,x,y,13);circle(A,x,y,12,2);emblem(x,y,8);}});ends(()=>line(A,95,35,w-95,35,1.7));break;
+      case 20: // engraved field register
+        sides(()=>{line(D,27,0,27,h,3);for(let y=40,i=0;y<h-35;y+=23,i++){let l=i%5===0?40:i%2===0?23:12;line(A,27,y,27+l,y,i%5===0?2.4:1);if(i%5===0)emblem(78,y,12);}});ends(()=>{line(D,110,24,w-110,24,1);for(let x=135;x<w-135;x+=35)line(A,x,24,x,34,1);});break;
+      case 21: // folded ribbon ends
+        ends(()=>{for(const [x,sx] of [[0,1],[w,-1]])at(x,0,sx,1,()=>{poly(D,[[0,0],[w*.22,0],[w*.17,45],[36,45],[36,95],[0,130]],dog?.35:.94);poly(A,[[0,0],[36,45],[36,95],[0,130]],.9);poly(A,[[36,45],[w*.17,45],[w*.14,61],[36,61]],.65);emblem(18,44,12,paper);});line(A,w*.23,26,w*.77,26,2);});break;
+      case 22: // shield cartouches and long narrow spine
+        sides(()=>{line(D,42,0,42,h,2);for(const y of [h*.13,h*.43,h*.73,h*.91]){rect(paper,4,y-35,76,70);plaque(42,y,32,2);}});ends(()=>{line(A,105,28,w-105,28,1);});break;
+      case 23: // layered wave engravings, upper/lower and side
+        ends(()=>{for(let j=0;j<6;j++)stroke(j%2?A:D,j===0?3:1.2,q=>{for(let i=0;i<=120;i++){let x=w*i/120,y=10+j*6+6*Math.sin(x/w*T*3+j*.5);i?q.lineTo(x,y):q.moveTo(x,y);}},.85);});sides(()=>{for(let y=110;y<h-85;y+=93)emblem(31,y,19);});break;
+      case 24: // stratified horizon, interrupted left/right
+        ends(()=>{for(let j=0;j<4;j++){poly(j%2?A:D,[[0,j*12],[w*.31,j*12],[w*.25,j*12+8],[0,j*12+8]],.8);poly(j%2?D:A,[[w,j*12],[w*.69,j*12],[w*.75,j*12+8],[w,j*12+8]],.8);}plaque(w/2,28,22,1);});sides(()=>{line(A,19,75,19,h-75,2);for(let y=100;y<h-80;y+=75)emblem(42,y,16);});break;
+      case 25: // modular capsules
+        sides(()=>{for(let y=25,i=0;y<h-55;y+=87,i++){stroke(i%2?A:D,2.2,q=>{q.roundRect(13,y,66,62,16);});rect(i%2?A:D,13,y+23,6,16);emblem(46,y+31,20);}});ends(()=>{line(A,112,26,w-112,26,2);for(let x=145;x<w-145;x+=70)dot(D,x,26,3);});break;
+      case 26: // fine guilloche medallions
+        border(21,1,D);corners(()=>{for(let i=0;i<3;i++)rosette(55,55,22+i*12,8+i*2);emblem(55,55,17);});sides(()=>{for(let y=155;y<h-145;y+=84){rosette(32,y,17,6);emblem(32,y,10);}});ends(()=>edgePattern(170,28,w-170,28,55));break;
+      case 27: // woven lattice side bands
+        sides(()=>{for(let y=-25;y<h;y+=39){line(D,13,y,75,y+45,2,.8);line(A,75,y,13,y+45,2,.8);}line(A,12,0,12,h,2);line(A,77,0,77,h,2);for(let y=105;y<h-65;y+=156){dot(paper,45,y,23);circle(A,45,y,23,2);emblem(45,y,15);}});ends(()=>line(D,100,27,w-100,27,1.4));break;
+      case 28: // cusp corners, linked angular arches
+        corners(()=>{stroke(D,heavy,q=>{q.moveTo(0,178);q.quadraticCurveTo(49,128,49,49);q.quadraticCurveTo(128,49,178,0);});stroke(A,3,q=>{q.moveTo(8,151);q.quadraticCurveTo(64,116,64,64);q.quadraticCurveTo(116,64,151,8);});emblem(28,28,20);});sides(()=>{for(let y=215;y<h-195;y+=85)diamond(25,y,10);});break;
+      case 29: // honor garland, open center
+        border(20,1,A);sides(()=>{stroke(D,1.6,q=>{q.moveTo(34,80);q.bezierCurveTo(61,h*.3,7,h*.7,34,h-80);});for(let y=105,i=0;y<h-90;y+=34,i++){let x=34+12*Math.sin(y/h*T);leaf(x-7,y,13,-.9);leaf(x+7,y+10,13,.9);if(i%4===0)emblem(62,y,13);}});ends(()=>{for(let x=110;x<w-110;x+=34){leaf(x,34,13,-.6);leaf(x+8,44,11,.6);}plaque(w/2,40,29);});break;
+    }}finally{ctx.restore();}
+  }
+
+  function drawSignatureCollection(kind,accent,ink){
+    const A=accent,D=ink, tau=Math.PI*2, e=Math.min(W,H), u=e/1190;
+    ctx.save();
+    ctx.lineCap='round';ctx.lineJoin='round';
+    const fill=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};
+    const p=(c,w,fn,opacity=1)=>{ctx.save();ctx.globalAlpha=opacity;ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();fn(ctx);ctx.stroke();ctx.restore();};
+    const shape=(c,fn,opacity=1)=>{ctx.save();ctx.globalAlpha=opacity;ctx.fillStyle=c;ctx.beginPath();fn(ctx);ctx.fill();ctx.restore();};
+    const poly=(c,pts,opacity=1)=>shape(c,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},opacity);
+    const line=(c,x,y,X,Y,w=1,opacity=1)=>p(c,w,q=>{q.moveTo(x,y);q.lineTo(X,Y);},opacity);
+    const rect=(c,m,w=1)=>p(c,w,q=>q.rect(m,m,W-m*2,H-m*2));
+    const circ=(c,x,y,r,w=1,opacity=1)=>p(c,w,q=>q.arc(x,y,r,0,tau),opacity);
+    const dot=(c,x,y,r,opacity=1)=>shape(c,q=>q.arc(x,y,r,0,tau),opacity);
+    const local=(x,y,sx,sy,fn)=>{ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);try{fn();}finally{ctx.restore();}};
+    const corners=[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]];
+    const goldLine=(x,y,X,Y,w=2)=>line(A,x,y,X,Y,w);
+    const curve=(c,x,y,r,n,opacity=1)=>p(c,1.4,q=>{for(let j=0;j<=240;j++){let a=tau*j/240,rr=r*(.82+.18*Math.cos(n*a));let xx=x+rr*Math.cos(a),yy=y+rr*Math.sin(a);j?q.lineTo(xx,yy):q.moveTo(xx,yy);}q.closePath();},opacity);
+    const leaf=(x,y,rx,ry,angle,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);shape(c,q=>{q.moveTo(-rx,0);q.quadraticCurveTo(0,-ry*2,rx,0);q.quadraticCurveTo(0,ry*2,-rx,0);},.85);line('#ffffff',-rx*.7,0,rx*.75,0,.7,.7);ctx.restore();};
+    const jewel=(x,y,r)=>{poly(A,[[x-r,y],[x,y-r],[x+r,y],[x,y+r]]);poly(D,[[x-r*.55,y],[x,y-r*.55],[x+r*.55,y],[x,y+r*.55]]);};
+    const edgeWash=(c,side,size)=>{let g=ctx.createLinearGradient(side?W:0,0,side?W-size:size,0);g.addColorStop(0,c);g.addColorStop(1,'rgba(255,255,255,0)');fill(g,side?W-size:0,0,size,H);};
+    const metal=(x,y,X,Y)=>{const g=ctx.createLinearGradient(x,y,X,Y);g.addColorStop(0,D);g.addColorStop(.23,A);g.addColorStop(.49,'#f2e4c4');g.addColorStop(.66,A);g.addColorStop(1,D);return g;};
+    try{switch(kind){
+      case 'sigApex': {
+        // Machined chamfered plates, inset rivets and engraved parallel grooves.
+        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{
+          poly(D,[[0,0],[W*.24,0],[W*.19,47],[119,47],[67,103],[67,217],[0,276]]);
+          poly(A,[[0,0],[W*.24,0],[W*.225,14],[104,14],[15,108],[15,263],[0,276]]);
+          poly('#ffffff',[[25,107],[111,23],[W*.187,23],[W*.175,34],[119,34],[56,105],[56,210],[25,238]],.13);
+          for(let j=0;j<7;j++)line(A,30,121+j*15,52,100+j*15,2,.8);
+          for(const [X,Y] of [[88,30],[28,72],[34,224]]){circ(A,X,Y,7,2);dot(A,X,Y,2);}
+        });
+        for(const [x,s] of [[25,1],[W-25,-1]]){line(D,x,290,x,H-290,3);for(let y=310;y<H-300;y+=38)line(A,x,y,x+s*(y%3?12:20),y,2);}
+        for(const y of [25,H-25]){goldLine(W*.29,y,W*.45,y,2);goldLine(W*.55,y,W*.71,y,2);jewel(W/2,y,12);}break;
+      }
+      case 'sigTrail': {
+        // Tracking ribbon: organically meandering paths and directional paw silhouettes.
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
+          edgeWash(D,0,1); // thin edge only; mirrored by the local transform
+          shape(D,q=>{q.moveTo(0,0);q.lineTo(81,0);for(let j=0;j<=100;j++){let t=j/100;q.lineTo(62+16*Math.sin(t*tau*2.2),t*H);}q.lineTo(0,H);q.closePath();});
+          for(let j=0;j<4;j++)p(A,1.7,q=>{for(let i=0;i<=200;i++){let t=i/200,X=89+j*10+12*Math.sin(t*tau*2.2+j*.3);i?q.lineTo(X,t*H):q.moveTo(X,t*H);}},.8-j*.13);
+          for(let y=105,i=0;y<H-60;y+=150,i++){ctx.save();ctx.translate(33+(i%2)*9,y);ctx.rotate((i%2?.25:-.25));shape(A,q=>{q.ellipse(0,5,11,9,0,0,tau);});for(let a=0;a<4;a++){let angle=Math.PI+(a+.5)*Math.PI/4;shape(A,q=>q.ellipse(14*Math.cos(angle),14*Math.sin(angle),3.3,5,angle+Math.PI/2,0,tau));}ctx.restore();}
+        });
+        for(const y of [38,H-38]){p(A,2,q=>{q.moveTo(155,y);q.bezierCurveTo(W*.29,y+14,W*.37,y-14,W/2,y);q.bezierCurveTo(W*.63,y+14,W*.71,y-14,W-155,y);});for(const x of [W*.25,W*.5,W*.75]){circ(D,x,y,7,2);dot(A,x,y,3);}}break;
+      }
+      case 'sigRescue': {
+        // Rescue beacon: asymmetric signal tower, radial sweeps and reflective chevrons.
+        fill(D,0,0,51,H);fill(A,51,0,8,H);
+        for(let y=25;y<H-22;y+=57)poly(A,[[0,y],[51,y+17],[51,y+32],[0,y+15]],.9);
+        for(const [x,y,sx,sy] of [corners[1],corners[3]])local(x,y,sx,sy,()=>{
+          shape(D,q=>{q.moveTo(0,0);q.lineTo(W*.27,0);q.quadraticCurveTo(60,65,0,230);q.closePath();});
+          for(let j=0;j<8;j++)p(A,2.2,q=>q.arc(0,0,42+j*23,0,Math.PI/2),.95-j*.07);
+          for(let j=0;j<8;j++){let a=j*Math.PI/14;line(A,Math.cos(a)*33,Math.sin(a)*33,Math.cos(a)*222,Math.sin(a)*222,1,.4);}
+          dot(A,23,23,8);circ('#fff',23,23,16,2);
+        });
+        for(const y of [26,H-26]){line(D,82,y,W*.67,y,2);line(A,82,y+6,W*.45,y+6,4);for(let i=0;i<3;i++)poly(D,[[W*.69+i*22,y-7],[W*.69+i*22+12,y],[W*.69+i*22,y+7]]);}break;
+      }
+      case 'sigForensic': {
+        // Stratigraphic cutaway panels, numbered-free specimen markers and fine hatching.
+        for(const [x,s] of [[0,1],[W,-1]])local(x,0,s,1,()=>{
+          fill(D,0,0,22,H);for(let j=0;j<7;j++){
+            shape(j%2?A:D,q=>{q.moveTo(22,j*H/7);q.lineTo(112,j*H/7+27);q.lineTo(88,(j+1)*H/7-26);q.lineTo(22,(j+1)*H/7);q.closePath();},.82);
+            for(let i=0;i<9;i++)line('#fff',31,j*H/7+13+i*12,71,j*H/7+28+i*12,1,.36);
+            circ(A,133,(j+.5)*H/7,11,1.8);line(D,126,(j+.5)*H/7,140,(j+.5)*H/7,1.5);line(D,133,(j+.5)*H/7-7,133,(j+.5)*H/7+7,1.5);
+          }
+        });for(const y of [30,H-30]){line(D,170,y,W-170,y,2);for(let i=0;i<21;i++)line(A,W*.21+i*W*.029,y,W*.21+i*W*.029,y+(i%5===0?15:6)*(y< H/2?1:-1),1.5);}break;
+      }
+      case 'sigNight': {
+        // Wide telemetry apertures, staggered micro-grid and electronic waveform.
+        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{
+          poly(D,[[0,0],[W*.44,0],[W*.37,38],[156,38],[86,103],[86,228],[0,305]]);
+          for(let i=0;i<7;i++)for(let j=0;j<8;j++)if(10+i*11<82)dot(A,12+i*11,53+j*14,2.1,.4+(i+j)%3*.24);
+          p(A,3,q=>{q.moveTo(7,284);q.lineTo(69,228);q.lineTo(69,103);q.lineTo(147,26);q.lineTo(W*.37,26);});
+          for(let j=0;j<6;j++)line('#fff',175+j*19,10,183+j*19,21,1.4,.65);
+        });
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,H/2,sx,1,()=>{fill(D,0,-H*.22,17,H*.44);p(A,3,q=>{q.moveTo(35,-H*.22);for(let j=0;j<24;j++)q.lineTo(35+([0,11,2,24,8,14][j%6]),-H*.22+(j+1)*H*.44/24);});});
+        for(const y of [43,H-43]){for(let i=0;i<13;i++)dot(A,W*.36+i*W*.024,y,i%3?2.2:4);line(D,W*.28,y,W*.34,y,3);line(D,W*.67,y,W*.73,y,3);}break;
+      }
+      case 'sigAurum': {
+        // Detailed intaglio engraving: braided border, rosettes and fine-cut acanthus corners.
+        rect(D,17,1.5);rect(A,24,3);rect(A,73,1.4);
+        for(const y of [48,H-48])for(let i=0;i<3;i++)p(A,1.1,q=>{for(let j=0;j<=700;j++){let t=j/700,X=80+t*(W-160),Y=y+15*Math.sin(t*tau*19+i*tau/3);j?q.lineTo(X,Y):q.moveTo(X,Y);}},.85);
+        for(const x of [47,W-47])for(let i=0;i<3;i++)p(A,1.1,q=>{for(let j=0;j<=500;j++){let t=j/500,X=x+13*Math.sin(t*tau*13+i*tau/3),Y=80+t*(H-160);j?q.lineTo(X,Y):q.moveTo(X,Y);}},.85);
+        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{
+          shape(D,q=>{q.moveTo(15,15);q.lineTo(190,15);q.bezierCurveTo(96,36,38,96,15,190);q.closePath();});
+          for(let j=0;j<13;j++)p(metal(15,15,145,145),1.4,q=>{q.moveTo(20+j*10,20);q.quadraticCurveTo(35+j*4,35+j*4,20,20+j*10);});
+          for(let j=0;j<7;j++){let a=.16+j*.2;leaf(27+105*Math.cos(a),27+105*Math.sin(a),15,5,a+1.1);}
+          curve(A,47,47,23,12);circ(A,47,47,14,1);dot(A,47,47,4);
+        });break;
+      }
+      case 'sigChateau': {
+        // Architectural pilasters and sculpted Baroque flourishes.
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
+          fill(D,0,0,26,H);for(let j=0;j<5;j++)fill(metal(28,0,70,0),29+j*9,0,5,H);
+          for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
+            poly(D,[[0,0],[W*.23,0],[W*.18,24],[115,24],[96,63],[0,63]]);
+            for(let j=0;j<5;j++)p(A,2,q=>{q.moveTo(35+j*11,74);q.bezierCurveTo(43,134+j*13,170+j*12,66,129+j*8,35);});
+            for(let j=0;j<6;j++)leaf(95+j*20,63+13*Math.sin(j),17,6,-.6);
+            for(let j=0;j<3;j++)circ(A,72,90,20+j*7,1.2);
+          });
+        });
+        for(const y of [28,H-28]){p(A,2,q=>{q.moveTo(W*.25,y);q.bezierCurveTo(W*.40,y+27,W*.42,y-19,W/2,y);q.bezierCurveTo(W*.58,y-19,W*.60,y+27,W*.75,y);});curve(A,W/2,y,19,6);}
+        break;
+      }
+      case 'sigLumiere': {
+        // Fan-shaped art-deco sunbursts contained in long horizontal capstones.
+        for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
+          shape(D,q=>{q.moveTo(0,0);q.lineTo(W,0);q.lineTo(W,35);q.lineTo(W*.64,35);q.lineTo(W*.60,65);q.lineTo(W*.40,65);q.lineTo(W*.36,35);q.lineTo(0,35);q.closePath();});
+          for(let j=0;j<=24;j++){let a=-Math.PI+j*Math.PI/24;const X=W/2+Math.cos(a)*W*.097,Y=61+Math.sin(a)*54;line(A,W/2,61,X,Y,2.3);}
+          for(let j=0;j<3;j++)p(A,1.5,q=>{q.moveTo(W*.40+j*12,61);q.quadraticCurveTo(W/2,5+j*12,W*.60-j*12,61);});
+          for(let j=0;j<3;j++){line(A,0,10+j*8,W*.35,10+j*8,1.1);line(A,W*.65,10+j*8,W,10+j*8,1.1);}
+        });
+        for(const x of [30,W-30]){line(D,x,60,x,H-60,2);for(let y=100;y<H-90;y+=112){poly(A,[[x-8,y],[x,y-17],[x+8,y],[x,y+17]]);circ(D,x,y,4,1);}}break;
+      }
+      case 'sigPorcelain': {
+        // Cobalt porcelain vines with petal clusters, alternating hand-painted motifs.
+        rect(A,19,3);rect(A,29,1);
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
+          p(A,2.3,q=>{for(let j=0;j<=220;j++){let t=j/220;let X=62+23*Math.sin(t*tau*5),Y=46+(H-92)*t;j?q.lineTo(X,Y):q.moveTo(X,Y);}});
+          for(let y=90,i=0;y<H-60;y+=97,i++){let X=60+19*Math.sin((y-46)/(H-92)*tau*5);for(let j=0;j<5;j++){let a=j*tau/5;leaf(X+15*Math.cos(a),y+15*Math.sin(a),12,5,a,A);}dot(D,X,y,4);leaf(X+20,y+30,17,6,.7);leaf(X-18,y-25,17,6,-.6);}
+        });
+        for(const y of [42,H-42]){for(let x=140,i=0;x<W-120;x+=52,i++){curve(A,x,y,15,i%2?4:6,.8);dot(A,x,y,2);if(x+26<W-120)leaf(x+26,y,10,3,0,A);}}break;
+      }
+      case 'sigEclipse': {
+        // Crescent cutout with offset orbital tracks; dramatic but print-friendly.
+        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{
+          shape(D,q=>{q.moveTo(0,0);q.lineTo(W*.46,0);q.bezierCurveTo(W*.23,29,64,81,0,H*.34);q.closePath();});
+          for(let j=0;j<10;j++)p(A,1.7,q=>{q.moveTo(W*(.47+j*.012),0);q.bezierCurveTo(W*(.20+j*.012),36+j*7,55+j*9,95+j*8,0,H*(.35+j*.016));},.91-j*.055);
+          for(let j=0;j<6;j++)dot(A,W*.29-j*18,14+j*12,2.6+j*.5,.75);
+        });
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,H/2,sx,1,()=>{p(A,2.4,q=>{q.moveTo(23,-H*.22);q.bezierCurveTo(99,-H*.13,99,H*.13,23,H*.22);});p(D,1,q=>{q.moveTo(15,-H*.22);q.bezierCurveTo(71,-H*.13,71,H*.13,15,H*.22);});});break;
+      }
+      case 'sigDiplomat': {
+        // Woven ceremonial ribbon; central generic ornamental medallions, no official seals.
+        for(const y of [0,H-47]){fill(D,0,y,W,47);for(let i=0;i<W;i+=24){poly(A,[[i,y],[i+12,y],[i+36,y+47],[i+24,y+47]],.75);line('#fff',i+2,y,i+26,y+47,.8,.45);}}
+        rect(A,58,1.6);
+        for(const x of [37,W-37])for(let y=90;y<H-70;y+=30){poly(D,[[x-9,y],[x,y-11],[x+9,y],[x,y+11]]);dot(A,x,y,3);}
+        for(const [y,sy] of [[48,1],[H-48,-1]])local(W/2,y,1,sy,()=>{shape('#fff',q=>q.arc(0,0,37,0,tau));circ(A,0,0,34,3);circ(D,0,0,28,1.5);curve(A,0,0,23,10);jewel(0,0,11);});break;
+      }
+      case 'sigAlma': {
+        // Gothic tracery built from pointed arches, ribbed capitals and quatrefoils.
+        for(const [x,s] of [[0,1],[W,-1]])local(x,0,s,1,()=>{
+          fill(D,0,0,19,H);line(A,24,0,24,H,3);
+          for(let y=70;y<H-100;y+=150){p(D,2.4,q=>{q.moveTo(35,y+86);q.lineTo(35,y+37);q.quadraticCurveTo(35,y+16,64,y);q.quadraticCurveTo(93,y+16,93,y+37);q.lineTo(93,y+86);});p(A,1.5,q=>{q.moveTo(45,y+86);q.lineTo(45,y+40);q.quadraticCurveTo(45,y+23,64,y+12);q.quadraticCurveTo(83,y+23,83,y+40);q.lineTo(83,y+86);});curve(A,64,y+56,14,4);line(D,33,y+92,95,y+92,3);}
+        });
+        for(const [y,sy] of [[20,1],[H-20,-1]])local(0,y,1,sy,()=>{for(let i=0;i<7;i++){let x=135+i*(W-270)/7,d=(W-270)/7;p(A,1.8,q=>{q.moveTo(x,32);q.quadraticCurveTo(x+d*.25,32,x+d/2,0);q.quadraticCurveTo(x+d*.75,32,x+d,32);});curve(D,x+d/2,35,9,4);}line(D,125,0,W-125,0,2);});break;
+      }
+      case 'sigMonograph': {
+        // Editorial composition: book spine, cropped folio tabs and asymmetric red line.
+        fill(D,0,0,42,H);fill(A,42,0,11,H);for(let j=0;j<5;j++)line('#fff',8+j*7,30,8+j*7,H-30,.8,.4);
+        fill(D,W*.68,0,W*.32,58);fill(A,W*.79,58,W*.21,10);
+        fill(A,0,H-51,W*.31,51);fill(D,W*.31,H-17,W*.69,17);
+        for(let j=0;j<6;j++){fill(j%2?A:D,W-65,110+j*H*.12,65,9);line(D,W-95,124+j*H*.12,W-22,124+j*H*.12,1);}
+        line(A,80,45,W*.62,45,2);line(D,80,52,W*.52,52,1);line(A,W*.37,H-39,W-85,H-39,2);break;
+      }
+      case 'sigHelix': {
+        // Abstract double helix with connected rungs and alternating chromatic curves.
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
+          fill(D,0,0,15,H);
+          for(let i=0;i<=57;i++){let y=25+i*(H-50)/57,a=(y/H)*tau*4;let X=70+31*Math.sin(a),Y=70-31*Math.sin(a);line(D,X,y,Y,y,1.8,.5);dot(A,X,y,3.3);dot(D,Y,y,3.3);}
+          for(const [c,sg] of [[A,1],[D,-1]])p(c,4,q=>{for(let j=0;j<=350;j++){let y=j*H/350,x=70+sg*31*Math.sin(y/H*tau*4);j?q.lineTo(x,y):q.moveTo(x,y);}});
+        });
+        for(const y of [35,H-35]){for(let i=0;i<15;i++){let x=W*.24+i*W*.037;line(D,x,y,x+W*.023,y,2);dot(A,x+W*.025,y,3);}}break;
+      }
+      case 'sigMarble': {
+        // Procedural mineral veining on broad diagonal corner panels; not a photo texture.
+        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{
+          ctx.save();ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*.42,0);ctx.lineTo(109,117);ctx.lineTo(0,295);ctx.closePath();ctx.clip();
+          fill('#e9e8e6',0,0,W*.43,300);for(let j=0;j<30;j++)p(j%4===0?A:D,j%4===0?2.5:.9,q=>{for(let i=0;i<=170;i++){let t=i/170,X=t*W*.46,Y=j*12-50+35*Math.sin(t*13+j*.53)+13*Math.sin(t*33+j*.11)+t*50;i?q.lineTo(X,Y):q.moveTo(X,Y);}},j%4===0?.8:.25);
+          ctx.restore();p(metal(0,280,W*.42,0),7,q=>{q.moveTo(0,295);q.lineTo(109,117);q.lineTo(W*.42,0);});
+        });
+        rect(A,21,1.2);for(const [y,sy] of [[55,1],[H-55,-1]]){line(D,W*.44,y,W*.72,y,1);jewel(W*.76,y,7);}break;
+      }
+      case 'sigHorizon': {
+        // Deep relief engraved waves, edge-to-edge micro-linework in bottom/top bands.
+        for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
+          shape(D,q=>{q.moveTo(0,0);q.lineTo(W,0);q.lineTo(W,45);q.bezierCurveTo(W*.75,9,W*.62,86,W*.40,48);q.bezierCurveTo(W*.20,15,W*.12,77,0,48);q.closePath();});
+          for(let j=0;j<12;j++)p(j%3?A:'#ffffff',1.4,q=>{for(let i=0;i<=400;i++){let t=i/400,X=t*W,Y=7+j*4+11*Math.sin(t*tau*2+j*.17)+5*Math.sin(t*tau*4-j*.07);i?q.lineTo(X,Y):q.moveTo(X,Y);}},j%3?.8:.46);
+          p(A,2.5,q=>{q.moveTo(0,48);q.bezierCurveTo(W*.12,77,W*.20,15,W*.40,48);q.bezierCurveTo(W*.62,86,W*.75,9,W,45);});
+        });
+        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{for(let j=0;j<3;j++)p(A,1.3,q=>{for(let i=0;i<=240;i++){let t=i/240, X=22+j*7+6*Math.sin(t*tau*4+j*.6),Y=93+t*(H-186);i?q.lineTo(X,Y):q.moveTo(X,Y);}},.8-j*.17);});break;
+      }
+    }}finally{ctx.restore();}
+  }
+
   function drawProfessionalOrnament(kind, accent, ink) {
     const m=38, e=Math.min(W,H), gold=accent, dark=ink;
     ctx.save();
@@ -2965,7 +3501,6 @@
   // L'archivio grafico è incorporato nell'app: nessuna rete e nessun caricamento all'apertura.
   populateThemeGallery();
   $("themeSearch").addEventListener("input", populateThemeGallery);
-  $("themeCategory").addEventListener("change", populateThemeGallery);
   $("themeGrid").addEventListener("click", event => {
     const button = event.target.closest(".theme-choice");
     if (button && $("themeGrid").contains(button)) applyCatalogTheme(button.dataset.theme);
