@@ -1,7 +1,7 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
-const CACHE = `${PREFIX}4.8.1`;
+const CACHE = `${PREFIX}4.8.2`;
 const FILES = ["./", "./index.html", "./css/style.css", "./js/app.js", "./js/pdf-vector.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(path=>new URL(path,SCOPE).href);
 const KNOWN = new Set(FILES);
 self.addEventListener("install", event=>event.waitUntil((async()=>{

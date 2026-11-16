@@ -1,4 +1,4 @@
-# K9 Template Studio — versione 4.8.1 (16 novembre 2026)
+# K9 Template Studio — versione 4.8.2 (16 novembre 2026)
 
 Applicazione statica per creare attestati e certificati in **A4 verticale (210 × 297 mm)** o **A4 orizzontale (297 × 210 mm)**, con PDF singoli o multipagina e PNG a 600 DPI.
 
@@ -7,6 +7,8 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 **Stabilità 4.7.2:** salvataggio e riapertura protetti; i dati e tutte le immagini sono validati prima di sostituire il progetto. Il cambio progetto viene interrotto se il salvataggio fallisce; le scritture concorrenti da schede differenti sono rilevate confrontando le versioni nell'archivio. «Salva progetto» aggiorna senza conferma. Caricare un modello di disciplina conserva l'ID del progetto aperto. Autosalvataggio a 250 ms e tentativo di salvataggio quando la pagina viene nascosta; Android può comunque interrompere la pagina senza consentire il completamento. Un recupero non riuscito impedisce scritture automatiche finché non viene aperto esplicitamente un altro progetto valido.
 
 **Backup:** massimo 80 MiB per il singolo progetto JSON e 180 MiB per ogni parte di archivio completo. Gli archivi grandi vengono divisi in file indipendenti, scaricabili e importabili uno alla volta; se un solo progetto non entra in una parte, occorre ridurre le immagini. I file troppo grandi vengono rifiutati prima del download. La cronologia locale delle versioni non è inclusa nei backup; si può esportare una versione dopo averla ripristinata. Il backup completo non duplica il lavoro corrente se già incluso nei progetti. Importazioni ripetute ignorano le versioni identiche; i progetti differenti sono aggiunti senza sovrascrivere quelli esistenti. L'archivio completa la scrittura in una transazione.
+
+**Novità 4.8.2:** anteprima fuori dalla zona scorrevole, pannelli con scorrimento indipendente in modalità rapida e completa. I collegamenti rapidi scorrono il pannello di modifica, non la pagina. Su schermi bassi la dimensione dell’anteprima si adatta allo spazio disponibile; la qualità di esportazione non cambia. Il nominativo del partecipante usa lo stesso colore principale di titolo e corso, anche su due righe, nelle miniature, nell’anteprima e nelle esportazioni PDF/PNG.
 
 **Novità 4.8.1:** il confronto del contenuto (compresi i dati delle immagini) evita nuove versioni per salvataggi invariati. Le importazioni riconoscono progetti con la stessa origine e contenuto anche se i token sono diversi; le copie volontarie rimangono distinte. I modelli per disciplina sono separati per orientamento, con recupero compatibile dei vecchi modelli. In caso di conflitto di modelli importati, l'app conserva quelli locali e segnala il numero dei modelli differenti. Il margine grafico del tema viene ricavato dal disegno, e testi e firme si adattano allo spazio rilevato; l'ingrandimento richiesto delle firme può essere limitato per rispettare tale spazio. I nuovi loghi vengono collocati cercando una posizione libera, senza spostare quelli esistenti. Le firme possono essere disegnate direttamente nel dialogo e salvate come PNG trasparente, nel progetto e nel backup. Il carattere automatico rimane dipendente dai font del dispositivo. La cache delle miniature è limitata a 32 immagini. Il PDF multipagina con codice manuale usa il codice per il nome del file, senza richiedere una disciplina o data aggiuntiva.
 
@@ -34,7 +36,7 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 
 **Pubblicazione:** la configurazione Pages rimane sul ramo `main` e sulla cartella `/(root)`. Nessuna impostazione GitHub Pages viene cambiata con questo aggiornamento. L’eventuale file `.nojekyll` è indipendente da queste modifiche e non risolve da solo un errore `Startup failure` di GitHub Actions.
 
-**Aggiornamento 4.8.1:** sostituire `index.html`, `css/style.css`, `js/app.js`, `sw.js` e `README.md` (motore `js/pdf-vector.js` invariato). Nessun nuovo file obbligatorio. È possibile eliminare `style.css` nella radice, `css/Gitgap` e `js/Gitgap` (non utilizzati). Prima di pubblicare, esportare un backup dei progetti.
+**Aggiornamento 4.8.2 (comprende 4.8.1):** sostituire `index.html`, `css/style.css`, `js/app.js`, `sw.js` e `README.md` (motore `js/pdf-vector.js` invariato). Nessun nuovo file obbligatorio. È possibile eliminare `style.css` nella radice, `css/Gitgap` e `js/Gitgap` (non utilizzati). Prima di pubblicare, esportare un backup dei progetti.
 
 **Grafica e impaginazione automatica:** 130 stili selezionabili (121 precedenti − 15 simili o identici + 24 nuove composizioni; varianti storiche conservate per compatibilità), miniature reali per il formato A4 selezionato, font coordinati e ridimensionamento dei nominativi. Il testo non viene riscritto. PDF vettoriale con font Times e Helvetica standard, grafica rasterizzata nativamente a 600 DPI (7016 × 4961 pixel in orizzontale e 4961 × 7016 in verticale). Testi che non entrano nello spazio disponibile sono segnalati prima dell’esportazione. I progetti esistenti mantengono ID, testi, immagini e orientamento; il nuovo motore può modificarne l’aspetto tipografico.
 
@@ -50,7 +52,7 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 
 ## Storico delle versioni precedenti
 
-Le note seguenti descrivono il comportamento delle **versioni storiche** e possono non corrispondere all'implementazione attuale 4.8.1. In caso di differenze, fa fede la sezione aggiornata qui sopra.
+Le note seguenti descrivono il comportamento delle **versioni storiche** e possono non corrispondere all'implementazione attuale 4.8.2. In caso di differenze, fa fede la sezione aggiornata qui sopra.
 
 ## V4.2.1 — Aggiornamento correttivo
 
