@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.2">
+  <link rel="stylesheet" href="css/style.css?v=4.9.4">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.2</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.4</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -169,6 +169,12 @@
           </div>
           <div class="theme-gallery-heading"><span id="themeCount" aria-live="polite">266 stili disponibili</span><button type="button" class="theme-locate" id="locateTheme" title="Apri la categoria dello stile caricato">Caricato: <strong id="themeLoaded">Classico</strong><span aria-hidden="true"> ›</span></button></div>
           <p class="theme-path" id="themePath"></p>
+          <label class="range-row">
+            <span>Opacità sfondo del tema <output id="themeBackgroundOpacityValue" for="themeBackgroundOpacity">100%</output></span>
+            <input id="themeBackgroundOpacity" type="range" min="0" max="100" step="1" value="100" aria-describedby="themeOpacityHelp">
+          </label>
+          <small id="themeOpacityHelp">0% nasconde il fondale; 100% mantiene l'aspetto originale. Cornici, medaglioni, testi, loghi e firme restano invariati. I temi senza fondale non cambiano.</small>
+          <button id="resetThemeBackgroundOpacity" class="button ghost small" type="button" disabled>Ripristina sfondo del tema</button>
           <div class="theme-menus" id="themeGrid" role="group" aria-label="Archivio stili grafici da caricare"></div>
           <p id="themeEmpty" class="help-text hidden">Nessuno stile trovato. Cambia la ricerca.</p>
           <p class="help-text">Apri una disciplina e la sua sottocategoria, oppure una collezione generale, poi tocca uno stile per caricarlo nel progetto attuale: non crea nuovi progetti, non modifica nomi, loghi, firme o formato A4. L'anteprima mostra subito il risultato. Nessuna connessione necessaria.</p>
@@ -205,8 +211,8 @@
 
           <div id="backgroundTools" class="image-tools hidden">
             <label class="range-row">
-              <span>Trasparenza <output id="backgroundOpacityValue">100%</output></span>
-              <input id="backgroundOpacity" type="range" min="10" max="100" value="100">
+              <span>Opacità immagine caricata <output id="backgroundOpacityValue">100%</output></span>
+              <input id="backgroundOpacity" type="range" min="0" max="100" value="100">
             </label>
             <label class="range-row">
               <span>Dimensione <output id="backgroundScaleValue">100%</output></span>
@@ -471,7 +477,8 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.2"></script>
-  <script src="js/app.js?v=4.9.2"></script>
+  <script src="js/pdf-vector.js?v=4.9.4"></script>
+  <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
+  <script src="js/app.js?v=4.9.4"></script>
 </body>
 </html>

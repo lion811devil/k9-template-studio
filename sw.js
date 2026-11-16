@@ -1,11 +1,11 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.2";
+const VERSION = "4.9.4";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
 const CACHE = `${PREFIX}${VERSION}`;
 const urlFor = path => new URL(path,SCOPE).href;
 const versioned = path => `${path}?v=${VERSION}`;
-const FILES = ["./", "./index.html", versioned("./css/style.css"), versioned("./js/app.js"), versioned("./js/pdf-vector.js"), "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(urlFor);
+const FILES = ["./", "./index.html", versioned("./css/style.css"), versioned("./js/app.js"), versioned("./js/realistic-backgrounds.js"), versioned("./js/pdf-vector.js"), "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(urlFor);
 const KNOWN = new Set(FILES);
 const NAV = new Set([urlFor("./"),urlFor("./index.html")]);
 self.addEventListener("install", event=>event.waitUntil((async()=>{
@@ -15,10 +15,12 @@ self.addEventListener("install", event=>event.waitUntil((async()=>{
     // Non attivare una release pubblicata solo in parte.
     for (const address of NAV) {
       const html=await (await cache.match(address)).text();
-      if (!html.includes(`js/app.js?v=${VERSION}`) || !html.includes(`css/style.css?v=${VERSION}`) || !html.includes(`js/pdf-vector.js?v=${VERSION}`)) throw new Error("HTML non aggiornato");
+      if (!html.includes(`js/app.js?v=${VERSION}`) || !html.includes(`css/style.css?v=${VERSION}`) || !html.includes(`js/pdf-vector.js?v=${VERSION}`) || !html.includes(`js/realistic-backgrounds.js?v=${VERSION}`)) throw new Error("HTML non aggiornato");
     }
     const app=await (await cache.match(urlFor(versioned("./js/app.js")))).text();
     if (!app.includes(`const STUDIO_VERSION = "${VERSION}";`)) throw new Error("JavaScript non aggiornato");
+    const photos=await (await cache.match(urlFor(versioned("./js/realistic-backgrounds.js")))).text();
+    if(!photos.includes(`K9_REALISTIC_VERSION = "${VERSION}";`) || (photos.match(/data:image\/jpeg;base64,/g)||[]).length!==120) throw new Error("Archivio fondali incompleto");
   } catch(error) {await caches.delete(CACHE);throw error;}
   // Attivazione dopo precache completo; nessun reload automatico di pagine con modifiche.
   await self.skipWaiting();
