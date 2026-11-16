@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.1";
+  const STUDIO_VERSION = "4.9.2";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -256,126 +256,126 @@
     sigMarble: {"label": "Marmo di Carrara", "detail": "Grafite, ottone e venature minerali", "category": "Eleganti", "accent": "#8B703E", "ink": "#343B43", "frame": "none", "ornament": "sigMarble", "profile": "editorial"},
     sigHorizon: {"label": "Horizon Relief", "detail": "Blu oceano e incisioni a onde profonde", "category": "Professionali", "accent": "#386E82", "ink": "#1E4556", "frame": "none", "ornament": "sigHorizon", "profile": "modern"},
 
-    k9mt01: {"label": "Trail Command", "detail": "Mantrailing · piastre angolari", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt01", "profile": "tactical", "discipline": "Mantrailing", "layout": 0},
-    k9mt02: {"label": "Urban Track", "detail": "Mantrailing · doppio binario", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt02", "profile": "tactical", "discipline": "Mantrailing", "layout": 1},
-    k9mt03: {"label": "Night Scent", "detail": "Mantrailing · arco inciso", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt03", "profile": "ceremony", "discipline": "Mantrailing", "layout": 2},
-    k9mt04: {"label": "Forest Line", "detail": "Mantrailing · pannelli sfaccettati", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt04", "profile": "tactical", "discipline": "Mantrailing", "layout": 3},
-    k9mt05: {"label": "Compass Elite", "detail": "Mantrailing · cartiglio a rombo", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt05", "profile": "tactical", "discipline": "Mantrailing", "layout": 4},
-    k9mt06: {"label": "Route of Honor", "detail": "Mantrailing · medaglioni laterali", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt06", "profile": "ceremony", "discipline": "Mantrailing", "layout": 5},
-    k9mt07: {"label": "Alpine Pursuit", "detail": "Mantrailing · fasce oblique", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt07", "profile": "tactical", "discipline": "Mantrailing", "layout": 6},
-    k9mt08: {"label": "Trail Atlas", "detail": "Mantrailing · reticolo agli angoli", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt08", "profile": "tactical", "discipline": "Mantrailing", "layout": 7},
-    k9mt09: {"label": "Scent Corridor", "detail": "Mantrailing · corridoio asimmetrico", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt09", "profile": "editorial", "discipline": "Mantrailing", "layout": 8},
-    k9mt10: {"label": "Operational Track", "detail": "Mantrailing · doppia fascia scanalata", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt10", "profile": "tactical", "discipline": "Mantrailing", "layout": 9},
-    k9mt11: {"label": "Pathfinder", "detail": "Mantrailing · cornice a scalini", "category": "Mantrailing", "accent": "#496B4C", "ink": "#263445", "frame": "none", "ornament": "k9mt11", "profile": "tactical", "discipline": "Mantrailing", "layout": 10},
-    k9mt12: {"label": "K9 Meridian", "detail": "Mantrailing · medaglione centrale", "category": "Mantrailing", "accent": "#37596A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt12", "profile": "ceremony", "discipline": "Mantrailing", "layout": 11},
-    k9mt13: {"label": "Silent Trail", "detail": "Mantrailing · parentesi sottili", "category": "Mantrailing", "accent": "#3E536F", "ink": "#273B32", "frame": "none", "ornament": "k9mt13", "profile": "editorial", "discipline": "Mantrailing", "layout": 12},
-    k9mt14: {"label": "Trail Heritage", "detail": "Mantrailing · fregio classico", "category": "Mantrailing", "accent": "#80623A", "ink": "#283742", "frame": "none", "ornament": "k9mt14", "profile": "ceremony", "discipline": "Mantrailing", "layout": 13},
-    k9mt15: {"label": "Waypoint", "detail": "Mantrailing · quattro sigilli", "category": "Mantrailing", "accent": "#916A34", "ink": "#263445", "frame": "none", "ornament": "k9mt15", "profile": "ceremony", "discipline": "Mantrailing", "layout": 14},
-    k9mt16: {"label": "Terra Incognita", "detail": "Mantrailing · curve organiche", "category": "Mantrailing", "accent": "#496456", "ink": "#3D372E", "frame": "none", "ornament": "k9mt16", "profile": "tactical", "discipline": "Mantrailing", "layout": 15},
-    k9mt17: {"label": "Street Grid", "detail": "Mantrailing · tessere geometriche", "category": "Mantrailing", "accent": "#627B55", "ink": "#273B32", "frame": "none", "ornament": "k9mt17", "profile": "tactical", "discipline": "Mantrailing", "layout": 16},
-    k9mt18: {"label": "Ridge Patrol", "detail": "Mantrailing · binari interrotti", "category": "Mantrailing", "accent": "#406D69", "ink": "#283742", "frame": "none", "ornament": "k9mt18", "profile": "tactical", "discipline": "Mantrailing", "layout": 17},
-    k9mt19: {"label": "Trail Compass", "detail": "Mantrailing · rosa radiale", "category": "Mantrailing", "accent": "#69523B", "ink": "#263445", "frame": "none", "ornament": "k9mt19", "profile": "tactical", "discipline": "Mantrailing", "layout": 18},
-    k9mt20: {"label": "Scent Navigator", "detail": "Mantrailing · percorso a nodi", "category": "Mantrailing", "accent": "#53643E", "ink": "#3D372E", "frame": "none", "ornament": "k9mt20", "profile": "tactical", "discipline": "Mantrailing", "layout": 19},
-    k9mt21: {"label": "Field Notes", "detail": "Mantrailing · registro a tacche", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt21", "profile": "editorial", "discipline": "Mantrailing", "layout": 20},
-    k9mt22: {"label": "Trail Ribbon", "detail": "Mantrailing · nastri ripiegati", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt22", "profile": "tactical", "discipline": "Mantrailing", "layout": 21},
-    k9mt23: {"label": "Map of Merit", "detail": "Mantrailing · cartigli a scudo", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt23", "profile": "ceremony", "discipline": "Mantrailing", "layout": 22},
-    k9mt24: {"label": "Olfactory Journey", "detail": "Mantrailing · onde parallele", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt24", "profile": "tactical", "discipline": "Mantrailing", "layout": 23},
-    k9mt25: {"label": "Search Horizon", "detail": "Mantrailing · orizzonte stratificato", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt25", "profile": "editorial", "discipline": "Mantrailing", "layout": 24},
-    k9mt26: {"label": "Trail Expedition", "detail": "Mantrailing · moduli alternati", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt26", "profile": "tactical", "discipline": "Mantrailing", "layout": 25},
-    k9mt27: {"label": "Trace & Honor", "detail": "Mantrailing · rosette incise", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt27", "profile": "ceremony", "discipline": "Mantrailing", "layout": 26},
-    k9mt28: {"label": "K9 Cartographer", "detail": "Mantrailing · trama reticolare", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt28", "profile": "tactical", "discipline": "Mantrailing", "layout": 27},
-    k9mt29: {"label": "Trail Vanguard", "detail": "Mantrailing · cornice a cuspidi", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt29", "profile": "tactical", "discipline": "Mantrailing", "layout": 28},
-    k9mt30: {"label": "Mantrailing Laureate", "detail": "Mantrailing · ghirlanda ornamentale", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt30", "profile": "ceremony", "discipline": "Mantrailing", "layout": 29},
-    k9hr01: {"label": "Forensic Command", "detail": "HRDD · cornice a righello e reticolo", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr01", "profile": "tactical", "discipline": "HRDD", "layout": 0},
-    k9hr02: {"label": "Evidence Archive", "detail": "HRDD · dorso archivistico", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr02", "profile": "tactical", "discipline": "HRDD", "layout": 1},
-    k9hr03: {"label": "Recovery Grid", "detail": "HRDD · marker a griglia", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr03", "profile": "ceremony", "discipline": "HRDD", "layout": 2},
-    k9hr04: {"label": "Stratigraphy", "detail": "HRDD · stratigrafia ondulata", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr04", "profile": "tactical", "discipline": "HRDD", "layout": 3},
-    k9hr05: {"label": "Forensic Meridian", "detail": "HRDD · piastre di rilievo diagonali", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr05", "profile": "tactical", "discipline": "HRDD", "layout": 4},
-    k9hr06: {"label": "Site Survey", "detail": "HRDD · campioni inquadrati", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr06", "profile": "ceremony", "discipline": "HRDD", "layout": 5},
-    k9hr07: {"label": "Silent Recovery", "detail": "HRDD · pannelli con diagonali", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr07", "profile": "tactical", "discipline": "HRDD", "layout": 6},
-    k9hr08: {"label": "Forensic Atlas", "detail": "HRDD · angoli a squadre concentriche", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr08", "profile": "tactical", "discipline": "HRDD", "layout": 7},
-    k9hr09: {"label": "Evidence Corridor", "detail": "HRDD · sezioni stratificate laterali", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr09", "profile": "editorial", "discipline": "HRDD", "layout": 8},
-    k9hr10: {"label": "Scene Documentation", "detail": "HRDD · cartigli di rilievo", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr10", "profile": "tactical", "discipline": "HRDD", "layout": 9},
-    k9hr11: {"label": "Ground Recon", "detail": "HRDD · bande a tasselli", "category": "HRDD", "accent": "#79533A", "ink": "#253D41", "frame": "none", "ornament": "k9hr11", "profile": "tactical", "discipline": "HRDD", "layout": 10},
-    k9hr12: {"label": "Recovery Protocol", "detail": "HRDD · reticolo di riferimento", "category": "HRDD", "accent": "#4D6571", "ink": "#41464C", "frame": "none", "ornament": "k9hr12", "profile": "ceremony", "discipline": "HRDD", "layout": 11},
-    k9hr13: {"label": "Forensic Ledger", "detail": "HRDD · dorso a registri sfalsati", "category": "HRDD", "accent": "#4D7070", "ink": "#343C42", "frame": "none", "ornament": "k9hr13", "profile": "editorial", "discipline": "HRDD", "layout": 12},
-    k9hr14: {"label": "HRDD Honor", "detail": "HRDD · fasce con marker concentrici", "category": "HRDD", "accent": "#745E4C", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr14", "profile": "ceremony", "discipline": "HRDD", "layout": 13},
-    k9hr15: {"label": "Site Marker", "detail": "HRDD · cornici a settori", "category": "HRDD", "accent": "#917044", "ink": "#253D41", "frame": "none", "ornament": "k9hr15", "profile": "ceremony", "discipline": "HRDD", "layout": 14},
-    k9hr16: {"label": "Layer Analysis", "detail": "HRDD · strati paralleli", "category": "HRDD", "accent": "#53616B", "ink": "#41464C", "frame": "none", "ornament": "k9hr16", "profile": "tactical", "discipline": "HRDD", "layout": 15},
-    k9hr17: {"label": "Sector Survey", "detail": "HRDD · mosaico di rilievo", "category": "HRDD", "accent": "#755347", "ink": "#343C42", "frame": "none", "ornament": "k9hr17", "profile": "tactical", "discipline": "HRDD", "layout": 16},
-    k9hr18: {"label": "Forensic Field", "detail": "HRDD · placche documentali", "category": "HRDD", "accent": "#526B64", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr18", "profile": "tactical", "discipline": "HRDD", "layout": 17},
-    k9hr19: {"label": "Recovery Compass", "detail": "HRDD · marcatori circolari", "category": "HRDD", "accent": "#776453", "ink": "#253D41", "frame": "none", "ornament": "k9hr19", "profile": "tactical", "discipline": "HRDD", "layout": 18},
-    k9hr20: {"label": "Evidence Path", "detail": "HRDD · campioni collegati", "category": "HRDD", "accent": "#455C75", "ink": "#41464C", "frame": "none", "ornament": "k9hr20", "profile": "tactical", "discipline": "HRDD", "layout": 19},
-    k9hr21: {"label": "Field Register", "detail": "HRDD · scala metrica", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr21", "profile": "editorial", "discipline": "HRDD", "layout": 20},
-    k9hr22: {"label": "Forensic Insignia", "detail": "HRDD · rilievi a strisce diagonali", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr22", "profile": "tactical", "discipline": "HRDD", "layout": 21},
-    k9hr23: {"label": "Archive of Merit", "detail": "HRDD · angoli di evidenza", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr23", "profile": "ceremony", "discipline": "HRDD", "layout": 22},
-    k9hr24: {"label": "Subsurface", "detail": "HRDD · linee di scansione", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr24", "profile": "tactical", "discipline": "HRDD", "layout": 23},
-    k9hr25: {"label": "Recovery Horizon", "detail": "HRDD · stratigrafia orizzontale", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr25", "profile": "editorial", "discipline": "HRDD", "layout": 24},
-    k9hr26: {"label": "Search Sector", "detail": "HRDD · cartigli trapezoidali", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr26", "profile": "tactical", "discipline": "HRDD", "layout": 25},
-    k9hr27: {"label": "Forensic Distinction", "detail": "HRDD · rombi di riferimento", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr27", "profile": "ceremony", "discipline": "HRDD", "layout": 26},
-    k9hr28: {"label": "Evidence Matrix", "detail": "HRDD · trama a croci", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr28", "profile": "tactical", "discipline": "HRDD", "layout": 27},
-    k9hr29: {"label": "HRDD Vanguard", "detail": "HRDD · angoli smussati", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr29", "profile": "tactical", "discipline": "HRDD", "layout": 28},
-    k9hr30: {"label": "Recovery Laureate", "detail": "HRDD · fregio di marker", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr30", "profile": "ceremony", "discipline": "HRDD", "layout": 29},
-    k9dt01: {"label": "Detection Command", "detail": "Detection · pannelli di comando e segnale", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt01", "profile": "tactical", "discipline": "Detection", "layout": 0},
-    k9dt02: {"label": "Target Scent", "detail": "Detection · bersagli e nodi", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt02", "profile": "tactical", "discipline": "Detection", "layout": 1},
-    k9dt03: {"label": "Olfactory Precision", "detail": "Detection · array di sensori", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt03", "profile": "ceremony", "discipline": "Detection", "layout": 2},
-    k9dt04: {"label": "Scent Dynamics", "detail": "Detection · onde olfattive", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt04", "profile": "tactical", "discipline": "Detection", "layout": 3},
-    k9dt05: {"label": "Sensor Elite", "detail": "Detection · angoli a circuito", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt05", "profile": "tactical", "discipline": "Detection", "layout": 4},
-    k9dt06: {"label": "Detection Honors", "detail": "Detection · medaglioni esagonali", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt06", "profile": "ceremony", "discipline": "Detection", "layout": 5},
-    k9dt07: {"label": "Signal Vector", "detail": "Detection · vettori diagonali", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt07", "profile": "tactical", "discipline": "Detection", "layout": 6},
-    k9dt08: {"label": "Detection Atlas", "detail": "Detection · reticolo esagonale", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt08", "profile": "tactical", "discipline": "Detection", "layout": 7},
-    k9dt09: {"label": "Scent Channel", "detail": "Detection · fascia a segnali", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt09", "profile": "editorial", "discipline": "Detection", "layout": 8},
-    k9dt10: {"label": "Alert Response", "detail": "Detection · fregio a chevron", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt10", "profile": "tactical", "discipline": "Detection", "layout": 9},
-    k9dt11: {"label": "Precision Array", "detail": "Detection · matrice angolare", "category": "Detection", "accent": "#286A83", "ink": "#273C43", "frame": "none", "ornament": "k9dt11", "profile": "tactical", "discipline": "Detection", "layout": 10},
-    k9dt12: {"label": "Detection Meridian", "detail": "Detection · impulsi radiali", "category": "Detection", "accent": "#355A88", "ink": "#283345", "frame": "none", "ornament": "k9dt12", "profile": "ceremony", "discipline": "Detection", "layout": 11},
-    k9dt13: {"label": "Silent Signal", "detail": "Detection · sensori a ventaglio", "category": "Detection", "accent": "#4F637D", "ink": "#21384C", "frame": "none", "ornament": "k9dt13", "profile": "editorial", "discipline": "Detection", "layout": 12},
-    k9dt14: {"label": "Detection Heritage", "detail": "Detection · circuito con bersagli", "category": "Detection", "accent": "#346E64", "ink": "#293A51", "frame": "none", "ornament": "k9dt14", "profile": "ceremony", "discipline": "Detection", "layout": 13},
-    k9dt15: {"label": "Target Lock", "detail": "Detection · archi di precisione", "category": "Detection", "accent": "#866137", "ink": "#273C43", "frame": "none", "ornament": "k9dt15", "profile": "ceremony", "discipline": "Detection", "layout": 14},
-    k9dt16: {"label": "Scent Spectrum", "detail": "Detection · spettro di intensità", "category": "Detection", "accent": "#34627A", "ink": "#283345", "frame": "none", "ornament": "k9dt16", "profile": "tactical", "discipline": "Detection", "layout": 15},
-    k9dt17: {"label": "Detection Matrix", "detail": "Detection · celle esagonali", "category": "Detection", "accent": "#435484", "ink": "#21384C", "frame": "none", "ornament": "k9dt17", "profile": "tactical", "discipline": "Detection", "layout": 16},
-    k9dt18: {"label": "Signal Field", "detail": "Detection · bande alternate", "category": "Detection", "accent": "#246B76", "ink": "#293A51", "frame": "none", "ornament": "k9dt18", "profile": "tactical", "discipline": "Detection", "layout": 17},
-    k9dt19: {"label": "Olfactory Compass", "detail": "Detection · rosa sensoriale", "category": "Detection", "accent": "#7B5145", "ink": "#273C43", "frame": "none", "ornament": "k9dt19", "profile": "tactical", "discipline": "Detection", "layout": 18},
-    k9dt20: {"label": "Scent Navigator", "detail": "Detection · nodi esagonali", "category": "Detection", "accent": "#3A6479", "ink": "#283345", "frame": "none", "ornament": "k9dt20", "profile": "tactical", "discipline": "Detection", "layout": 19},
-    k9dt21: {"label": "Detection Log", "detail": "Detection · grafico di intensità", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt21", "profile": "editorial", "discipline": "Detection", "layout": 20},
-    k9dt22: {"label": "Detection Insignia", "detail": "Detection · fascia di segnale diagonale", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt22", "profile": "tactical", "discipline": "Detection", "layout": 21},
-    k9dt23: {"label": "Precision Merit", "detail": "Detection · sigilli esagonali", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt23", "profile": "ceremony", "discipline": "Detection", "layout": 22},
-    k9dt24: {"label": "Scent Flow", "detail": "Detection · flusso sinusoidale", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt24", "profile": "tactical", "discipline": "Detection", "layout": 23},
-    k9dt25: {"label": "Signal Horizon", "detail": "Detection · spettro a barre", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt25", "profile": "editorial", "discipline": "Detection", "layout": 24},
-    k9dt26: {"label": "Detection Lab", "detail": "Detection · celle sensoriali", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt26", "profile": "tactical", "discipline": "Detection", "layout": 25},
-    k9dt27: {"label": "Alert & Honor", "detail": "Detection · esagoni concentrici", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt27", "profile": "ceremony", "discipline": "Detection", "layout": 26},
-    k9dt28: {"label": "Sensor Network", "detail": "Detection · rete di nodi", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt28", "profile": "tactical", "discipline": "Detection", "layout": 27},
-    k9dt29: {"label": "Detection Vanguard", "detail": "Detection · angoli a vettore", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt29", "profile": "tactical", "discipline": "Detection", "layout": 28},
-    k9dt30: {"label": "Detection Laureate", "detail": "Detection · fregio di sensori", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt30", "profile": "ceremony", "discipline": "Detection", "layout": 29},
-    k9ds01: {"label": "Canine Care", "detail": "Dogsitter · angoli botanici e impronte", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds01", "profile": "modern", "discipline": "Dogsitter", "layout": 0},
-    k9ds02: {"label": "Companion Atelier", "detail": "Dogsitter · nastro fluido e medaglioni", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds02", "profile": "modern", "discipline": "Dogsitter", "layout": 1},
-    k9ds03: {"label": "Trusted Paws", "detail": "Dogsitter · impronte sfalsate", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds03", "profile": "ceremony", "discipline": "Dogsitter", "layout": 2},
-    k9ds04: {"label": "Garden of Care", "detail": "Dogsitter · rami ornamentali", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds04", "profile": "modern", "discipline": "Dogsitter", "layout": 3},
-    k9ds05: {"label": "Care Signature", "detail": "Dogsitter · volute e sigillo", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds05", "profile": "modern", "discipline": "Dogsitter", "layout": 4},
-    k9ds06: {"label": "Companion Honor", "detail": "Dogsitter · medaglioni con foglie", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds06", "profile": "ceremony", "discipline": "Dogsitter", "layout": 5},
-    k9ds07: {"label": "Paw Heritage", "detail": "Dogsitter · angoli a petalo", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds07", "profile": "modern", "discipline": "Dogsitter", "layout": 6},
-    k9ds08: {"label": "Canine Atelier", "detail": "Dogsitter · medaglioni e smerli", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds08", "profile": "modern", "discipline": "Dogsitter", "layout": 7},
-    k9ds09: {"label": "Gentle Walk", "detail": "Dogsitter · percorso di impronte", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds09", "profile": "editorial", "discipline": "Dogsitter", "layout": 8},
-    k9ds10: {"label": "Care & Trust", "detail": "Dogsitter · fregio foglie e impronte", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds10", "profile": "modern", "discipline": "Dogsitter", "layout": 9},
-    k9ds11: {"label": "Paw & Leaf", "detail": "Dogsitter · rami a ventaglio", "category": "Dogsitter", "accent": "#8A614C", "ink": "#493B46", "frame": "none", "ornament": "k9ds11", "profile": "modern", "discipline": "Dogsitter", "layout": 10},
-    k9ds12: {"label": "Companion House", "detail": "Dogsitter · curve e fiori", "category": "Dogsitter", "accent": "#55776B", "ink": "#474632", "frame": "none", "ornament": "k9ds12", "profile": "ceremony", "discipline": "Dogsitter", "layout": 11},
-    k9ds13: {"label": "Tender Care", "detail": "Dogsitter · angoli morbidi", "category": "Dogsitter", "accent": "#73556B", "ink": "#443A34", "frame": "none", "ornament": "k9ds13", "profile": "editorial", "discipline": "Dogsitter", "layout": 12},
-    k9ds14: {"label": "Canine Heritage", "detail": "Dogsitter · fregio floreale", "category": "Dogsitter", "accent": "#796B39", "ink": "#334C45", "frame": "none", "ornament": "k9ds14", "profile": "ceremony", "discipline": "Dogsitter", "layout": 13},
-    k9ds15: {"label": "Paw Jewel", "detail": "Dogsitter · rosoni con impronta", "category": "Dogsitter", "accent": "#9A703F", "ink": "#493B46", "frame": "none", "ornament": "k9ds15", "profile": "ceremony", "discipline": "Dogsitter", "layout": 14},
-    k9ds16: {"label": "Garden Companion", "detail": "Dogsitter · tralci vegetali", "category": "Dogsitter", "accent": "#466E69", "ink": "#474632", "frame": "none", "ornament": "k9ds16", "profile": "modern", "discipline": "Dogsitter", "layout": 15},
-    k9ds17: {"label": "Care Mosaic", "detail": "Dogsitter · mosaico floreale", "category": "Dogsitter", "accent": "#7C5750", "ink": "#443A34", "frame": "none", "ornament": "k9ds17", "profile": "modern", "discipline": "Dogsitter", "layout": 16},
-    k9ds18: {"label": "Walking Club", "detail": "Dogsitter · ovali con impronte", "category": "Dogsitter", "accent": "#536C82", "ink": "#334C45", "frame": "none", "ornament": "k9ds18", "profile": "modern", "discipline": "Dogsitter", "layout": 17},
-    k9ds19: {"label": "Companion Compass", "detail": "Dogsitter · archi botanici", "category": "Dogsitter", "accent": "#927250", "ink": "#493B46", "frame": "none", "ornament": "k9ds19", "profile": "modern", "discipline": "Dogsitter", "layout": 18},
-    k9ds20: {"label": "Paw Journey", "detail": "Dogsitter · sentiero sinuoso", "category": "Dogsitter", "accent": "#606F49", "ink": "#474632", "frame": "none", "ornament": "k9ds20", "profile": "modern", "discipline": "Dogsitter", "layout": 19},
-    k9ds21: {"label": "Care Journal", "detail": "Dogsitter · fiori e medaglioni", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds21", "profile": "editorial", "discipline": "Dogsitter", "layout": 20},
-    k9ds22: {"label": "Ribbon of Trust", "detail": "Dogsitter · nastri e rametti", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds22", "profile": "modern", "discipline": "Dogsitter", "layout": 21},
-    k9ds23: {"label": "Care Merit", "detail": "Dogsitter · cartigli morbidi", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds23", "profile": "ceremony", "discipline": "Dogsitter", "layout": 22},
-    k9ds24: {"label": "Gentle Flow", "detail": "Dogsitter · onde sottili e fiori", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds24", "profile": "modern", "discipline": "Dogsitter", "layout": 23},
-    k9ds25: {"label": "Companion Horizon", "detail": "Dogsitter · fascia morbida e impronte", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds25", "profile": "editorial", "discipline": "Dogsitter", "layout": 24},
-    k9ds26: {"label": "Canine Wellness", "detail": "Dogsitter · capsule arrotondate", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds26", "profile": "modern", "discipline": "Dogsitter", "layout": 25},
-    k9ds27: {"label": "Paw Distinction", "detail": "Dogsitter · rosette e foglie", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds27", "profile": "ceremony", "discipline": "Dogsitter", "layout": 26},
-    k9ds28: {"label": "Care Collective", "detail": "Dogsitter · fregio di foglie", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds28", "profile": "modern", "discipline": "Dogsitter", "layout": 27},
-    k9ds29: {"label": "Dogsitter Prestige", "detail": "Dogsitter · angoli a petalo scuro", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds29", "profile": "modern", "discipline": "Dogsitter", "layout": 28},
-    k9ds30: {"label": "Companion Laureate", "detail": "Dogsitter · ghirlanda cinofila", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds30", "profile": "ceremony", "discipline": "Dogsitter", "layout": 29},
+    k9mt01: {"label": "Trail Command", "detail": "Mantrailing · binomio in traccia · fasce incise", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt01", "profile": "tactical", "discipline": "Mantrailing", "layout": 0},
+    k9mt02: {"label": "Urban Track", "detail": "Mantrailing · ricerca in bosco · cartigli asimmetrici", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt02", "profile": "tactical", "discipline": "Mantrailing", "layout": 1},
+    k9mt03: {"label": "Night Scent", "detail": "Mantrailing · percorso e waypoint · medaglioni gemelli", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt03", "profile": "ceremony", "discipline": "Mantrailing", "layout": 2},
+    k9mt04: {"label": "Forest Line", "detail": "Mantrailing · ricerca urbana · dorso illustrato", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt04", "profile": "tactical", "discipline": "Mantrailing", "layout": 3},
+    k9mt05: {"label": "Compass Elite", "detail": "Mantrailing · profilo cinofilo e bussola · archi verticali", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt05", "profile": "tactical", "discipline": "Mantrailing", "layout": 4},
+    k9mt06: {"label": "Route of Honor", "detail": "Mantrailing · binomio in traccia · quattro medaglioni", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt06", "profile": "ceremony", "discipline": "Mantrailing", "layout": 5},
+    k9mt07: {"label": "Alpine Pursuit", "detail": "Mantrailing · ricerca in bosco · scudi e angolari", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt07", "profile": "tactical", "discipline": "Mantrailing", "layout": 6},
+    k9mt08: {"label": "Trail Atlas", "detail": "Mantrailing · percorso e waypoint · pannelli illustrati", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt08", "profile": "tactical", "discipline": "Mantrailing", "layout": 7},
+    k9mt09: {"label": "Scent Corridor", "detail": "Mantrailing · ricerca urbana · medaglione centrale", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt09", "profile": "editorial", "discipline": "Mantrailing", "layout": 8},
+    k9mt10: {"label": "Operational Track", "detail": "Mantrailing · profilo cinofilo e bussola · fregi intrecciati", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt10", "profile": "tactical", "discipline": "Mantrailing", "layout": 9},
+    k9mt11: {"label": "Pathfinder", "detail": "Mantrailing · percorso e waypoint · fasce incise", "category": "Mantrailing", "accent": "#496B4C", "ink": "#263445", "frame": "none", "ornament": "k9mt11", "profile": "tactical", "discipline": "Mantrailing", "layout": 10},
+    k9mt12: {"label": "K9 Meridian", "detail": "Mantrailing · ricerca urbana · cartigli asimmetrici", "category": "Mantrailing", "accent": "#37596A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt12", "profile": "ceremony", "discipline": "Mantrailing", "layout": 11},
+    k9mt13: {"label": "Silent Trail", "detail": "Mantrailing · profilo cinofilo e bussola · medaglioni gemelli", "category": "Mantrailing", "accent": "#3E536F", "ink": "#273B32", "frame": "none", "ornament": "k9mt13", "profile": "editorial", "discipline": "Mantrailing", "layout": 12},
+    k9mt14: {"label": "Trail Heritage", "detail": "Mantrailing · binomio in traccia · dorso illustrato", "category": "Mantrailing", "accent": "#80623A", "ink": "#283742", "frame": "none", "ornament": "k9mt14", "profile": "ceremony", "discipline": "Mantrailing", "layout": 13},
+    k9mt15: {"label": "Waypoint", "detail": "Mantrailing · ricerca in bosco · archi verticali", "category": "Mantrailing", "accent": "#916A34", "ink": "#263445", "frame": "none", "ornament": "k9mt15", "profile": "ceremony", "discipline": "Mantrailing", "layout": 14},
+    k9mt16: {"label": "Terra Incognita", "detail": "Mantrailing · percorso e waypoint · quattro medaglioni", "category": "Mantrailing", "accent": "#496456", "ink": "#3D372E", "frame": "none", "ornament": "k9mt16", "profile": "tactical", "discipline": "Mantrailing", "layout": 15},
+    k9mt17: {"label": "Street Grid", "detail": "Mantrailing · ricerca urbana · scudi e angolari", "category": "Mantrailing", "accent": "#627B55", "ink": "#273B32", "frame": "none", "ornament": "k9mt17", "profile": "tactical", "discipline": "Mantrailing", "layout": 16},
+    k9mt18: {"label": "Ridge Patrol", "detail": "Mantrailing · profilo cinofilo e bussola · pannelli illustrati", "category": "Mantrailing", "accent": "#406D69", "ink": "#283742", "frame": "none", "ornament": "k9mt18", "profile": "tactical", "discipline": "Mantrailing", "layout": 17},
+    k9mt19: {"label": "Trail Compass", "detail": "Mantrailing · binomio in traccia · medaglione centrale", "category": "Mantrailing", "accent": "#69523B", "ink": "#263445", "frame": "none", "ornament": "k9mt19", "profile": "tactical", "discipline": "Mantrailing", "layout": 18},
+    k9mt20: {"label": "Scent Navigator", "detail": "Mantrailing · ricerca in bosco · fregi intrecciati", "category": "Mantrailing", "accent": "#53643E", "ink": "#3D372E", "frame": "none", "ornament": "k9mt20", "profile": "tactical", "discipline": "Mantrailing", "layout": 19},
+    k9mt21: {"label": "Field Notes", "detail": "Mantrailing · profilo cinofilo e bussola · fasce incise", "category": "Mantrailing", "accent": "#496B4C", "ink": "#273B32", "frame": "none", "ornament": "k9mt21", "profile": "editorial", "discipline": "Mantrailing", "layout": 20},
+    k9mt22: {"label": "Trail Ribbon", "detail": "Mantrailing · binomio in traccia · cartigli asimmetrici", "category": "Mantrailing", "accent": "#37596A", "ink": "#283742", "frame": "none", "ornament": "k9mt22", "profile": "tactical", "discipline": "Mantrailing", "layout": 21},
+    k9mt23: {"label": "Map of Merit", "detail": "Mantrailing · ricerca in bosco · medaglioni gemelli", "category": "Mantrailing", "accent": "#3E536F", "ink": "#263445", "frame": "none", "ornament": "k9mt23", "profile": "ceremony", "discipline": "Mantrailing", "layout": 22},
+    k9mt24: {"label": "Olfactory Journey", "detail": "Mantrailing · percorso e waypoint · dorso illustrato", "category": "Mantrailing", "accent": "#80623A", "ink": "#3D372E", "frame": "none", "ornament": "k9mt24", "profile": "tactical", "discipline": "Mantrailing", "layout": 23},
+    k9mt25: {"label": "Search Horizon", "detail": "Mantrailing · ricerca urbana · archi verticali", "category": "Mantrailing", "accent": "#916A34", "ink": "#273B32", "frame": "none", "ornament": "k9mt25", "profile": "editorial", "discipline": "Mantrailing", "layout": 24},
+    k9mt26: {"label": "Trail Expedition", "detail": "Mantrailing · profilo cinofilo e bussola · quattro medaglioni", "category": "Mantrailing", "accent": "#496456", "ink": "#283742", "frame": "none", "ornament": "k9mt26", "profile": "tactical", "discipline": "Mantrailing", "layout": 25},
+    k9mt27: {"label": "Trace & Honor", "detail": "Mantrailing · binomio in traccia · scudi e angolari", "category": "Mantrailing", "accent": "#627B55", "ink": "#263445", "frame": "none", "ornament": "k9mt27", "profile": "ceremony", "discipline": "Mantrailing", "layout": 26},
+    k9mt28: {"label": "K9 Cartographer", "detail": "Mantrailing · ricerca in bosco · pannelli illustrati", "category": "Mantrailing", "accent": "#406D69", "ink": "#3D372E", "frame": "none", "ornament": "k9mt28", "profile": "tactical", "discipline": "Mantrailing", "layout": 27},
+    k9mt29: {"label": "Trail Vanguard", "detail": "Mantrailing · percorso e waypoint · medaglione centrale", "category": "Mantrailing", "accent": "#69523B", "ink": "#273B32", "frame": "none", "ornament": "k9mt29", "profile": "tactical", "discipline": "Mantrailing", "layout": 28},
+    k9mt30: {"label": "Mantrailing Laureate", "detail": "Mantrailing · ricerca urbana · fregi intrecciati", "category": "Mantrailing", "accent": "#53643E", "ink": "#283742", "frame": "none", "ornament": "k9mt30", "profile": "ceremony", "discipline": "Mantrailing", "layout": 29},
+    k9hr01: {"label": "Forensic Command", "detail": "HRDD · cane in ricerca e griglia · fasce incise", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr01", "profile": "tactical", "discipline": "HRDD", "layout": 0},
+    k9hr02: {"label": "Evidence Archive", "detail": "HRDD · ricerca sul terreno e marcatore · cartigli asimmetrici", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr02", "profile": "tactical", "discipline": "HRDD", "layout": 1},
+    k9hr03: {"label": "Recovery Grid", "detail": "HRDD · rilievo e documentazione · medaglioni gemelli", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr03", "profile": "ceremony", "discipline": "HRDD", "layout": 2},
+    k9hr04: {"label": "Stratigraphy", "detail": "HRDD · fascicolo e unità cinofila · dorso illustrato", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr04", "profile": "tactical", "discipline": "HRDD", "layout": 3},
+    k9hr05: {"label": "Forensic Meridian", "detail": "HRDD · cane e marker di ricerca · archi verticali", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr05", "profile": "tactical", "discipline": "HRDD", "layout": 4},
+    k9hr06: {"label": "Site Survey", "detail": "HRDD · cane in ricerca e griglia · quattro medaglioni", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr06", "profile": "ceremony", "discipline": "HRDD", "layout": 5},
+    k9hr07: {"label": "Silent Recovery", "detail": "HRDD · ricerca sul terreno e marcatore · scudi e angolari", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr07", "profile": "tactical", "discipline": "HRDD", "layout": 6},
+    k9hr08: {"label": "Forensic Atlas", "detail": "HRDD · rilievo e documentazione · pannelli illustrati", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr08", "profile": "tactical", "discipline": "HRDD", "layout": 7},
+    k9hr09: {"label": "Evidence Corridor", "detail": "HRDD · fascicolo e unità cinofila · medaglione centrale", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr09", "profile": "editorial", "discipline": "HRDD", "layout": 8},
+    k9hr10: {"label": "Scene Documentation", "detail": "HRDD · cane e marker di ricerca · fregi intrecciati", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr10", "profile": "tactical", "discipline": "HRDD", "layout": 9},
+    k9hr11: {"label": "Ground Recon", "detail": "HRDD · rilievo e documentazione · fasce incise", "category": "HRDD", "accent": "#79533A", "ink": "#253D41", "frame": "none", "ornament": "k9hr11", "profile": "tactical", "discipline": "HRDD", "layout": 10},
+    k9hr12: {"label": "Recovery Protocol", "detail": "HRDD · fascicolo e unità cinofila · cartigli asimmetrici", "category": "HRDD", "accent": "#4D6571", "ink": "#41464C", "frame": "none", "ornament": "k9hr12", "profile": "ceremony", "discipline": "HRDD", "layout": 11},
+    k9hr13: {"label": "Forensic Ledger", "detail": "HRDD · cane e marker di ricerca · medaglioni gemelli", "category": "HRDD", "accent": "#4D7070", "ink": "#343C42", "frame": "none", "ornament": "k9hr13", "profile": "editorial", "discipline": "HRDD", "layout": 12},
+    k9hr14: {"label": "HRDD Honor", "detail": "HRDD · cane in ricerca e griglia · dorso illustrato", "category": "HRDD", "accent": "#745E4C", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr14", "profile": "ceremony", "discipline": "HRDD", "layout": 13},
+    k9hr15: {"label": "Site Marker", "detail": "HRDD · ricerca sul terreno e marcatore · archi verticali", "category": "HRDD", "accent": "#917044", "ink": "#253D41", "frame": "none", "ornament": "k9hr15", "profile": "ceremony", "discipline": "HRDD", "layout": 14},
+    k9hr16: {"label": "Layer Analysis", "detail": "HRDD · rilievo e documentazione · quattro medaglioni", "category": "HRDD", "accent": "#53616B", "ink": "#41464C", "frame": "none", "ornament": "k9hr16", "profile": "tactical", "discipline": "HRDD", "layout": 15},
+    k9hr17: {"label": "Sector Survey", "detail": "HRDD · fascicolo e unità cinofila · scudi e angolari", "category": "HRDD", "accent": "#755347", "ink": "#343C42", "frame": "none", "ornament": "k9hr17", "profile": "tactical", "discipline": "HRDD", "layout": 16},
+    k9hr18: {"label": "Forensic Field", "detail": "HRDD · cane e marker di ricerca · pannelli illustrati", "category": "HRDD", "accent": "#526B64", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr18", "profile": "tactical", "discipline": "HRDD", "layout": 17},
+    k9hr19: {"label": "Recovery Compass", "detail": "HRDD · cane in ricerca e griglia · medaglione centrale", "category": "HRDD", "accent": "#776453", "ink": "#253D41", "frame": "none", "ornament": "k9hr19", "profile": "tactical", "discipline": "HRDD", "layout": 18},
+    k9hr20: {"label": "Evidence Path", "detail": "HRDD · ricerca sul terreno e marcatore · fregi intrecciati", "category": "HRDD", "accent": "#455C75", "ink": "#41464C", "frame": "none", "ornament": "k9hr20", "profile": "tactical", "discipline": "HRDD", "layout": 19},
+    k9hr21: {"label": "Field Register", "detail": "HRDD · cane e marker di ricerca · fasce incise", "category": "HRDD", "accent": "#79533A", "ink": "#343C42", "frame": "none", "ornament": "k9hr21", "profile": "editorial", "discipline": "HRDD", "layout": 20},
+    k9hr22: {"label": "Forensic Insignia", "detail": "HRDD · cane in ricerca e griglia · cartigli asimmetrici", "category": "HRDD", "accent": "#4D6571", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr22", "profile": "tactical", "discipline": "HRDD", "layout": 21},
+    k9hr23: {"label": "Archive of Merit", "detail": "HRDD · ricerca sul terreno e marcatore · medaglioni gemelli", "category": "HRDD", "accent": "#4D7070", "ink": "#253D41", "frame": "none", "ornament": "k9hr23", "profile": "ceremony", "discipline": "HRDD", "layout": 22},
+    k9hr24: {"label": "Subsurface", "detail": "HRDD · rilievo e documentazione · dorso illustrato", "category": "HRDD", "accent": "#745E4C", "ink": "#41464C", "frame": "none", "ornament": "k9hr24", "profile": "tactical", "discipline": "HRDD", "layout": 23},
+    k9hr25: {"label": "Recovery Horizon", "detail": "HRDD · fascicolo e unità cinofila · archi verticali", "category": "HRDD", "accent": "#917044", "ink": "#343C42", "frame": "none", "ornament": "k9hr25", "profile": "editorial", "discipline": "HRDD", "layout": 24},
+    k9hr26: {"label": "Search Sector", "detail": "HRDD · cane e marker di ricerca · quattro medaglioni", "category": "HRDD", "accent": "#53616B", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr26", "profile": "tactical", "discipline": "HRDD", "layout": 25},
+    k9hr27: {"label": "Forensic Distinction", "detail": "HRDD · cane in ricerca e griglia · scudi e angolari", "category": "HRDD", "accent": "#755347", "ink": "#253D41", "frame": "none", "ornament": "k9hr27", "profile": "ceremony", "discipline": "HRDD", "layout": 26},
+    k9hr28: {"label": "Evidence Matrix", "detail": "HRDD · ricerca sul terreno e marcatore · pannelli illustrati", "category": "HRDD", "accent": "#526B64", "ink": "#41464C", "frame": "none", "ornament": "k9hr28", "profile": "tactical", "discipline": "HRDD", "layout": 27},
+    k9hr29: {"label": "HRDD Vanguard", "detail": "HRDD · rilievo e documentazione · medaglione centrale", "category": "HRDD", "accent": "#776453", "ink": "#343C42", "frame": "none", "ornament": "k9hr29", "profile": "tactical", "discipline": "HRDD", "layout": 28},
+    k9hr30: {"label": "Recovery Laureate", "detail": "HRDD · fascicolo e unità cinofila · fregi intrecciati", "category": "HRDD", "accent": "#455C75", "ink": "#3E3B37", "frame": "none", "ornament": "k9hr30", "profile": "ceremony", "discipline": "HRDD", "layout": 29},
+    k9dt01: {"label": "Detection Command", "detail": "Detection · cane e postazioni olfattive · fasce incise", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt01", "profile": "tactical", "discipline": "Detection", "layout": 0},
+    k9dt02: {"label": "Target Scent", "detail": "Detection · profilo cinofilo e flussi · cartigli asimmetrici", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt02", "profile": "tactical", "discipline": "Detection", "layout": 1},
+    k9dt03: {"label": "Olfactory Precision", "detail": "Detection · analisi e bersaglio · medaglioni gemelli", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt03", "profile": "ceremony", "discipline": "Detection", "layout": 2},
+    k9dt04: {"label": "Scent Dynamics", "detail": "Detection · segnalazione e postazioni · dorso illustrato", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt04", "profile": "tactical", "discipline": "Detection", "layout": 3},
+    k9dt05: {"label": "Sensor Elite", "detail": "Detection · profilo e campioni olfattivi · archi verticali", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt05", "profile": "tactical", "discipline": "Detection", "layout": 4},
+    k9dt06: {"label": "Detection Honors", "detail": "Detection · cane e postazioni olfattive · quattro medaglioni", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt06", "profile": "ceremony", "discipline": "Detection", "layout": 5},
+    k9dt07: {"label": "Signal Vector", "detail": "Detection · profilo cinofilo e flussi · scudi e angolari", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt07", "profile": "tactical", "discipline": "Detection", "layout": 6},
+    k9dt08: {"label": "Detection Atlas", "detail": "Detection · analisi e bersaglio · pannelli illustrati", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt08", "profile": "tactical", "discipline": "Detection", "layout": 7},
+    k9dt09: {"label": "Scent Channel", "detail": "Detection · segnalazione e postazioni · medaglione centrale", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt09", "profile": "editorial", "discipline": "Detection", "layout": 8},
+    k9dt10: {"label": "Alert Response", "detail": "Detection · profilo e campioni olfattivi · fregi intrecciati", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt10", "profile": "tactical", "discipline": "Detection", "layout": 9},
+    k9dt11: {"label": "Precision Array", "detail": "Detection · analisi e bersaglio · fasce incise", "category": "Detection", "accent": "#286A83", "ink": "#273C43", "frame": "none", "ornament": "k9dt11", "profile": "tactical", "discipline": "Detection", "layout": 10},
+    k9dt12: {"label": "Detection Meridian", "detail": "Detection · segnalazione e postazioni · cartigli asimmetrici", "category": "Detection", "accent": "#355A88", "ink": "#283345", "frame": "none", "ornament": "k9dt12", "profile": "ceremony", "discipline": "Detection", "layout": 11},
+    k9dt13: {"label": "Silent Signal", "detail": "Detection · profilo e campioni olfattivi · medaglioni gemelli", "category": "Detection", "accent": "#4F637D", "ink": "#21384C", "frame": "none", "ornament": "k9dt13", "profile": "editorial", "discipline": "Detection", "layout": 12},
+    k9dt14: {"label": "Detection Heritage", "detail": "Detection · cane e postazioni olfattive · dorso illustrato", "category": "Detection", "accent": "#346E64", "ink": "#293A51", "frame": "none", "ornament": "k9dt14", "profile": "ceremony", "discipline": "Detection", "layout": 13},
+    k9dt15: {"label": "Target Lock", "detail": "Detection · profilo cinofilo e flussi · archi verticali", "category": "Detection", "accent": "#866137", "ink": "#273C43", "frame": "none", "ornament": "k9dt15", "profile": "ceremony", "discipline": "Detection", "layout": 14},
+    k9dt16: {"label": "Scent Spectrum", "detail": "Detection · analisi e bersaglio · quattro medaglioni", "category": "Detection", "accent": "#34627A", "ink": "#283345", "frame": "none", "ornament": "k9dt16", "profile": "tactical", "discipline": "Detection", "layout": 15},
+    k9dt17: {"label": "Detection Matrix", "detail": "Detection · segnalazione e postazioni · scudi e angolari", "category": "Detection", "accent": "#435484", "ink": "#21384C", "frame": "none", "ornament": "k9dt17", "profile": "tactical", "discipline": "Detection", "layout": 16},
+    k9dt18: {"label": "Signal Field", "detail": "Detection · profilo e campioni olfattivi · pannelli illustrati", "category": "Detection", "accent": "#246B76", "ink": "#293A51", "frame": "none", "ornament": "k9dt18", "profile": "tactical", "discipline": "Detection", "layout": 17},
+    k9dt19: {"label": "Olfactory Compass", "detail": "Detection · cane e postazioni olfattive · medaglione centrale", "category": "Detection", "accent": "#7B5145", "ink": "#273C43", "frame": "none", "ornament": "k9dt19", "profile": "tactical", "discipline": "Detection", "layout": 18},
+    k9dt20: {"label": "Scent Navigator", "detail": "Detection · profilo cinofilo e flussi · fregi intrecciati", "category": "Detection", "accent": "#3A6479", "ink": "#283345", "frame": "none", "ornament": "k9dt20", "profile": "tactical", "discipline": "Detection", "layout": 19},
+    k9dt21: {"label": "Detection Log", "detail": "Detection · profilo e campioni olfattivi · fasce incise", "category": "Detection", "accent": "#286A83", "ink": "#21384C", "frame": "none", "ornament": "k9dt21", "profile": "editorial", "discipline": "Detection", "layout": 20},
+    k9dt22: {"label": "Detection Insignia", "detail": "Detection · cane e postazioni olfattive · cartigli asimmetrici", "category": "Detection", "accent": "#355A88", "ink": "#293A51", "frame": "none", "ornament": "k9dt22", "profile": "tactical", "discipline": "Detection", "layout": 21},
+    k9dt23: {"label": "Precision Merit", "detail": "Detection · profilo cinofilo e flussi · medaglioni gemelli", "category": "Detection", "accent": "#4F637D", "ink": "#273C43", "frame": "none", "ornament": "k9dt23", "profile": "ceremony", "discipline": "Detection", "layout": 22},
+    k9dt24: {"label": "Scent Flow", "detail": "Detection · analisi e bersaglio · dorso illustrato", "category": "Detection", "accent": "#346E64", "ink": "#283345", "frame": "none", "ornament": "k9dt24", "profile": "tactical", "discipline": "Detection", "layout": 23},
+    k9dt25: {"label": "Signal Horizon", "detail": "Detection · segnalazione e postazioni · archi verticali", "category": "Detection", "accent": "#866137", "ink": "#21384C", "frame": "none", "ornament": "k9dt25", "profile": "editorial", "discipline": "Detection", "layout": 24},
+    k9dt26: {"label": "Detection Lab", "detail": "Detection · profilo e campioni olfattivi · quattro medaglioni", "category": "Detection", "accent": "#34627A", "ink": "#293A51", "frame": "none", "ornament": "k9dt26", "profile": "tactical", "discipline": "Detection", "layout": 25},
+    k9dt27: {"label": "Alert & Honor", "detail": "Detection · cane e postazioni olfattive · scudi e angolari", "category": "Detection", "accent": "#435484", "ink": "#273C43", "frame": "none", "ornament": "k9dt27", "profile": "ceremony", "discipline": "Detection", "layout": 26},
+    k9dt28: {"label": "Sensor Network", "detail": "Detection · profilo cinofilo e flussi · pannelli illustrati", "category": "Detection", "accent": "#246B76", "ink": "#283345", "frame": "none", "ornament": "k9dt28", "profile": "tactical", "discipline": "Detection", "layout": 27},
+    k9dt29: {"label": "Detection Vanguard", "detail": "Detection · analisi e bersaglio · medaglione centrale", "category": "Detection", "accent": "#7B5145", "ink": "#21384C", "frame": "none", "ornament": "k9dt29", "profile": "tactical", "discipline": "Detection", "layout": 28},
+    k9dt30: {"label": "Detection Laureate", "detail": "Detection · segnalazione e postazioni · fregi intrecciati", "category": "Detection", "accent": "#3A6479", "ink": "#293A51", "frame": "none", "ornament": "k9dt30", "profile": "ceremony", "discipline": "Detection", "layout": 29},
+    k9ds01: {"label": "Canine Care", "detail": "Dogsitter · cane e ambiente domestico · fasce incise", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds01", "profile": "modern", "discipline": "Dogsitter", "layout": 0},
+    k9ds02: {"label": "Companion Atelier", "detail": "Dogsitter · binomio in passeggiata · cartigli asimmetrici", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds02", "profile": "modern", "discipline": "Dogsitter", "layout": 1},
+    k9ds03: {"label": "Trusted Paws", "detail": "Dogsitter · impronta e alloro · medaglioni gemelli", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds03", "profile": "ceremony", "discipline": "Dogsitter", "layout": 2},
+    k9ds04: {"label": "Garden of Care", "detail": "Dogsitter · profilo e guinzaglio · dorso illustrato", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds04", "profile": "modern", "discipline": "Dogsitter", "layout": 3},
+    k9ds05: {"label": "Care Signature", "detail": "Dogsitter · cani e accoglienza · archi verticali", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds05", "profile": "modern", "discipline": "Dogsitter", "layout": 4},
+    k9ds06: {"label": "Companion Honor", "detail": "Dogsitter · cane e ambiente domestico · quattro medaglioni", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds06", "profile": "ceremony", "discipline": "Dogsitter", "layout": 5},
+    k9ds07: {"label": "Paw Heritage", "detail": "Dogsitter · binomio in passeggiata · scudi e angolari", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds07", "profile": "modern", "discipline": "Dogsitter", "layout": 6},
+    k9ds08: {"label": "Canine Atelier", "detail": "Dogsitter · impronta e alloro · pannelli illustrati", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds08", "profile": "modern", "discipline": "Dogsitter", "layout": 7},
+    k9ds09: {"label": "Gentle Walk", "detail": "Dogsitter · profilo e guinzaglio · medaglione centrale", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds09", "profile": "editorial", "discipline": "Dogsitter", "layout": 8},
+    k9ds10: {"label": "Care & Trust", "detail": "Dogsitter · cani e accoglienza · fregi intrecciati", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds10", "profile": "modern", "discipline": "Dogsitter", "layout": 9},
+    k9ds11: {"label": "Paw & Leaf", "detail": "Dogsitter · impronta e alloro · fasce incise", "category": "Dogsitter", "accent": "#8A614C", "ink": "#493B46", "frame": "none", "ornament": "k9ds11", "profile": "modern", "discipline": "Dogsitter", "layout": 10},
+    k9ds12: {"label": "Companion House", "detail": "Dogsitter · profilo e guinzaglio · cartigli asimmetrici", "category": "Dogsitter", "accent": "#55776B", "ink": "#474632", "frame": "none", "ornament": "k9ds12", "profile": "ceremony", "discipline": "Dogsitter", "layout": 11},
+    k9ds13: {"label": "Tender Care", "detail": "Dogsitter · cani e accoglienza · medaglioni gemelli", "category": "Dogsitter", "accent": "#73556B", "ink": "#443A34", "frame": "none", "ornament": "k9ds13", "profile": "editorial", "discipline": "Dogsitter", "layout": 12},
+    k9ds14: {"label": "Canine Heritage", "detail": "Dogsitter · cane e ambiente domestico · dorso illustrato", "category": "Dogsitter", "accent": "#796B39", "ink": "#334C45", "frame": "none", "ornament": "k9ds14", "profile": "ceremony", "discipline": "Dogsitter", "layout": 13},
+    k9ds15: {"label": "Paw Jewel", "detail": "Dogsitter · binomio in passeggiata · archi verticali", "category": "Dogsitter", "accent": "#9A703F", "ink": "#493B46", "frame": "none", "ornament": "k9ds15", "profile": "ceremony", "discipline": "Dogsitter", "layout": 14},
+    k9ds16: {"label": "Garden Companion", "detail": "Dogsitter · impronta e alloro · quattro medaglioni", "category": "Dogsitter", "accent": "#466E69", "ink": "#474632", "frame": "none", "ornament": "k9ds16", "profile": "modern", "discipline": "Dogsitter", "layout": 15},
+    k9ds17: {"label": "Care Mosaic", "detail": "Dogsitter · profilo e guinzaglio · scudi e angolari", "category": "Dogsitter", "accent": "#7C5750", "ink": "#443A34", "frame": "none", "ornament": "k9ds17", "profile": "modern", "discipline": "Dogsitter", "layout": 16},
+    k9ds18: {"label": "Walking Club", "detail": "Dogsitter · cani e accoglienza · pannelli illustrati", "category": "Dogsitter", "accent": "#536C82", "ink": "#334C45", "frame": "none", "ornament": "k9ds18", "profile": "modern", "discipline": "Dogsitter", "layout": 17},
+    k9ds19: {"label": "Companion Compass", "detail": "Dogsitter · cane e ambiente domestico · medaglione centrale", "category": "Dogsitter", "accent": "#927250", "ink": "#493B46", "frame": "none", "ornament": "k9ds19", "profile": "modern", "discipline": "Dogsitter", "layout": 18},
+    k9ds20: {"label": "Paw Journey", "detail": "Dogsitter · binomio in passeggiata · fregi intrecciati", "category": "Dogsitter", "accent": "#606F49", "ink": "#474632", "frame": "none", "ornament": "k9ds20", "profile": "modern", "discipline": "Dogsitter", "layout": 19},
+    k9ds21: {"label": "Care Journal", "detail": "Dogsitter · cani e accoglienza · fasce incise", "category": "Dogsitter", "accent": "#8A614C", "ink": "#443A34", "frame": "none", "ornament": "k9ds21", "profile": "editorial", "discipline": "Dogsitter", "layout": 20},
+    k9ds22: {"label": "Ribbon of Trust", "detail": "Dogsitter · cane e ambiente domestico · cartigli asimmetrici", "category": "Dogsitter", "accent": "#55776B", "ink": "#334C45", "frame": "none", "ornament": "k9ds22", "profile": "modern", "discipline": "Dogsitter", "layout": 21},
+    k9ds23: {"label": "Care Merit", "detail": "Dogsitter · binomio in passeggiata · medaglioni gemelli", "category": "Dogsitter", "accent": "#73556B", "ink": "#493B46", "frame": "none", "ornament": "k9ds23", "profile": "ceremony", "discipline": "Dogsitter", "layout": 22},
+    k9ds24: {"label": "Gentle Flow", "detail": "Dogsitter · impronta e alloro · dorso illustrato", "category": "Dogsitter", "accent": "#796B39", "ink": "#474632", "frame": "none", "ornament": "k9ds24", "profile": "modern", "discipline": "Dogsitter", "layout": 23},
+    k9ds25: {"label": "Companion Horizon", "detail": "Dogsitter · profilo e guinzaglio · archi verticali", "category": "Dogsitter", "accent": "#9A703F", "ink": "#443A34", "frame": "none", "ornament": "k9ds25", "profile": "editorial", "discipline": "Dogsitter", "layout": 24},
+    k9ds26: {"label": "Canine Wellness", "detail": "Dogsitter · cani e accoglienza · quattro medaglioni", "category": "Dogsitter", "accent": "#466E69", "ink": "#334C45", "frame": "none", "ornament": "k9ds26", "profile": "modern", "discipline": "Dogsitter", "layout": 25},
+    k9ds27: {"label": "Paw Distinction", "detail": "Dogsitter · cane e ambiente domestico · scudi e angolari", "category": "Dogsitter", "accent": "#7C5750", "ink": "#493B46", "frame": "none", "ornament": "k9ds27", "profile": "ceremony", "discipline": "Dogsitter", "layout": 26},
+    k9ds28: {"label": "Care Collective", "detail": "Dogsitter · binomio in passeggiata · pannelli illustrati", "category": "Dogsitter", "accent": "#536C82", "ink": "#474632", "frame": "none", "ornament": "k9ds28", "profile": "modern", "discipline": "Dogsitter", "layout": 27},
+    k9ds29: {"label": "Dogsitter Prestige", "detail": "Dogsitter · impronta e alloro · medaglione centrale", "category": "Dogsitter", "accent": "#927250", "ink": "#443A34", "frame": "none", "ornament": "k9ds29", "profile": "modern", "discipline": "Dogsitter", "layout": 28},
+    k9ds30: {"label": "Companion Laureate", "detail": "Dogsitter · profilo e guinzaglio · fregi intrecciati", "category": "Dogsitter", "accent": "#606F49", "ink": "#334C45", "frame": "none", "ornament": "k9ds30", "profile": "ceremony", "discipline": "Dogsitter", "layout": 29},
   };
   // Stili storici conservati per i progetti esistenti, esclusi dalla nuova galleria.
   const archivedThemeIds = new Set(["emerald", "navy", "burgundy", "academic", "sage", "coral", "alpine", "olive", "moss", "dusk", "bark", "lavender", "ice", "coastal", "copper", "ocean", "imperialNavy", "baroqueRuby", "artDecoTeal", "academyCrimson", "executiveTeal", "corporateGraphite", "k9Urban", "sarField", "hrddPro", "editorialBlue", "honorBlue", "diplomaSilver"]);
@@ -907,7 +907,193 @@
 
   // Motivi leggeri ai margini: conservano leggibili i testi A4 in ogni orientamento.
   // Sono disegnati anche in drawGraphics(), quindi compaiono in PDF e PNG.
-  function drawCatalogOrnament(ornament = $("ornamentStyle").value, color = designColor("accentColor", "#735a2f"), ink = designColor("inkColor", "#26231f")) {
+  // 4.9.2: original illustrated, resolution-independent artwork. All dimensions
+  // are in stage units; the same paths are drawn at preview and print resolution.
+  function illustratedDiscipline(theme, A, D, n, discipline) {
+    const u=Math.min(W,H)/1190, w=W/u,h=H/u, portrait=h>w;
+    const pale='#ffffff', rail=portrait?134:168, style=n%10, edition=Math.floor(n/10)%3;
+    const name=discipline==='SAR · ricerca e soccorso'?'RICERCA E SOCCORSO':discipline==='K9 tattici generali'?'UNITÀ CINOFILA':discipline.toUpperCase();
+    const legacy=n>=30, sar=discipline==='SAR · ricerca e soccorso', generic=discipline==='K9 tattici generali';
+    const mt=discipline==='Mantrailing'||discipline==='SAR · ricerca e soccorso'||discipline==='K9 tattici generali', hr=discipline==='HRDD', dt=discipline==='Detection', ds=discipline==='Dogsitter';
+    ctx.save();ctx.scale(u,u);ctx.lineCap='round';ctx.lineJoin='round';
+    const path=(d,c,fill=true,z=2,alpha=1)=>{ctx.save();ctx.globalAlpha*=alpha;ctx.lineWidth=z;ctx[fill?'fillStyle':'strokeStyle']=c;const p=new Path2D(d);fill?ctx.fill(p):ctx.stroke(p);ctx.restore();};
+    const rect=(x,y,X,Y,c,a=1)=>{ctx.save();ctx.globalAlpha*=a;ctx.fillStyle=c;ctx.fillRect(x,y,X,Y);ctx.restore();};
+    const line=(x,y,X,Y,c=A,z=1.6,a=1)=>path(`M${x} ${y}L${X} ${Y}`,c,false,z,a);
+    const circle=(x,y,r,c=A,fill=false,z=2,a=1)=>{ctx.save();ctx.globalAlpha*=a;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx[fill?'fillStyle':'strokeStyle']=c;ctx.lineWidth=z;fill?ctx.fill():ctx.stroke();ctx.restore();};
+    const at=(x,y,s,f,flip=1)=>{ctx.save();ctx.translate(x,y);ctx.scale(s*flip,s);try{f();}finally{ctx.restore();}};
+    const text=(s,x,y,size,c,weight='600',family='Arial')=>{ctx.save();ctx.fillStyle=c;ctx.font=`${weight} ${size}px ${family}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();};
+    const frame=(m,c=A,z=2,a=1)=>path(`M${m} ${m}H${w-m}V${h-m}H${m}Z`,c,false,z,a);
+    const gradient=(x,y,X,Y,c1,c2)=>{const g=ctx.createLinearGradient(x,y,X,Y);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;};
+    // Anatomically recognisable working dog: head lowered, tail, harness and four limbs.
+    // A second, seated dog and a spaniel head give each discipline its own imagery.
+    function dog(c=A,mode=0,detail=pale){
+      if(mode===1){
+        path('M-45 45 Q-55 28 -47 4 L-32 -15 -27 -48 -9 -25 Q6 -29 18 -17 L34 -11 45 -4 41 7 23 12 19 28 Q37 48 41 69 L61 74 61 83 18 83 4 56 -6 73 -28 75 -30 83 -59 83 -59 73 -44 66 Q-64 66 -76 55 -83 45 -78 35 -71 54 -53 51Z',c);
+        path('M-26 -22L-24 -40 -15 -23M-20 4Q0 18 22 11M-38 26Q-13 27 8 20M6 34Q-12 51 -3 65',detail,false,2.7,.8);circle(12,-12,2.5,detail,true);path('M41 -7L46 -4 42 1',D);
+      }else if(mode===2){
+        path('M-61 31 Q-71 4 -51 -23 Q-42 -49 -12 -57 Q21 -63 40 -42 Q52 -23 51 -10 L76 7 Q81 16 67 25 L36 31 Q28 51 4 62 L-22 80 -66 80 Q-49 62 -54 48Z',c);
+        path('M-35 -45 Q-58 -38 -62 -10 Q-67 25 -49 39 Q-32 42 -29 15 Q-24 -11 -12 -34Z',D,true,2,.58);
+        path('M-25 -30Q-33 -1 -41 17M-16 35Q13 47 35 30M-34 55L15 62',detail,false,3,.85);circle(31,-16,3,detail,true);path('M72 5L81 11 74 17 65 13Z',D);
+      }else{
+        path('M-90 1 Q-108 -9 -119 -30 Q-122 -36 -126 -31 Q-125 -10 -103 13 L-88 20 Q-82 32 -75 39 L-87 69 -105 75 -105 84 -78 84 -64 48 -53 36 -30 42 7 38 24 37 36 49 42 76 62 80 65 88 36 88 25 75 16 52 5 47 -1 63 -12 80 -28 80 -29 88 -3 88 17 68 31 51 44 35 Q52 24 56 10 L72 2 91 7 106 1 118 -2 122 -10 107 -15 86 -19 79 -30 66 -35 49 -62 46 -35 34 -28 Q9 -18 -17 -21 L-54 -22 Q-77 -22 -90 1Z',c);
+        path('M49 -34L51 -50 61 -35M48 -14Q57 0 75 1M-69 7Q-54 21 -45 36M-14 -16L-4 35M-14 -16Q8 -29 27 -15L18 35M-6 5L22 1',detail,false,3,.9);circle(80,-18,2.8,detail,true);path('M116 -13L123 -10 119 -5 111 -8Z',D);
+      }
+    }
+    function handler(c){path('M-12 -62A11 11 0 1 1 10 -62A11 11 0 1 1 -12 -62 M-16 -48L12 -48 23 -9 43 3 39 12 13 2 5 -18 8 21 25 69 13 75 -8 39 -24 77 -38 73 -18 25 -23 -4 -36 15 -45 11 -29 -40Z',c);path('M-17 -38L11 -39M-16 -17L8 -17',pale,false,2,.8);}
+    function paw(c){for(const [x,y,rx,ry,a] of [[-25,-15,9,14,-.45],[-9,-31,10,15,-.15],[11,-31,10,15,.15],[27,-14,9,14,.45]]){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,a,0,Math.PI*2);ctx.fill();ctx.restore();}path('M-28 22Q-37 4 -15 -6Q0 -17 15 -6Q37 4 28 22Q23 34 8 26Q0 21 -8 26Q-23 34 -28 22Z',c);}
+    function tree(x,y,s,c){at(x,y,s,()=>{path('M0 -48L-24 -10 -12 -10 -31 15 -15 15 -39 43 -5 43 -5 55 5 55 5 43 39 43 15 15 31 15 12 -10 24 -10Z',c);});}
+    function compass(c){circle(0,0,50,c,false,2);circle(0,0,43,c,false,1);for(let i=0;i<16;i++){let a=i*Math.PI/8;line(Math.cos(a)*43,Math.sin(a)*43,Math.cos(a)*48,Math.sin(a)*48,c,1);}path('M0 -39L11 -8 39 0 11 8 0 39 -11 8 -39 0 -11 -8Z',c,false,2);path('M0 -39L11 -8 0 0 -11 -8Z',c);text('N',0,-62,12,c,'700');}
+    function scent(c){for(let k=0;k<4;k++)path(`M-45 ${-28+k*17} C-17 ${-53+k*17} 5 ${-4+k*17} 46 ${-34+k*17}`,c,false,2.3-k*.26,.9);for(let k=0;k<9;k++)circle(28+(k%3)*13,-24+Math.floor(k/3)*15,2+(k%2),c,true,1,.8);}
+    function terrain(c){for(let k=0;k<6;k++){let y=-55+k*19;path(`M-66 ${y}Q-43 ${y-26} -13 ${y-5}T36 ${y+1}T69 ${y-19}`,c,false,1.8,.55);} }
+    function grid(c){for(let k=-60;k<=60;k+=20){line(k,-58,k,58,c,1,.55);line(-60,k,60,k,c,1,.55);}path('M-60 -40V-60H-40M40 -60H60V-40M60 40V60H40M-40 60H-60V40',c,false,3);}
+    function flag(c){path('M-30 55V-48H37L13 -29 37 -10H-30',c,false,3);circle(-30,-48,3,c,true);path('M-12 53L0 28 12 53Z',c);text('01',0,43,12,pale,'700');}
+    function boxSearch(c){for(let k=0;k<3;k++){let x=-66+k*48;path(`M${x} 18l35 -9 12 13 -35 10Z M${x} 18v27l12 11 35 -10V22M${x+12} 32v24`,c,false,2.8);circle(x+23,22,3,c,true);}}
+    function home(c){path('M-65 -9L0 -61 65 -9M-49 -14V57H49V-14M-17 57V23Q0 6 17 23V57',c,false,4);at(0,-8,.42,()=>paw(c));path('M-62 57H62',c,false,3);}
+    function collar(c){path('M-63 8Q-61 -30 0 -29Q61 -30 63 8Q61 35 0 35Q-61 35 -63 8Z M-49 8Q-42 -15 0 -15Q42 -15 49 8Q42 20 0 20Q-42 20 -49 8Z',c,false,3);path('M-12 22H12V41H-12Z',c,false,3);circle(0,49,9,c,false,2);path('M10 52Q42 65 64 42Q80 24 62 -2',c,false,3);}
+    function laurel(c){for(const side of [-1,1])at(0,0,1,()=>{path('M0 53Q-56 29 -51 -44',c,false,2);for(let k=0;k<6;k++){let x=-20-k*6,y=42-k*16;path(`M${x} ${y}q-25 -8 -13 -24q14 3 13 24M${x} ${y}q23 -7 17 -22q-14 1 -17 22`,c,true,1,.87);}},side);}
+    // Distinct scenes, not merely icons or changed palettes. Each is rendered at
+    // the top or side of the sheet on a locally clipped illustration panel.
+    function scene(kind,c,secondary){
+      if(sar){
+        path('M-68 24L-32 -33 -10 -6 17 -48 66 24Z',secondary,false,2.5);path('M-68 25H66',secondary,false,1.5);at(-18,13,.44,()=>dog(c,0));path('M42 -54V-22M26 -38H58',c,false,5);if(kind%2)at(35,48,.3,()=>compass(c));else circle(42,-38,20,c,false,1.5);
+      }else if(generic){
+        at(-18,3,.54,()=>dog(c,kind%3));path('M35 48L47 8 59 48Z M31 48H63',secondary,false,2.8);path('M31 -35L47 -45 63 -35V-12L47 0 31 -12Z',secondary,false,2);path('M39 -22L45 -16 56 -29',c,false,2.4);
+      }else if(mt){
+        if(kind===0){terrain(secondary);at(-42,-20,.54,()=>handler(c));at(24,10,.46,()=>dog(c,0));path('M-21 -14Q4 -23 10 5',c,false,2.2);}
+        else if(kind===1){terrain(secondary);for(let k=0;k<4;k++)tree(-50+k*32,-36+(k%2)*12,.36,secondary);at(0,11,.49,()=>dog(c,0));path('M-55 54Q-27 38 5 52T59 42',c,false,2);}
+        else if(kind===2){grid(secondary);path('M-57 42L-28 22 -34 -9 12 -18 22 12 54 -34',c,false,3.5);for(const [x,y] of [[-57,42],[-34,-9],[22,12],[54,-34]])circle(x,y,5,c,true);at(40,43,.39,()=>compass(c));}
+        else if(kind===3){for(let k=0;k<5;k++)path(`M${-60+k*25} -52v${39+k%2*14}h${17+k%2*6}v${-39-k%2*14}Z`,secondary,true,1,.7);at(0,21,.5,()=>dog(c,0));path('M-60 53H60',c,false,2);}
+        else {at(0,-9,.63,()=>dog(c,2));at(0,46,.45,()=>compass(secondary));}
+      }else if(hr){
+        if(kind===0){grid(secondary);at(-6,11,.49,()=>dog(c,0));at(44,-34,.45,()=>flag(c));}
+        else if(kind===1){terrain(secondary);for(let k=0;k<5;k++)line(-62,30+k*7,62,30+k*7,secondary,1.3);at(-5,-3,.45,()=>dog(c,0));at(49,10,.48,()=>flag(c));}
+        else if(kind===2){grid(secondary);at(-26,-8,.7,()=>flag(c));path('M3 -49H59V40H3Z M13 -35H49M13 -22H49M13 -9H49M13 4H40',c,false,2);circle(39,32,15,c,false,2);}
+        else if(kind===3){path('M-60 -40H-2L8 -30H60V48H-60Z M-60 -19H60',secondary,false,3);at(0,9,.49,()=>dog(c,0));circle(43,-31,8,c,false,2);}
+        else{at(0,-5,.6,()=>dog(c,1));at(44,-37,.42,()=>flag(secondary));line(-58,55,58,55,c,2);}
+      }else if(dt){
+        if(kind===0){at(-6,-15,.52,()=>dog(c,0));at(1,29,.84,()=>boxSearch(secondary));}
+        else if(kind===1){at(-35,0,.55,()=>dog(c,2));at(37,-10,.63,()=>scent(secondary));circle(53,-37,5,c,false,2);}
+        else if(kind===2){for(let r=15;r<=58;r+=14)circle(0,0,r,secondary,false,1.5);line(-65,0,65,0,secondary,1);line(0,-65,0,65,secondary,1);at(0,0,.48,()=>dog(c,2));}
+        else if(kind===3){at(-31,-5,.57,()=>dog(c,1));at(35,17,.55,()=>boxSearch(secondary));path('M19 -21L29 -11 50 -35',c,false,4);}
+        else{at(-14,0,.53,()=>dog(c,2));for(let k=0;k<5;k++)circle(48,-37+k*17,3+k*.7,secondary,true);}
+      }else if(ds){
+        if(kind===0){at(10,-15,.83,()=>home(secondary));at(-13,16,.47,()=>dog(c,1));}
+        else if(kind===1){at(-34,-20,.54,()=>handler(secondary));at(24,14,.46,()=>dog(c,0));path('M-14 -7Q10 -23 25 7',c,false,2.3);}
+        else if(kind===2){at(0,0,.95,()=>laurel(secondary));at(0,-5,.86,()=>paw(c));}
+        else if(kind===3){at(0,-16,.65,()=>dog(c,2));at(0,42,.73,()=>collar(secondary));}
+        else{at(-27,-9,.61,()=>dog(c,1));at(29,7,.49,()=>dog(secondary,2));path('M-54 53Q0 44 54 53',c,false,2);}
+      }
+    }
+    function badge(x,y,r,kind,form,dark=false){at(x,y,r/73,()=>{
+      const base=dark?D:pale, fg=dark?pale:D, secondary=dark?A:A;
+      if(form===0){circle(0,0,72,base,true);circle(0,0,70,A,false,2.8);circle(0,0,64,fg,false,1,.7);}
+      if(form===1){path('M0 -76L62 -54V22Q55 51 0 76Q-55 51 -62 22V-54Z',base);path('M0 -76L62 -54V22Q55 51 0 76Q-55 51 -62 22V-54Z',A,false,3);path('M0 -67L54 -48V20Q47 47 0 66Q-47 47 -54 20V-48Z',fg,false,1,.75);}
+      if(form===2){path('M-60 -70H60L74 -56V56L60 70H-60L-74 56V-56Z',base);path('M-60 -70H60L74 -56V56L60 70H-60L-74 56V-56Z',A,false,3);path('M-57 -62H57L65 -54V54L57 62H-57L-65 54V-54Z',fg,false,1,.65);}
+      if(form===3){path('M-67 67V-10Q-67 -70 0 -74Q67 -70 67 -10V67Z',base);path('M-67 67V-10Q-67 -70 0 -74Q67 -70 67 -10V67Z',A,false,3);}
+      at(0,0,.86,()=>scene(kind,fg,secondary));
+    });}
+    const decorative=(x,y,c,kind)=>at(x,y,.58,()=>{if(mt){kind%2?compass(c):terrain(c);}else if(hr){kind%2?flag(c):grid(c);}else if(dt){kind%2?scent(c):boxSearch(c);}else{kind%2?paw(c):laurel(c);}});
+    // Restrict substantial artwork to peripheral zones. No fixed graphic under
+    // the editable title, name, body, course or signature text.
+    function panel(side,from,to,width,dark){const x=side===0?0:w-width;const g=gradient(x,0,x+width,0,side===0?(dark?D:A):A,side===0?A:(dark?D:A));rect(x,from,width,to-from,g,dark?1:.10);line(side===0?width:w-width,from,side===0?width:w-width,to,A,2.4);}
+    function corner(x,y,sx,sy,kind){ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);path('M0 0H175L143 26H48L26 48V143L0 175Z',D);path('M0 0H143L118 13H40L13 40V118L0 143Z',A);for(let k=0;k<4;k++)line(22+k*9,12,12,22+k*9,pale,1,.66);ctx.restore();}
+    const Y=h*.52, x=rail*.51, r=rail*.43, kind=(n+edition*2)%5, other=(kind+2+edition)%5;
+    // Rich engraved scenery in the paper itself, deliberately below the 10% ink
+    // threshold so normal text and user artwork remain readable. No opaque center.
+    ctx.save();ctx.globalAlpha=.055;
+    at(w/2,h*.51,Math.min(w,h)*.0045,()=>scene(kind,D,A));
+    ctx.restore();
+    // Each discipline uses its own engraved marginal language. The actual side
+    // scene is continuous rather than a row of repeated clip-art symbols.
+    for(const side of [0,1]) {
+      const X=side===0?0:w;
+      ctx.save();ctx.translate(X,0);ctx.scale(side===0?1:-1,1);
+      ctx.beginPath();ctx.rect(0,0,rail*.88,h);ctx.clip();
+      const wash=ctx.createLinearGradient(0,0,rail*.88,0);wash.addColorStop(0,A+'26');wash.addColorStop(1,A+'00');rect(0,0,rail*.88,h,wash);
+      if(mt){for(let i=0;i<8;i++){const xx=8+i*17;path(`M${xx} 0Q${xx+45} ${h*.13} ${xx+3} ${h*.27}T${xx+3} ${h*.54}T${xx+3} ${h*.81}T${xx} ${h}`,A,false,1.4,.35);} }
+      else if(hr){for(let y=75;y<h;y+=32){line(4,y,rail*.88,y,A,1,.25);line(4,y,12+(Math.round(y/32)%5===0?24:8),y,D,1.5,.5);}for(let j=0;j<4;j++)line(12+j*24,0,12+j*24,h,A,1,.22);}
+      else if(dt){for(let j=0;j<6;j++){let x0=10+j*19;path(`M${x0} 0C${x0+100} ${h*.27} ${x0-70} ${h*.38} ${x0} ${h*.5}S${x0-80} ${h*.8} ${x0} ${h}`,A,false,1.5,.34);} }
+      else{for(let i=0;i<2;i++){const xx=21+i*40;path(`M${xx} 0Q${xx+45} ${h*.2} ${xx} ${h*.4}T${xx} ${h*.8}T${xx} ${h}`,A,false,1.5,.40);for(let y=96;y<h-70;y+=86){path(`M${xx} ${y}q40 -35 26 -53q-27 11 -26 53M${xx} ${y}q-28 -27 -30 -43q30 8 30 43`,A,true,1,.22);}}}
+      ctx.restore();
+    }
+    // The thirty designs use ten distinct frame architectures and three different
+    // arrangements of illustrations. Shared motifs do not imply shared layouts.
+    switch(style){
+      case 0: frame(18,D,4);frame(29,A,1.4);panel(0,0,h,rail*.78,true);panel(1,0,h,rail*.78,true);for(const y of [h*.20,h*.80]){decorative(x*.77,y,pale,n);decorative(w-x*.77,y,pale,n+1);}for(let i=0;i<5;i++){line(15,100+i*6,rail*.70,100+i*6,pale,1,.34);line(w-rail*.70,h-100-i*6,w-15,h-100-i*6,pale,1,.34);}badge(x,Y,r,kind,1,true);badge(w-x,Y,r,other,1,true);break;
+      case 1: frame(27,A,3);frame(38,D,1);for(const [X,Y0,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])corner(X,Y0,sx,sy,n);badge(rail*.63,h*.27,r*1.08,kind,2);badge(w-rail*.63,h*.73,r*1.08,other,2);line(rail*.63,h*.38,rail*.63,h*.86,A,1.8);line(w-rail*.63,h*.14,w-rail*.63,h*.62,A,1.8);break;
+      case 2: frame(22,A,2.5);frame(32,A,1);for(const X of [x,w-x]){path(`M${X} 115Q${X-40} ${h*.33} ${X} ${h*.5}T${X} ${h-115}`,A,false,2.3,.65);badge(X,h*.23,r*.92,kind,0);badge(X,h*.78,r*.92,other,0);}break;
+      case 3: panel(0,0,h,rail*.88,true);path(`M${rail*.88} 0L${rail+18} 80V${h-80}L${rail*.88} ${h}`,A,false,3);line(w-26,30,w-26,h-30,D,3);badge(rail*.47,h*.37,r,kind,2,true);badge(rail*.47,h*.67,r,other,2,true);for(let y=150;y<h-100;y+=105)decorative(w-x*.5,y,A,n);break;
+      case 4: frame(23,A,2);for(const X of [x,w-x]){path(`M${X-28} 70V${h-70}M${X+28} 70V${h-70}`,A,false,1.5,.66);badge(X,Y,r,kind,3);decorative(X,h*.23,A,n);decorative(X,h*.79,A,n+1);}break;
+      case 5: frame(18,D,1);frame(26,A,3);for(const [X,Y0] of [[x,h*.20],[w-x,h*.20],[x,h*.80],[w-x,h*.80]])badge(X,Y0,r*.86,(kind+(Y0>h/2?2:0)+(X>w/2?1:0))%5,0);break;
+      case 6: for(const [X,Y0,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]])corner(X,Y0,sx,sy,n);for(const X of [x,w-x]){rect(X-3,200,6,h-400,A,.85);badge(X,h*.42,r,kind,1,true);badge(X,h*.68,r*.80,other,0);}break;
+      case 7: panel(0,58,h-58,rail*.85,false);panel(1,58,h-58,rail*.85,false);frame(18,D,2);for(const X of [x,w-x]){badge(X,h*.30,r*.9,kind,2);badge(X,h*.63,r*.9,other,3);for(let y=h*.43;y<h*.53;y+=24)circle(X,y,3,A,true);}break;
+      case 8: frame(26,A,2);for(const X of [x,w-x]){for(let k=0;k<4;k++)path(`M${X-38+k*8} 90V${h-90}`,A,false,1,.55);badge(X,Y,r*1.06,kind,0,true);decorative(X,h*.20,A,n);decorative(X,h*.80,A,n+1);}break;
+      case 9: frame(18,A,3);frame(27,D,1);for(const X of [x,w-x]){path(`M${X-32} 100Q${X+28} ${h*.29} ${X-32} ${h*.5}T${X-32} ${h-100} M${X+32} 100Q${X-28} ${h*.29} ${X+32} ${h*.5}T${X+32} ${h-100}`,A,false,1.8);badge(X,h*.34,r*.96,kind,3);badge(X,h*.68,r*.96,other,1);}break;
+    }
+    // Large scene panels in the upper margin: landscape composition at left,
+    // a secondary disciplinary motif at right. These are not official logos.
+    if(![0,2,3,5].includes(style)){
+      const yy=110;
+      for(const side of [0,1]){const xx=side? w-rail*.55:rail*.55;
+        ctx.save();ctx.beginPath();ctx.rect(side?w-rail:0,66,rail,128);ctx.clip();
+        ctx.globalAlpha=.55;at(xx,yy+16,rail*.0065,()=>scene(side?other:kind,D,A));ctx.restore();
+      }
+    }
+    if(edition===1){const metallic=theme.profile==='ceremony'?'#A68A51':A;for(const X of [x,w-x]){line(X-25,70,X+25,70,metallic,2);line(X-25,h-70,X+25,h-70,metallic,2);at(X,h-95,.44,()=>laurel(metallic));}}
+    if(edition===2){for(const X of [x,w-x]){for(let j=0;j<4;j++){line(X-26+j*6,76,X-9+j*6,61,A,1.6);line(X-26+j*6,h-76,X-9+j*6,h-61,A,1.6);}}}
+    // The pre-existing discipline-specific models are deliberately distinct from
+    // the 30 new designs: preserve a separate folio architecture for these IDs.
+    if(legacy){const l=rail*.9;for(const [xx,sx] of [[0,1],[w,-1]]){ctx.save();ctx.translate(xx,0);ctx.scale(sx,1);path(`M0 0H${l}L${l*.56} 62H0Z`,D);path(`M0 ${h}H${l}L${l*.56} ${h-62}H0Z`,D);for(let j=0;j<3;j++){line(6,22+j*9,l*.51,22+j*9,A,1.5);line(6,h-22-j*9,l*.51,h-22-j*9,A,1.5);}ctx.restore();}}
+    // Edition differences are structural: cartouche, engraved header, or double
+    // ornamental rule. The caption identifies the actual discipline at a glance.
+    const bw=Math.min(w-2*rail-36,550), cx=w/2;
+    if(edition===0){path(`M${cx-bw/2} 22H${cx+bw/2}L${cx+bw/2-26} 59H${cx-bw/2+26}Z`,D);line(cx-bw/2+22,55,cx+bw/2-22,55,A,2);text(name,cx,39,23,pale,'700');}
+    else if(edition===1){line(cx-bw/2,32,cx-155,32,A,2);line(cx+155,32,cx+bw/2,32,A,2);circle(cx-bw/2,32,4,A,true);circle(cx+bw/2,32,4,A,true);text(name,cx,38,24,D,'700','Georgia');line(cx-115,57,cx+115,57,A,1);}
+    else{path(`M${cx-bw/2} 24H${cx+bw/2}V58H${cx-bw/2}Z`,pale);path(`M${cx-bw/2} 24H${cx+bw/2}V58H${cx-bw/2}Z`,A,false,2);text(name,cx,41,22,D,'700');}
+    // Bottom ornament sits below the signature safe area; no invented logos,
+    // accreditation or certification marks are printed.
+    line(cx-105,h-29,cx-19,h-29,A,1.6);line(cx+19,h-29,cx+105,h-29,A,1.6);
+    at(cx,h-29,.23,()=>{if(ds)paw(A);else if(mt)compass(A);else if(hr)flag(A);else scent(A);});
+    ctx.restore();
+  }
+  // Retain the visual architecture of general themes. Add category-specific
+  // engraved edge finishing, not a universal overlay across the content area.
+  function refinedGeneralEdge(theme,A,D){
+    const category=theme.category, s=Math.min(W,H)/1190, w=W/s,h=H/s;
+    ctx.save();ctx.scale(s,s);ctx.lineCap='round';
+    const stroke=(d,c,z=1,a=1)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=z;ctx.globalAlpha=a;ctx.stroke(new Path2D(d));ctx.restore();};
+    const fill=(d,c,a=1)=>{ctx.save();ctx.fillStyle=c;ctx.globalAlpha=a;ctx.fill(new Path2D(d));ctx.restore();};
+    const soft=ctx.createLinearGradient(0,0,38,0);soft.addColorStop(0,A+'22');soft.addColorStop(1,A+'00');ctx.fillStyle=soft;ctx.fillRect(0,0,38,h);
+    const other=ctx.createLinearGradient(w-38,0,w,0);other.addColorStop(0,A+'00');other.addColorStop(1,A+'22');ctx.fillStyle=other;ctx.fillRect(w-38,0,38,h);
+    const serif=['Premium','Cerimoniali','Accademici','Eleganti','Base'].includes(category);
+    for(const [x,y,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]]){
+      ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);
+      if(serif){stroke('M7 112V7H112M13 82V13H82',A,1.8,.9);for(let i=0;i<4;i++){const t=17+i*14;stroke(`M7 ${t}Q23 ${t-8} 13 ${t-16}M${t} 7Q${t-8} 23 ${t-16} 13`,A,1,.78);}fill('M9 9L18 9 9 18Z',D,.8);}
+      else if(category==='Creativi'){for(let i=0;i<3;i++)stroke(`M${7+i*5} 100V${7+i*5}H${100-i*12}`,A,2,.8-i*.13);}
+      else if(category==='Natura e K9'||category==='Natura'){stroke('M10 100Q5 50 10 10Q50 5 100 10',A,1.5,.9);for(let i=0;i<5;i++){let y0=18+i*15;fill(`M10 ${y0}q18 -13 15 -20q-16 5 -15 20M${y0} 10q-13 18 -20 15q5 -16 20 -15`,A,.75);}}
+      else{fill('M0 0H107L85 8H8V85L0 107Z',D,.91);stroke('M13 80V13H80',A,2,.9);for(let i=0;i<4;i++)stroke(`M3 ${25+i*10}H10M${25+i*10} 3V10`,A,1.3,.8);}
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function drawCatalogOrnament(ornament = $("ornamentStyle").value, color = designColor("accentColor", "#735a2f"), ink = designColor("inkColor", "#26231f"), theme = themePalettes[selectedTheme]) {
+    const id = Object.keys(themePalettes).find(key => themePalettes[key] === theme);
+    if(specialK9Ids.has(ornament)) {
+      const t=themePalettes[ornament]; illustratedDiscipline(t,color,ink,t.layout,t.discipline); return;
+    }
+    if(theme && id && !archivedThemeIds.has(id) && theme.ornament===ornament) {
+      const group=galleryPath(id,theme).group;
+      if(["Mantrailing","HRDD","Detection","Dogsitter","K9 tattici generali","SAR · ricerca e soccorso"].includes(group)) {
+        const related=catalogThemes.filter(([key,t])=>!specialK9Ids.has(key)&&galleryPath(key,t).group===group);
+        const number=related.findIndex(([key])=>key===id);
+        illustratedDiscipline(theme,color,ink,30+Math.max(0,number),group);return;
+      }
+      refinedGeneralEdge(theme,color,ink);
+    }
+    drawLegacyCatalogOrnament(ornament,color,ink);
+  }
+  function drawLegacyCatalogOrnament(ornament, color, ink) {
     if (!ornament || ornament === "none") return;
     if (specialK9Ids.has(ornament)) { drawSpecialK9(ornament,color,ink); return; }
     if (signatureThemeIds.has(ornament)) { drawSignatureCollection(ornament,color,ink); return; }
@@ -1728,7 +1914,7 @@
       ctx=preview.getContext("2d");W=portrait?1190:1683;H=portrait?1683:1190;
       ctx.scale(preview.width/W,preview.height/H);
       ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
-      drawCatalogOrnament(theme.ornament,theme.accent,theme.ink);
+      drawCatalogOrnament(theme.ornament,theme.accent,theme.ink,theme);
       drawFrame(theme.frame,theme.accent);
       const profile=layoutProfile(theme,theme.ornament);
       ctx.textAlign="center";ctx.textBaseline="middle";
@@ -1736,7 +1922,7 @@
       ctx.fillStyle=theme.accent;ctx.font=`700 ${portrait?78:90}px ${profile.name}`;ctx.fillText("NOME COGNOME",W/2,H*.48);
       ctx.fillStyle=theme.ink;
       ctx.globalAlpha=.50;ctx.fillRect(W*.27,H*.56,W*.46,12);ctx.fillRect(W*.34,H*.59,W*.32,9);
-      ctx.globalAlpha=1;ctx.fillStyle=theme.accent;ctx.font=`700 52px ${profile.course}`;ctx.fillText("CORSO",W/2,H*.68);
+      ctx.globalAlpha=1;ctx.fillStyle=theme.accent;ctx.font=`700 52px ${profile.course}`;ctx.fillText(theme.discipline ? `CORSO ${theme.discipline.toUpperCase()}` : "CORSO",W/2,H*.68);
       ctx.fillRect(W*.18,H*.82,W*.22,5);ctx.fillRect(W*.60,H*.82,W*.22,5);
     } finally {ctx=prior.ctx;W=prior.W;H=prior.H;}
   }
@@ -1932,7 +2118,7 @@
   const themeMaskCache=new Map();
   function themeSafeArea(yStart=.24,yEnd=.88){
     const ornament=$("ornamentStyle").value,frame=$("frameStyle").value;
-    const key=`${W}x${H}|${ornament}|${frame}`;
+    const key=`${W}x${H}|${selectedTheme}|${ornament}|${frame}`;
     let mask=themeMaskCache.get(key);
     if(!mask){
       const sample=document.createElement("canvas"),previous=ctx;
