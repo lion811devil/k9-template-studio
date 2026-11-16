@@ -1,4 +1,4 @@
-# K9 Template Studio — versione 4.8.3 (16 novembre 2026)
+# K9 Template Studio — versione 4.9.0 (16 novembre 2026)
 
 Applicazione statica per creare attestati e certificati in **A4 verticale (210 × 297 mm)** o **A4 orizzontale (297 × 210 mm)**, con PDF singoli o multipagina e PNG a 600 DPI.
 
@@ -7,6 +7,8 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 **Stabilità 4.7.2:** salvataggio e riapertura protetti; i dati e tutte le immagini sono validati prima di sostituire il progetto. Il cambio progetto viene interrotto se il salvataggio fallisce; le scritture concorrenti da schede differenti sono rilevate confrontando le versioni nell'archivio. «Salva progetto» aggiorna senza conferma. Caricare un modello di disciplina conserva l'ID del progetto aperto. Autosalvataggio a 250 ms e tentativo di salvataggio quando la pagina viene nascosta; Android può comunque interrompere la pagina senza consentire il completamento. Un recupero non riuscito impedisce scritture automatiche finché non viene aperto esplicitamente un altro progetto valido.
 
 **Backup:** massimo 80 MiB per il singolo progetto JSON e 180 MiB per ogni parte di archivio completo. Gli archivi grandi vengono divisi in file indipendenti, scaricabili e importabili uno alla volta; se un solo progetto non entra in una parte, occorre ridurre le immagini. I file troppo grandi vengono rifiutati prima del download. La cronologia locale delle versioni non è inclusa nei backup; si può esportare una versione dopo averla ripristinata. Il backup completo non duplica il lavoro corrente se già incluso nei progetti. Importazioni ripetute ignorano le versioni identiche; i progetti differenti sono aggiunti senza sovrascrivere quelli esistenti. L'archivio completa la scrittura in una transazione.
+
+**Novità 4.9.0 — Signature Collection:** 120 temi dedicati (30 Mantrailing, 30 HRDD, 30 Detection, 30 Dogsitter) e 16 composizioni Signature, per un totale di 266 temi selezionabili. Menu a tendina indipendenti per disciplina e per le categorie precedenti; ricerca trasversale, compatibilità con tutti i progetti storici, colori coordinati, grafica A4 a 600 DPI senza risorse esterne. Sostituire solo `index.html`, `css/style.css`, `js/app.js`, `sw.js` e `README.md`.
 
 **Novità 4.8.3:** aggiornamento offline con risorse versionate e verifica di coerenza prima dell’attivazione. La nuova cache si attiva senza ricaricare automaticamente l’editor e senza toccare IndexedDB. La versione effettiva del JavaScript è visibile nel titolo dell’archivio stili. Titolo, nominativo e corso condividono il colore principale anche per il tema Laureato. Chiudere e riaprire l’app online dopo la pubblicazione.
 
@@ -42,7 +44,7 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 
 **Aggiornamento 4.8.2 (comprende 4.8.1):** sostituire `index.html`, `css/style.css`, `js/app.js`, `sw.js` e `README.md` (motore `js/pdf-vector.js` invariato). Nessun nuovo file obbligatorio. È possibile eliminare `style.css` nella radice, `css/Gitgap` e `js/Gitgap` (non utilizzati). Prima di pubblicare, esportare un backup dei progetti.
 
-**Grafica e impaginazione automatica:** 130 stili selezionabili (121 precedenti − 15 simili o identici + 24 nuove composizioni; varianti storiche conservate per compatibilità), miniature reali per il formato A4 selezionato, font coordinati e ridimensionamento dei nominativi. Il testo non viene riscritto. PDF vettoriale con font Times e Helvetica standard, grafica rasterizzata nativamente a 600 DPI (7016 × 4961 pixel in orizzontale e 4961 × 7016 in verticale). Testi che non entrano nello spazio disponibile sono segnalati prima dell’esportazione. I progetti esistenti mantengono ID, testi, immagini e orientamento; il nuovo motore può modificarne l’aspetto tipografico.
+**Grafica e impaginazione automatica:** 266 stili selezionabili (130 precedenti + 16 Signature + 120 K9; varianti storiche conservate per compatibilità), miniature reali per il formato A4 selezionato, font coordinati e ridimensionamento dei nominativi. Il testo non viene riscritto. PDF vettoriale con font Times e Helvetica standard, grafica rasterizzata nativamente a 600 DPI (7016 × 4961 pixel in orizzontale e 4961 × 7016 in verticale). Testi che non entrano nello spazio disponibile sono segnalati prima dell’esportazione. I progetti esistenti mantengono ID, testi, immagini e orientamento; il nuovo motore può modificarne l’aspetto tipografico.
 
 **Qualità Ultra HD:** 600 DPI per tutti i temi anche storici, disegnati nuovamente in esportazione. PNG con metadati 600 DPI, PDF con testo vettoriale e grafica JPEG di alta qualità. Le immagini personali conservano il dettaglio della sorgente. La generazione richiede circa 133 MiB per il solo canvas UHD; il PDF multipagina riutilizza una sola grafica.
 
@@ -56,7 +58,7 @@ Applicazione statica per creare attestati e certificati in **A4 verticale (210 �
 
 ## Storico delle versioni precedenti
 
-Le note seguenti descrivono il comportamento delle **versioni storiche** e possono non corrispondere all'implementazione attuale 4.8.3. In caso di differenze, fa fede la sezione aggiornata qui sopra.
+Le note seguenti descrivono il comportamento delle **versioni storiche** e possono non corrispondere all'implementazione attuale 4.9.0. In caso di differenze, fa fede la sezione aggiornata qui sopra.
 
 ## V4.2.1 — Aggiornamento correttivo
 
