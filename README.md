@@ -1,5 +1,6 @@
-# K9 Template Studio — versione 4.9.1 (16 novembre 2026)
+# K9 Template Studio — versione 4.9.2 (16 novembre 2026)
 
+**Novità 4.9.2:** collezioni cinofile illustrate (120 temi dedicati e temi cinofili preesistenti), disegni originali Canvas/Path2D in scala di stampa, riferimenti espliciti alla disciplina, finiture delle collezioni generali. Conservati i 266 ID di catalogo e la tassonomia. I progetti che usano un tema aggiornato mostreranno la nuova grafica; salvare i PDF precedenti se serve mantenerne l’aspetto. Nessun asset remoto o database esterno. Sostituire index.html, js/app.js, sw.js e README.md.
 Applicazione statica per creare attestati e certificati in **A4 verticale (210 × 297 mm)** o **A4 orizzontale (297 × 210 mm)**, con PDF singoli o multipagina e PNG a 600 DPI.
 
 **Gestione progetti:** dopo aver salvato un progetto in A4 verticale o orizzontale, lo si riapre dall'elenco «Progetti salvati» con «Apri progetto». Si recuperano lo stesso progetto (stesso identificativo), l'orientamento, i testi, lo sfondo, i loghi, le firme e l'elenco corsisti. **Non viene creata una copia automaticamente.** Se si cambia orientamento in un progetto già aperto, il formato viene salvato nel progetto esistente tramite autosalvataggio; premendo «Salva progetto» si aggiorna lo stesso progetto. Solo il pulsante facoltativo «Duplica come nuovo» crea una copia distinta. Il lavoro in corso viene inoltre recuperato in apertura dell'app se l'archivio locale del dispositivo è disponibile.
