@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.0">
+  <link rel="stylesheet" href="css/style.css?v=4.9.1">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.0</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.1</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -165,12 +165,13 @@
         <div class="panel-body design-area">
           <p class="mini-heading">Archivio stili grafici · pronti da caricare<span id="studioVersion"></span></p>
           <div class="theme-toolbar theme-search-only">
-            <label>Cerca in tutti i menu<input type="search" id="themeSearch" placeholder="Es. mantrailing, HRDD, detection, dogsitter, oro" autocomplete="off" aria-label="Cerca nell'archivio degli stili"></label>
+            <label>Cerca per disciplina, categoria o nome<input type="search" id="themeSearch" placeholder="Es. HRDD griglie, Dogsitter botanici, oro" autocomplete="off" aria-label="Cerca nell'archivio degli stili"></label>
           </div>
-          <div class="theme-gallery-heading"><span id="themeCount" aria-live="polite">266 stili disponibili</span><span>Caricato: <strong id="themeLoaded">Classico</strong></span></div>
+          <div class="theme-gallery-heading"><span id="themeCount" aria-live="polite">266 stili disponibili</span><button type="button" class="theme-locate" id="locateTheme" title="Apri la categoria dello stile caricato">Caricato: <strong id="themeLoaded">Classico</strong><span aria-hidden="true"> ›</span></button></div>
+          <p class="theme-path" id="themePath"></p>
           <div class="theme-menus" id="themeGrid" role="group" aria-label="Archivio stili grafici da caricare"></div>
           <p id="themeEmpty" class="help-text hidden">Nessuno stile trovato. Cambia la ricerca.</p>
-          <p class="help-text">Apri il menu della disciplina o categoria, poi tocca uno stile per caricarlo nel progetto attuale: non crea nuovi progetti, non modifica nomi, loghi, firme o formato A4. L'anteprima mostra subito il risultato. Nessuna connessione necessaria.</p>
+          <p class="help-text">Apri una disciplina e la sua sottocategoria, oppure una collezione generale, poi tocca uno stile per caricarlo nel progetto attuale: non crea nuovi progetti, non modifica nomi, loghi, firme o formato A4. L'anteprima mostra subito il risultato. Nessuna connessione necessaria.</p>
           <div class="design-settings">
             <label>Colore principale <input id="accentColor" type="color" value="#735a2f" aria-label="Colore titolo, nominativo, corso e cornice"></label>
             <label>Colore testi <input id="inkColor" type="color" value="#26231f" aria-label="Colore principale dei testi"></label>
@@ -470,7 +471,7 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.0"></script>
-  <script src="js/app.js?v=4.9.0"></script>
+  <script src="js/pdf-vector.js?v=4.9.1"></script>
+  <script src="js/app.js?v=4.9.1"></script>
 </body>
 </html>
