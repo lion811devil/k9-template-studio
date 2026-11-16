@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.0";
+  const STUDIO_VERSION = "4.9.1";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -752,19 +752,45 @@
 
   // Catalogo locale: nessun asset esterno e nessun progetto creato automaticamente.
   // Ogni anteprima applica lo stile solo con un tocco esplicito dell'utente.
-  const galleryGroups = ["Mantrailing", "HRDD", "Detection", "Dogsitter", "K9 operativi", "Top professionali", "Cerimoniali", "Accademici", "Eleganti e creativi", "Classici"];
-  const existingDiscipline = {fieldMap:"Mantrailing",compass:"Mantrailing",trace:"Mantrailing",trackRoute:"Mantrailing",contourField:"Mantrailing",sigTrail:"Mantrailing",sigNight:"Mantrailing",scanline:"HRDD",forense:"HRDD",coordinateL:"HRDD",sigForensic:"HRDD",detectionPro:"Detection",radar:"Detection",sensor:"Detection",hexTech:"Detection",pulse:"Detection"};
-  const topThemeIds = new Set(["imperialGold","artDeco","academyBlue","executiveNavy","corporateBlue","guilloche","engraved","minimalLux","magistrale","prestigioNoir","atlasPrime","doge","orbitale","prismaNobile","notarile","florealeNobile","incisioneBlu","ducal","silhouette","mosaic","vectorCut","laureate","trackRoute"]);
-  function galleryGroup(id, theme) {
-    if (theme.discipline) return theme.discipline;
-    if (existingDiscipline[id]) return existingDiscipline[id];
-    if (theme.category === "K9 operativo" || theme.category === "Natura e K9") return "K9 operativi";
-    if (theme.category === "Cerimoniali") return "Cerimoniali";
-    if (theme.category === "Accademici") return "Accademici";
-    if (theme.category === "Base") return "Classici";
-    if (theme.category === "Premium" || theme.category === "Professionali") return "Top professionali";
-    return "Eleganti e creativi";
+  // Tassonomia esclusiva: una sola posizione per tema, senza modificare i suoi ID o la grafica.
+  const gallerySections = [
+    {label:"Discipline cinofile",groups:[
+      {name:"Mantrailing",families:["Tattici e operativi","Cartografia e tracciamento","Percorsi e territorio","Cerimoniali e di merito"]},
+      {name:"HRDD",families:["Rilievo e griglie forensi","Stratigrafia e terreno","Documentazione e repertazione","Distinzione specialistica"]},
+      {name:"Detection",families:["Tattici e risposta al segnale","Sensori e precisione","Flussi e analisi olfattiva","Cerimoniali e di merito"]},
+      {name:"Dogsitter",families:["Botanici e naturali","Impronte e passeggiate","Moderni e accoglienti","Eleganti e di merito"]},
+      {name:"K9 tattici generali"},{name:"SAR · ricerca e soccorso"}
+    ]},
+    {label:"Collezioni grafiche generali",groups:[{name:"Premium"},{name:"Professionali"},{name:"Cerimoniali"},{name:"Accademici"},{name:"Eleganti"},{name:"Creativi"},{name:"Natura"},{name:"Classici"}]}
+  ];
+  // Assegnazioni curate sulla base delle decorazioni, non dei soli colori o del nome commerciale.
+  const disciplineFamilies={
+    Mantrailing:{prefix:"k9mt",sets:[[1,2,4,7,10,11,18,26,29],[5,8,17,19,20,21,28],[9,13,16,24,25],[3,6,12,14,15,22,23,27,30]],legacy:[["sigNight"],["trace","trackRoute","sigTrail"],["contourField"],[]]},
+    HRDD:{prefix:"k9hr",sets:[[1,3,5,8,12,15,17,19,21,26,28],[4,9,16,24,25],[2,6,10,13,18,20,23],[7,11,14,22,27,29,30]],legacy:[["coordinateL"],["sigForensic","scanline"],["forense"],[]]},
+    Detection:{prefix:"k9dt",sets:[[1,7,10,18,22,29],[2,3,5,8,11,13,15,17,19,20,26,28],[4,9,12,14,16,21,24,25],[6,23,27,30]],legacy:[["detectionPro"],["radar","sensor","hexTech"],["pulse"],[]]},
+    Dogsitter:{prefix:"k9ds",sets:[[1,4,7,10,11,12,14,16,19,28],[3,9,18,20,25],[8,13,17,21,24,26],[2,5,6,15,22,23,27,29,30]],legacy:[[],[],[],[]]}
+  };
+  const curatedGalleryPaths=new Map();
+  for(const [group,config] of Object.entries(disciplineFamilies)){
+    const definition=gallerySections[0].groups.find(g=>g.name===group);
+    config.sets.forEach((ids,i)=>{
+      for(const id of [...ids.map(n=>config.prefix+String(n).padStart(2,"0")),...config.legacy[i]]){
+        if(curatedGalleryPaths.has(id))throw Error("Tema duplicato nella tassonomia: "+id);
+        curatedGalleryPaths.set(id,{group,family:definition.families[i]});
+      }
+    });
   }
+  const sarThemeIds=new Set(["sarRescue","fieldMap","compass","relay","triage","rescueBand","sigRescue"]);
+  const natureThemeIds=new Set(["earth","sand","mountain","current","botanical","vettaCivica","marea","cedar"]);
+  function galleryPath(id,theme){
+    if(curatedGalleryPaths.has(id))return curatedGalleryPaths.get(id);
+    if(sarThemeIds.has(id))return {group:"SAR · ricerca e soccorso",family:""};
+    if(natureThemeIds.has(id))return {group:"Natura",family:""};
+    if(theme.category==="K9 operativo"||theme.category==="Natura e K9")return {group:"K9 tattici generali",family:""};
+    return {group:theme.category==="Base"?"Classici":theme.category,family:""};
+  }
+  const galleryGroup=(id,theme)=>galleryPath(id,theme).group;
+  const normalizeThemeSearch=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("it").trim();
   const thumbnailCache=new Map();
   function renderCachedThumbnail(canvas,theme,id){
     const key=`${currentOrientation()}|${id}`;
@@ -776,40 +802,84 @@
     if(thumbnailCache.size>32){const oldest=thumbnailCache.keys().next().value;const old=thumbnailCache.get(oldest);old.width=1;old.height=1;thumbnailCache.delete(oldest);}
   }
   let thumbnailObserver=null;
-  let openedThemeGroup=null;
+  // La navigazione normale e la ricerca hanno stati separati. Il cambio A4 non chiude i menu.
+  const browseGallery={group:"",family:""}, searchGallery={group:"",family:""};
+  let previousThemeQuery="";
   function populateThemeGallery() {
     if(thumbnailObserver)thumbnailObserver.disconnect();
-    const grid=$("themeGrid"), query=($("themeSearch").value||"").trim().toLocaleLowerCase("it");
-    const visible=catalogThemes.filter(([id,t])=>`${t.label} ${t.detail} ${t.category} ${galleryGroup(id,t)}`.toLocaleLowerCase("it").includes(query));
-    const groups=new Map(galleryGroups.map(g=>[g,[]]));
-    for(const item of visible) groups.get(galleryGroup(...item)).push(item);
-    if(openedThemeGroup===null)openedThemeGroup=galleryGroup(selectedTheme,themePalettes[selectedTheme]||themePalettes.classic);
+    const grid=$("themeGrid"), query=normalizeThemeSearch($("themeSearch").value);
+    const tokens=query.split(/\s+/).filter(Boolean);
+    const nav=query?searchGallery:browseGallery;
+    if(query!==previousThemeQuery){searchGallery.group="";searchGallery.family="";previousThemeQuery=query;}
+    const visible=catalogThemes.filter(([id,t])=>{
+      const path=galleryPath(id,t),hay=normalizeThemeSearch(`${t.label} ${t.detail} ${path.group} ${path.family}`);
+      return tokens.every(token=>hay.includes(token));
+    });
+    const groups=new Map();
+    for(const section of gallerySections)for(const g of section.groups)groups.set(g.name,new Map((g.families||[""]).map(f=>[f,[]])));
+    for(const item of visible){const path=galleryPath(...item);groups.get(path.group).get(path.family).push(item);}
+    const countGroup=g=>[...groups.get(g).values()].reduce((n,items)=>n+items.length,0);
+    const matchingGroups=[...groups.keys()].filter(g=>countGroup(g));
+    if(query&&matchingGroups.length===1&&!nav.group){nav.group=matchingGroups[0];const families=[...groups.get(nav.group)].filter(([,items])=>items.length);if(families.length===1)nav.family=families[0][0];}
     const fragment=document.createDocumentFragment();
     thumbnailObserver=typeof IntersectionObserver==="function"?new IntersectionObserver((entries,observer)=>{
       for(const e of entries)if(e.isIntersecting){const c=e.target;observer.unobserve(c);if(c.isConnected){const t=themePalettes[c.dataset.themeId];if(t)renderCachedThumbnail(c,t,c.dataset.themeId);}}
     },{rootMargin:"120px"}):null;
-    function fillGroup(panel,items){
-      if(panel.dataset.built==="yes")return;panel.dataset.built="yes";
-      const inner=panel.querySelector('.theme-group-grid'),cards=document.createDocumentFragment();
-      items.sort((a,b)=>Number(specialK9Ids.has(b[0]))-Number(specialK9Ids.has(a[0]))||Number(signatureThemeIds.has(b[0]))-Number(signatureThemeIds.has(a[0]))||Number(topThemeIds.has(b[0]))-Number(topThemeIds.has(a[0])));
-      for(const [id,t] of items){
+    function clearCards(inner){for(const c of inner.querySelectorAll("canvas")){thumbnailObserver?.unobserve(c);c.width=1;c.height=1;}inner.replaceChildren();}
+    function fillCards(inner,items){
+      if(inner.childElementCount)return;
+      const cards=document.createDocumentFragment();
+      for(const [id,t] of [...items].sort((a,b)=>a[1].label.localeCompare(b[1].label,"it"))){
         const button=document.createElement("button");button.type="button";button.className="theme-choice";button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(selectedTheme===id));if(selectedTheme===id)button.classList.add("selected");
         const preview=document.createElement("canvas");preview.className="theme-preview";preview.dataset.ornament=t.ornament;preview.dataset.frame=t.frame;preview.dataset.themeId=id;preview.style.setProperty("--preset-accent",t.accent);preview.style.setProperty("--preset-ink",t.ink);preview.setAttribute("aria-hidden","true");preview.width=1;preview.height=1;preview.style.aspectRatio=currentOrientation()==="portrait"?"210 / 297":"297 / 210";
         if(thumbnailObserver)thumbnailObserver.observe(preview);else renderCachedThumbnail(preview,t,id);
-        const title=document.createElement("strong"),detail=document.createElement("small");title.textContent=t.label;detail.textContent=t.detail;button.append(preview,title,detail);cards.appendChild(button);
-      } inner.appendChild(cards);
+        const title=document.createElement("strong"),detail=document.createElement("small");title.textContent=t.label;detail.textContent=t.detail.replace(/^(Mantrailing|HRDD|Detection|Dogsitter) · /,"");button.append(preview,title,detail);cards.appendChild(button);
+      }inner.appendChild(cards);
     }
-    let defaultOpen=groups.get(openedThemeGroup)?.length?openedThemeGroup:(openedThemeGroup===""&&!query?null:galleryGroups.find(g=>groups.get(g).length));
-    for(const [group,items] of groups){if(!items.length)continue;
-      const panel=document.createElement("details");panel.className="theme-discipline";panel.dataset.group=group;
-      const heading=document.createElement("summary"),label=document.createElement("strong"),count=document.createElement("span");label.textContent=group;count.textContent=`${items.length} temi`;heading.append(label,count);
-      const inner=document.createElement("div");inner.className="theme-grid theme-group-grid";panel.append(heading,inner);
-      panel.open=group===defaultOpen;if(panel.open)fillGroup(panel,items);
-      heading.addEventListener("click",()=>{if(!panel.open){openedThemeGroup=group;for(const other of grid.querySelectorAll(".theme-discipline"))if(other!==panel)other.open=false;fillGroup(panel,items);}else if(openedThemeGroup===group)openedThemeGroup="";});
-      panel.addEventListener("toggle",()=>{if(panel.open)fillGroup(panel,items);});
-      fragment.appendChild(panel);
+    function makeSummary(label,count){const heading=document.createElement("summary"),name=document.createElement("strong"),total=document.createElement("span");name.textContent=label;total.textContent=`${count} temi`;heading.append(name,total);return heading;}
+    const controls=[];
+    for(const section of gallerySections){
+      const sectionCount=section.groups.reduce((n,g)=>n+countGroup(g.name),0);if(!sectionCount)continue;
+      const sectionEl=document.createElement("section");sectionEl.className="theme-section";
+      const title=document.createElement("h3");title.className="theme-section-title";title.textContent=section.label;
+      const sectionTotal=document.createElement("span");sectionTotal.textContent=`${sectionCount} temi`;title.append(sectionTotal);sectionEl.append(title);
+      for(const g of section.groups){
+        const group=g.name,total=countGroup(group);if(!total)continue;
+        const panel=document.createElement("details");panel.className="theme-discipline";panel.dataset.group=group;
+        const heading=makeSummary(group,total);panel.append(heading);
+        const body=document.createElement("div");body.className="theme-category-body";panel.append(body);
+        const families=[];
+        for(const [family,items] of groups.get(group)){if(!items.length)continue;
+          const inner=document.createElement("div");inner.className="theme-grid theme-group-grid";
+          if(family){const sub=document.createElement("details");sub.className="theme-family";sub.dataset.family=family;const subHeading=makeSummary(family,items.length);sub.append(subHeading,inner);body.append(sub);families.push({sub,inner,items,family});
+            subHeading.addEventListener("click",event=>{event.preventDefault();const open=!sub.open;nav.family=open?family:"";for(const f of families){f.sub.open=open&&f.sub===sub;if(f.sub.open)fillCards(f.inner,f.items);else clearCards(f.inner);}});
+          }else{body.append(inner);families.push({sub:null,inner,items,family});}
+        }
+        function setOpen(open){panel.open=open;for(const f of families){const show=open&&(!f.sub||f.family===nav.family);if(f.sub)f.sub.open=show;if(show)fillCards(f.inner,f.items);else clearCards(f.inner);}}
+        controls.push({group,setOpen});
+        heading.addEventListener("click",event=>{event.preventDefault();const open=!panel.open;nav.group=open?group:"";nav.family="";for(const control of controls)control.setOpen(open&&control.group===group);});
+        sectionEl.append(panel);
+      }
+      fragment.append(sectionEl);
     }
-    grid.replaceChildren(fragment);$("themeCount").textContent=`${visible.length} stili su ${catalogThemes.length}`;$("themeEmpty").classList.toggle("hidden",visible.length!==0);
+    grid.replaceChildren(fragment);
+    for(const control of controls)control.setOpen(control.group===nav.group);
+    $("themeCount").textContent=`${visible.length} stili su ${catalogThemes.length}`;$("themeEmpty").classList.toggle("hidden",visible.length!==0);
+    syncGallerySelection();
+  }
+  function syncGallerySelection(){
+    const theme=themePalettes[selectedTheme],visible=theme&&!archivedThemeIds.has(selectedTheme);
+    const path=visible?galleryPath(selectedTheme,theme):null;
+    $("themePath").textContent=path?[path.group,path.family].filter(Boolean).join(" / "):theme?"Stile storico · compatibile":"Stile personalizzato";
+    $("locateTheme").disabled=!path;
+    document.querySelectorAll(".theme-discipline").forEach(panel=>panel.classList.toggle("contains-selected",panel.dataset.group===path?.group));
+    document.querySelectorAll(".theme-family").forEach(panel=>panel.classList.toggle("contains-selected",panel.closest(".theme-discipline")?.dataset.group===path?.group&&panel.dataset.family===path?.family));
+  }
+  function locateSelectedTheme(){
+    const theme=themePalettes[selectedTheme];if(!theme||archivedThemeIds.has(selectedTheme))return;
+    const path=galleryPath(selectedTheme,theme);$("themeSearch").value="";Object.assign(browseGallery,path);populateThemeGallery();
+    const selected=[...$("themeGrid").querySelectorAll(".theme-choice")].find(b=>b.dataset.theme===selectedTheme);
+    if(selected)selected.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});
   }
 
   function applyCatalogTheme(id) {
@@ -832,6 +902,7 @@
     });
     $("fontScaleValue").value = `${$("fontScale").value}%`;
     $("themeLoaded").textContent = selectedTheme === "custom" ? "Personalizzato" : (themePalettes[selectedTheme]?.label || "Classico");
+    syncGallerySelection();
   }
 
   // Motivi leggeri ai margini: conservano leggibili i testi A4 in ogni orientamento.
@@ -3501,6 +3572,7 @@
   // L'archivio grafico è incorporato nell'app: nessuna rete e nessun caricamento all'apertura.
   populateThemeGallery();
   $("themeSearch").addEventListener("input", populateThemeGallery);
+  $("locateTheme").addEventListener("click",locateSelectedTheme);
   $("themeGrid").addEventListener("click", event => {
     const button = event.target.closest(".theme-choice");
     if (button && $("themeGrid").contains(button)) applyCatalogTheme(button.dataset.theme);
