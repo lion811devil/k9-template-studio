@@ -1,29 +1,43 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
+const VERSION = "4.8.3";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
-const CACHE = `${PREFIX}4.8.2`;
-const FILES = ["./", "./index.html", "./css/style.css", "./js/app.js", "./js/pdf-vector.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(path=>new URL(path,SCOPE).href);
+const CACHE = `${PREFIX}${VERSION}`;
+const urlFor = path => new URL(path,SCOPE).href;
+const versioned = path => `${path}?v=${VERSION}`;
+const FILES = ["./", "./index.html", versioned("./css/style.css"), versioned("./js/app.js"), versioned("./js/pdf-vector.js"), "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(urlFor);
 const KNOWN = new Set(FILES);
+const NAV = new Set([urlFor("./"),urlFor("./index.html")]);
 self.addEventListener("install", event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE);
-  try{await cache.addAll(FILES.map(url=>new Request(url,{cache:"reload"})));}
-  catch(error){await caches.delete(CACHE);throw error;}
-  // Non forzare l'attivazione mentre una pagina della versione precedente è aperta.
+  try {
+    await cache.addAll(FILES.map(url=>new Request(url,{cache:"reload"})));
+    // Non attivare una release pubblicata solo in parte.
+    for (const address of NAV) {
+      const html=await (await cache.match(address)).text();
+      if (!html.includes(`js/app.js?v=${VERSION}`) || !html.includes(`css/style.css?v=${VERSION}`) || !html.includes(`js/pdf-vector.js?v=${VERSION}`)) throw new Error("HTML non aggiornato");
+    }
+    const app=await (await cache.match(urlFor(versioned("./js/app.js")))).text();
+    if (!app.includes(`const STUDIO_VERSION = "${VERSION}";`)) throw new Error("JavaScript non aggiornato");
+  } catch(error) {await caches.delete(CACHE);throw error;}
+  // Attivazione dopo precache completo; nessun reload automatico di pagine con modifiche.
+  await self.skipWaiting();
 })()));
 self.addEventListener("activate",event=>event.waitUntil((async()=>{
   const names=await caches.keys();
   await Promise.all(names.filter(name=>name.startsWith(PREFIX)&&name!==CACHE).map(name=>caches.delete(name)));
-  // Le cache storiche generiche non vengono eliminate: possono appartenere ad altre app.
+  // Non toccare le cache di altre app, IndexedDB o localStorage.
+  await self.clients.claim();
 })()));
 self.addEventListener("fetch",event=>{
   if(event.request.method!=="GET")return;
-  const url=new URL(event.request.url),canonical=new URL(url.href);canonical.search="";canonical.hash="";
-  if(!KNOWN.has(canonical.href))return;
+  const url=new URL(event.request.url);url.hash="";
+  const canonical=new URL(url.href);canonical.search="";
+  const key=event.request.mode==="navigate" && NAV.has(canonical.href)?canonical.href:url.href;
+  if(!KNOWN.has(key))return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE);
-    const saved=await cache.match(canonical.href);
-    if(saved)return saved;
-    // Se la cache è stata svuotata, non mescolare asset di versioni diverse in una nuova cache.
-    return fetch(event.request);
+    const saved=await cache.match(key);
+    return saved||fetch(event.request);
   })());
 });
