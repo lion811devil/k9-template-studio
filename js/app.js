@@ -1124,7 +1124,8 @@
       const profile=layoutProfile(theme,theme.ornament);
       ctx.textAlign="center";ctx.textBaseline="middle";
       ctx.fillStyle=theme.accent;ctx.font=`700 ${portrait?93:100}px ${profile.title}`;ctx.fillText("ATTESTATO",W/2,H*.32);
-      ctx.fillStyle=theme.ink;ctx.font=`700 ${portrait?78:90}px ${profile.name}`;ctx.fillText("NOME COGNOME",W/2,H*.48);
+      ctx.fillStyle=theme.accent;ctx.font=`700 ${portrait?78:90}px ${profile.name}`;ctx.fillText("NOME COGNOME",W/2,H*.48);
+      ctx.fillStyle=theme.ink;
       ctx.globalAlpha=.50;ctx.fillRect(W*.27,H*.56,W*.46,12);ctx.fillRect(W*.34,H*.59,W*.32,9);
       ctx.globalAlpha=1;ctx.fillStyle=theme.accent;ctx.font=`700 52px ${profile.course}`;ctx.fillText("CORSO",W/2,H*.68);
       ctx.fillRect(W*.18,H*.82,W*.22,5);ctx.fillRect(W*.60,H*.82,W*.22,5);
@@ -1444,11 +1445,11 @@
       for(let size=portrait?55:41;size>=20;size--){
         const lines=wrapLines(recipient,nameWidth,`700 ${size}px ${profile.name}`);
         if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=nameWidth)){
-          lines.forEach((line,i)=>drawCentered(line,nameY+(i-(lines.length-1)/2)*(size+3),size,profile.name,ink,"700",nameWidth));found=true;break;
+          lines.forEach((line,i)=>drawCentered(line,nameY+(i-(lines.length-1)/2)*(size+3),size,profile.name,gold,"700",nameWidth));found=true;break;
         }
       }
       if(!found)layoutWarnings.push("Nominativo troppo lungo per lo spazio disponibile.");
-    } else drawCentered(recipient,nameY,fitted,profile.name,ink,"700",nameWidth);
+    } else drawCentered(recipient,nameY,fitted,profile.name,gold,"700",nameWidth);
 
     const body = bodyLayout();
     if (!body.fits) layoutWarnings.push("Testo centrale troppo lungo: riducilo prima di creare il PDF.");
@@ -2974,14 +2975,19 @@
     $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
   }
 
+  // I pannelli scorrono autonomamente, il foglio non partecipa allo scroll.
+  function scrollEditorTo(target) {
+    const editor = document.querySelector(".layout > .controls");
+    if (!editor || !target) return;
+    const top = editor.scrollTop + target.getBoundingClientRect().top - editor.getBoundingClientRect().top - editor.clientTop - 8;
+    editor.scrollTo({top:Math.max(0,top),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  }
   document.querySelectorAll(".quick-link").forEach(btn => btn.addEventListener("click", () => {
     const panels = document.querySelectorAll(".controls > details.panel");
     const panel = panels[Number(btn.dataset.panelIndex)];
     if (!panel) return;
     panel.open = true;
-    const stickyHeight = innerWidth < 900 ? document.querySelector(".preview-panel")?.getBoundingClientRect().height || 0 : 0;
-    const top = window.scrollY + panel.getBoundingClientRect().top - stickyHeight - 14;
-    window.scrollTo({top:Math.max(0,top),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+    scrollEditorTo(panel);
   }));
 
   $("collapseSections").addEventListener("click", () => {
@@ -3120,7 +3126,7 @@
   $("modeFull").addEventListener("click", () => setEditorMode("full"));
   $("quickCustomize").addEventListener("click", () => {
     setEditorMode("full");
-    document.querySelector(".quick-nav")?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",block:"start"});
+    scrollEditorTo(document.querySelector(".quick-nav"));
   });
   quickName.addEventListener("input", () => {$("recipientName").value = quickName.value;deferSettingsSave();queuePreviewRender();});
   quickCourse.addEventListener("input", () => {
@@ -3276,14 +3282,6 @@
     setSaveIndicator(archiveAvailable&&!recoveryBlocked ? "Archivio locale pronto" : "Archivio protetto: recupero necessario", archiveAvailable&&!recoveryBlocked ? "" : "error");
     setEditorBusy(false);
   }
-  // L'anteprima è l'unico elemento fisso: i salti ai pannelli rispettano la sua altezza reale.
-  const fixedPreview = document.querySelector(".preview-panel");
-  function syncStickyPreviewHeight(){
-    document.documentElement.style.setProperty("--sticky-preview-height", `${Math.ceil(fixedPreview.getBoundingClientRect().height)}px`);
-  }
-  if ("ResizeObserver" in window) new ResizeObserver(syncStickyPreviewHeight).observe(fixedPreview);
-  window.addEventListener("resize", syncStickyPreviewHeight);
-  syncStickyPreviewHeight();
   initialize().catch(error=>{console.error(error);recoveryBlocked=true;state.initialized=true;setEditorBusy(false);setStatus("Avvio non riuscito: archivio protetto, esporta un backup se necessario","warning");});
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
