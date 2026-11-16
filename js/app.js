@@ -1,7 +1,9 @@
 (() => {
   "use strict";
 
+  const STUDIO_VERSION = "4.8.3";
   const $ = id => document.getElementById(id);
+  if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
   let ctx = canvas.getContext("2d", { alpha: false });
   let pdfTextOps = null;
@@ -1427,12 +1429,13 @@
     textBounds=[];
     const [title, subtitle] = $("documentType").value.split("|");
     const ink = designColor("inkColor", "#26231f");
-    const gold = designColor("accentColor", "#735a2f");
+    // Un solo colore per titolo, nominativo e corso, anche nel livello vettoriale PDF.
+    const mainTextColor = designColor("accentColor", "#735a2f");
     const fontAdj = fontRatio();
     const profile=layoutProfile();
     const portrait = currentOrientation() === "portrait";
     // Il verticale ha spaziature dedicate, non è il foglio orizzontale ruotato.
-    drawCentered(title, (portrait ? 475 : 370)+profile.dy, Math.min(portrait?95:91,Math.round((portrait ? 78 : 82) * fontAdj*profile.scale)), profile.title, gold, "700", portrait ? 990 : 1380);
+    drawCentered(title, (portrait ? 475 : 370)+profile.dy, Math.min(portrait?95:91,Math.round((portrait ? 78 : 82) * fontAdj*profile.scale)), profile.title, mainTextColor, "700", portrait ? 990 : 1380);
     drawCentered(subtitle, (portrait ? 555 : 438)+profile.dy, Math.min(44,Math.round((portrait ? 39 : 40) * fontAdj)), profile.body, ink, "700", portrait ? 940 : 1260);
 
     const recipient = $("recipientName").value.trim().toUpperCase();
@@ -1445,11 +1448,11 @@
       for(let size=portrait?55:41;size>=20;size--){
         const lines=wrapLines(recipient,nameWidth,`700 ${size}px ${profile.name}`);
         if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=nameWidth)){
-          lines.forEach((line,i)=>drawCentered(line,nameY+(i-(lines.length-1)/2)*(size+3),size,profile.name,gold,"700",nameWidth));found=true;break;
+          lines.forEach((line,i)=>drawCentered(line,nameY+(i-(lines.length-1)/2)*(size+3),size,profile.name,mainTextColor,"700",nameWidth));found=true;break;
         }
       }
       if(!found)layoutWarnings.push("Nominativo troppo lungo per lo spazio disponibile.");
-    } else drawCentered(recipient,nameY,fitted,profile.name,gold,"700",nameWidth);
+    } else drawCentered(recipient,nameY,fitted,profile.name,mainTextColor,"700",nameWidth);
 
     const body = bodyLayout();
     if (!body.fits) layoutWarnings.push("Testo centrale troppo lungo: riducilo prima di creare il PDF.");
@@ -1468,10 +1471,10 @@
       let found=false;
       for(let size=portrait?38:30;size>=18;size--){
         const lines=wrapLines(course,courseWidth,`700 ${size}px ${profile.course}`);
-        if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=courseWidth)){lines.forEach((line,i)=>drawCentered(line,courseY+(i-(lines.length-1)/2)*(size+3),size,profile.course,gold,"700",courseWidth));found=true;break;}
+        if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=courseWidth)){lines.forEach((line,i)=>drawCentered(line,courseY+(i-(lines.length-1)/2)*(size+3),size,profile.course,mainTextColor,"700",courseWidth));found=true;break;}
       }
       if(!found)layoutWarnings.push("Titolo del corso troppo lungo: riducilo prima di esportare.");
-    }else drawCentered(course,courseY,courseFit,profile.course,gold,"700",courseWidth);
+    }else drawCentered(course,courseY,courseFit,profile.course,mainTextColor,"700",courseWidth);
 
     const locationDate = [$("place").value.trim(), formatDate($("certificateDate").value)].filter(Boolean).join(" · ");
     drawCentered(locationDate, portrait ? 1200 : 812, Math.round(28 * fontAdj), profile.body, ink, "700", portrait ? 950 : 1160);
@@ -3285,6 +3288,15 @@
   initialize().catch(error=>{console.error(error);recoveryBlocked=true;state.initialized=true;setEditorBusy(false);setStatus("Avvio non riuscito: archivio protetto, esporta un backup se necessario","warning");});
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
-    window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+    const checkWorker = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("./sw.js", {updateViaCache:"none"});
+        await registration.update();
+      } catch(error) { console.warn("Controllo aggiornamento offline non riuscito", error); }
+    };
+    window.addEventListener("load", checkWorker, {once:true});
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && navigator.onLine) void checkWorker();
+    });
   }
 })();
