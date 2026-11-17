@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.10-ultra-controls";
+  const STUDIO_VERSION = "4.9.12-ultra";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -562,7 +562,8 @@
     const input=$("themeBackgroundOpacity");
     input.value=normalizeThemeOpacity(input.value);
     $("themeBackgroundOpacityValue").value=`${input.value}%`;
-    $("resetThemeBackgroundOpacity").disabled=input.value==="100";
+    input.disabled=state.themeBackgroundLocked;
+    $("resetThemeBackgroundOpacity").disabled=state.themeBackgroundLocked||input.value==="100";
   }
   function frameAlpha(){return Number(normalizeThemeOpacity($("frameOpacity").value))/100;}
   function syncFrameOpacity(){
@@ -570,8 +571,8 @@
     input.value=normalizeThemeOpacity(input.value);
     $("frameOpacityValue").value=`${input.value}%`;
     const absent=$("frameStyle").value==="none";
-    input.disabled=absent;
-    $("resetFrameOpacity").disabled=absent||input.value==="100";
+    input.disabled=absent||state.frameLocked;
+    $("resetFrameOpacity").disabled=absent||state.frameLocked||input.value==="100";
   }
 
   const frameCatalogItem = id => premiumFrameCatalog.find(item => item.id === id) || null;
@@ -600,7 +601,7 @@
     const locked = !!state.themeBackgroundLocked;
     ["themeSearch","themeBackgroundOpacity","resetThemeBackgroundOpacity","removeThemeBackground","locateTheme"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked;
+      if (el) el.disabled = locked || (id==="resetThemeBackgroundOpacity" && $("themeBackgroundOpacity").value==="100") || (id==="removeThemeBackground" && activeBackgroundId()==="none") || (id==="locateTheme" && (!themePalettes[activeBackgroundId()] || archivedThemeIds.has(activeBackgroundId())));
     });
     document.querySelectorAll('.theme-choice').forEach(btn => btn.disabled = locked);
     const btn = $("lockThemeBackground");
@@ -615,7 +616,7 @@
     const locked = !!state.frameLocked;
     ["frameStyle","removeFrame","frameOpacity","resetFrameOpacity"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked || (id !== "frameStyle" && $("frameStyle").value === "none" && id !== "removeFrame");
+      if (el) el.disabled = locked || (id !== "frameStyle" && $("frameStyle").value === "none") || (id==="resetFrameOpacity" && $("frameOpacity").value==="100");
     });
     const removeBtn = $("removeFrame");
     if (removeBtn) removeBtn.disabled = locked || $("frameStyle").value === "none";
@@ -1096,7 +1097,7 @@
       if(inner.childElementCount)return;
       const cards=document.createDocumentFragment();
       for(const [id,t] of [...items].sort((a,b)=>a[1].label.localeCompare(b[1].label,"it"))){
-        const button=document.createElement("button");button.type="button";button.className="theme-choice";button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(activeBackgroundId()===id));if(activeBackgroundId()===id)button.classList.add("selected");
+        const button=document.createElement("button");button.type="button";button.className="theme-choice";button.disabled=state.themeBackgroundLocked;button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(activeBackgroundId()===id));if(activeBackgroundId()===id)button.classList.add("selected");
         const preview=document.createElement("canvas");preview.className="theme-preview";preview.dataset.ornament=t.ornament;preview.dataset.frame=t.frame;preview.dataset.themeId=id;preview.style.setProperty("--preset-accent",t.accent);preview.style.setProperty("--preset-ink",t.ink);preview.setAttribute("aria-hidden","true");preview.width=1;preview.height=1;preview.style.aspectRatio=currentOrientation()==="portrait"?"210 / 297":"297 / 210";
         if(thumbnailObserver)thumbnailObserver.observe(preview);else renderCachedThumbnail(preview,t,id);
         const title=document.createElement("strong"),detail=document.createElement("small");title.textContent=t.label;detail.textContent=t.detail.replace(/^(Mantrailing|HRDD|Detection|Dogsitter) · /,"");button.append(preview,title,detail);cards.appendChild(button);
@@ -1138,7 +1139,7 @@
     const id=activeBackgroundId(),theme=themePalettes[id],visible=theme&&!archivedThemeIds.has(id);
     const path=visible?galleryPath(id,theme):null;
     $("themePath").textContent=path?[path.group,path.family].filter(Boolean).join(" / "):theme?"Stile storico · compatibile":"Stile personalizzato";
-    $("locateTheme").disabled=!path;
+    $("locateTheme").disabled=!path||state.themeBackgroundLocked;
     document.querySelectorAll(".theme-discipline").forEach(panel=>panel.classList.toggle("contains-selected",panel.dataset.group===path?.group));
     document.querySelectorAll(".theme-family").forEach(panel=>panel.classList.toggle("contains-selected",panel.closest(".theme-discipline")?.dataset.group===path?.group&&panel.dataset.family===path?.family));
   }
@@ -1155,6 +1156,7 @@
     if (!theme) return;
     const photo=photoKeyFor(id);
     if(photo){photoFailures.delete(photo);await ensurePhoto(photo);}
+    if(state.themeBackgroundLocked)return;
     selectedTheme = id;
     $("accentColor").value = theme.accent;
     $("inkColor").value = theme.ink;
@@ -3152,7 +3154,7 @@
 
   ["documentType", "certificateDate", ...textIds].forEach(id => {
     $(id).addEventListener("input", () => { deferSettingsSave(); queuePreviewRender(); });
-    $(id).addEventListener("change", () => { if(id==="frameStyle" && state.frameLocked){syncDesignUI();return;} saveSettings(); queuePreviewRender(); });
+    $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
   });
 
   $("downloadPdf").addEventListener("click", downloadPdf);
