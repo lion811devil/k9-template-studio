@@ -589,3 +589,6 @@ body{min-height:0}
 .theme-path{font-size:11px;color:#52677b;margin:-8px 0 0;overflow-wrap:anywhere}
 .theme-locate:focus-visible,.theme-discipline>summary:focus-visible,.theme-family>summary:focus-visible{outline:2px solid #2878a6;outline-offset:-2px}
 @media(max-width:620px){.theme-group-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none}.theme-section-title{font-size:12px}.theme-family>summary{font-size:11px}}
+
+/* 4.9.5: controlli indipendenti, senza nuove fasce in anteprima. */
+.layer-controls{display:grid;gap:8px;padding:12px;border:1px solid #d8e3eb;border-radius:12px;background:#f5f8fb;margin-bottom:12px}.layer-controls strong{font-size:13px;color:#274058}.layer-controls small{font-size:11px;color:#566b7e}.layer-controls select{width:100%}.layer-divider{height:1px;background:#d8e3eb;margin:3px 0}
