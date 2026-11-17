@@ -1,3 +1,11 @@
+# K9 Template Studio 4.9.9 Ultra — Espansione cornici
+
+Aggiornamento cumulativo dalla 4.9.8: 80 cornici aggiuntive, 20 per ciascuna disciplina, con 240 cornici totali (60 per disciplina). Conservati integralmente i 160 elementi precedenti e i loro ID. I nuovi elementi sono nominati «Ultra Nuova 01–20» con un nome descrittivo. Nuove immagini raster generate con centro trasparente, adattate ai due orientamenti senza il ritaglio a bordo sottile. I file di immagine originali sono di risoluzione variabile: circa 286–366 px di larghezza per Mantrailing, 285–298 per HRDD, 292–297 per Detection, 54–56 per Dogsitter. La risoluzione del documento resta 600 DPI; le nuove immagini non sono native a quella risoluzione. I 120 fondali similreali, i cursori separati e l'archivio dei progetti restano invariati.
+
+Sostituire insieme index.html, js/app.js, js/premium-frames.js, sw.js e README.md. Conservare css/style.css, js/pdf-vector.js e js/realistic-backgrounds.js. Prima dell'aggiornamento salvare un backup e dopo il commit riaprire online; controllare la versione v4.9.9-ultra.
+
+---
+
 K9 Template Studio 4.9.8
 
 Aggiornamento: cornici Ultra approvate aggiunte mantenendo quelle già presenti in repository.
