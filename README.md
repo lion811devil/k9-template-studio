@@ -1,3 +1,13 @@
+K9 Template Studio 4.9.8
+
+Aggiornamento: cornici Ultra approvate aggiunte mantenendo quelle già presenti in repository.
+- Archivio cornici: 160 totali (40 esistenti + 120 nuove approvate in chat)
+- Gruppi disciplinari mantenuti: Mantrailing, HRDD, Detection, Dogsitter
+- Versione cache aggiornata a 4.9.8-ultra
+
+File da sostituire: index.html, js/app.js, js/premium-frames.js, sw.js
+
+
 # Aggiornamento cumulativo 4.9.7 Ultra — Cornici e opacità indipendenti
 
 - 40 cornici raster generate, 10 per Mantrailing, HRDD, Detection e Dogsitter, con apertura centrale trasparente. I gruppi sono separati nel selettore Cornice Ultra indipendente.
