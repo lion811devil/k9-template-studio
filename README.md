@@ -1,3 +1,15 @@
+# K9 Template Studio 4.9.12 Ultra — correzione cumulativa
+
+Partenza: pacchetto 4.9.10, non richiede installazione della 4.9.11.
+- 260 cornici (80 Mantrailing, 60 HRDD, 60 Detection, 60 Dogsitter); 120 identificativi A/B/C ricostruiti e rinominati, 20 Wild Trail aggiunte.
+- Tutti i 240 ID precedenti sono conservati. Otto voci B09/B10 sono ricomposte da una tavola supplementare: nella tavola B esistevano solo otto riquadri per disciplina.
+- Rendering con quadranti proporzionati, raccordi morbidi e cornice indipendente; nessun allungamento non uniforme delle immagini. Due composizioni A4, apertura centrale con alfa zero.
+- Le fotografie sono sorgenti a risoluzione variabile, non native a 600 DPI; le miniature più piccole sono state sostituite per Dogsitter, le tavole approvate restano sorgenti di dimensione limitata.
+- Navigazione e blocchi conservati, stato pulsanti corretto, cache sincronizzata.
+- Sostituire index.html, js/app.js, js/premium-frames.js, sw.js, README.md. Conservare js/realistic-backgrounds.js e gli altri file.
+
+---
+
 # K9 Template Studio 4.9.9 Ultra — Espansione cornici
 
 Aggiornamento cumulativo dalla 4.9.8: 80 cornici aggiuntive, 20 per ciascuna disciplina, con 240 cornici totali (60 per disciplina). Conservati integralmente i 160 elementi precedenti e i loro ID. I nuovi elementi sono nominati «Ultra Nuova 01–20» con un nome descrittivo. Nuove immagini raster generate con centro trasparente, adattate ai due orientamenti senza il ritaglio a bordo sottile. I file di immagine originali sono di risoluzione variabile: circa 286–366 px di larghezza per Mantrailing, 285–298 per HRDD, 292–297 per Detection, 54–56 per Dogsitter. La risoluzione del documento resta 600 DPI; le nuove immagini non sono native a quella risoluzione. I 120 fondali similreali, i cursori separati e l'archivio dei progetti restano invariati.
@@ -339,3 +351,10 @@ I modelli per disciplina sono **locali al dispositivo**, non sincronizzati onlin
 - blocco / sblocco dedicato per cornice Ultra indipendente
 - blocco / sblocco dedicato per sfondo indipendente
 - salvataggio di questi blocchi anche nei progetti e nell’ultimo lavoro locale
+
+
+### Verifiche 4.9.12
+- 260 sorgenti decodificate, dimensioni conformi; 240 ID storici conservati, 260 etichette univoche per disciplina.
+- 16 rendering campione Chromium (8 modelli nei due orientamenti), apertura centrale trasparente e opacità zero senza variazioni.
+- Interfaccia Chromium: navigazione, blocco/sblocco cornice e fondale, nessun errore JavaScript osservato.
+- Non verificati tutti i 520 rendering: test completo scaduto. Non verificati pubblicazione GitHub Pages, persistenza Android e esportazione PDF/PNG di questa release.
