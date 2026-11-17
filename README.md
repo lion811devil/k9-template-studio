@@ -1,3 +1,7 @@
+# K9 Template Studio 4.9.12 Ultra Personal
+
+Aggiornamento cumulativo dalla 4.9.12 Ultra: cornice personale da PNG/WebP, adattamento A4 proporzionale automatico, opacità e blocco condivisi con il livello cornice, salvataggio locale e backup. Le 260 cornici integrate non cambiano. Non sostituire js/premium-frames.js: resta quello originale della 4.9.12-ultra. Il file personale resta nel progetto, non nella repository. Limiti 15 MiB, 40 MP per immagine, 100 MP per progetto. La cornice non viene ingrandita artificialmente nel file sorgente.
+
 # K9 Template Studio 4.9.12 Ultra — correzione cumulativa
 
 Partenza: pacchetto 4.9.10, non richiede installazione della 4.9.11.

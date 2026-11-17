@@ -1,11 +1,11 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.12-ultra";
+const VERSION = "4.9.12-ultra-personal";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
 const CACHE = `${PREFIX}${VERSION}`;
 const urlFor = path => new URL(path,SCOPE).href;
 const versioned = path => `${path}?v=${VERSION}`;
-const FILES = ["./", "./index.html", versioned("./css/style.css"), versioned("./js/app.js"), "./js/realistic-backgrounds.js?v=4.9.4", versioned("./js/premium-frames.js"), versioned("./js/pdf-vector.js"), "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(urlFor);
+const FILES = ["./", "./index.html", versioned("./css/style.css"), versioned("./js/app.js"), "./js/realistic-backgrounds.js?v=4.9.4", "./js/premium-frames.js?v=4.9.12-ultra", versioned("./js/pdf-vector.js"), "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"].map(urlFor);
 const KNOWN = new Set(FILES);
 const NAV = new Set([urlFor("./"),urlFor("./index.html")]);
 self.addEventListener("install", event=>event.waitUntil((async()=>{
@@ -15,12 +15,12 @@ self.addEventListener("install", event=>event.waitUntil((async()=>{
     // Non attivare una release pubblicata solo in parte.
     for (const address of NAV) {
       const html=await (await cache.match(address)).text();
-      if (!html.includes(`js/app.js?v=${VERSION}`) || !html.includes(`css/style.css?v=${VERSION}`) || !html.includes(`js/pdf-vector.js?v=${VERSION}`) || !html.includes(`js/premium-frames.js?v=${VERSION}`) || !html.includes(`js/realistic-backgrounds.js?v=4.9.4`)) throw new Error("HTML non aggiornato");
+      if (!html.includes(`js/app.js?v=${VERSION}`) || !html.includes(`css/style.css?v=${VERSION}`) || !html.includes(`js/pdf-vector.js?v=${VERSION}`) || !html.includes(`js/premium-frames.js?v=4.9.12-ultra`) || !html.includes(`js/realistic-backgrounds.js?v=4.9.4`)) throw new Error("HTML non aggiornato");
     }
     const app=await (await cache.match(urlFor(versioned("./js/app.js")))).text();
     if (!app.includes(`const STUDIO_VERSION = "${VERSION}";`)) throw new Error("JavaScript non aggiornato");
-    const frames=await (await cache.match(urlFor(versioned("./js/premium-frames.js")))).text();
-    if(!frames.includes(`K9_FRAME_VERSION = "${VERSION}"`) || (frames.match(/"src":"data:image\//g)||[]).length!==260)throw new Error("Archivio cornici Ultra incompleto");
+    const frames=await (await cache.match(urlFor("./js/premium-frames.js?v=4.9.12-ultra"))).text();
+    if(!frames.includes(`K9_FRAME_VERSION = "4.9.12-ultra"`) || (frames.match(/"src":"data:image\//g)||[]).length!==260)throw new Error("Archivio cornici Ultra incompleto");
     const photos=await (await cache.match(urlFor("./js/realistic-backgrounds.js?v=4.9.4"))).text();
     if(!photos.includes(`K9_REALISTIC_VERSION = "4.9.4";`) || (photos.match(/data:image\/jpeg;base64,/g)||[]).length!==120) throw new Error("Archivio fondali incompleto");
   } catch(error) {await caches.delete(CACHE);throw error;}

@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.12-ultra">
+  <link rel="stylesheet" href="css/style.css?v=4.9.12-ultra-personal">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.12-ultra</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.12-ultra-personal</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -167,6 +167,11 @@
           <div class="layer-controls">
             <label for="frameStyle"><strong>1. Cornice Ultra indipendente</strong></label>
             <select id="frameStyle"><option value="none">Senza cornice</option></select>
+            <button id="loadPersonalFrame" class="button secondary" type="button">Carica cornice personale dalla galleria</button>
+            <input id="personalFrameFile" type="file" accept="image/png,image/webp,.png,.webp" hidden>
+            <small id="personalFrameInfo" aria-live="polite">Nessuna cornice personale caricata</small>
+            <button id="fitPersonalFrame" class="button ghost small" type="button" disabled>Adatta a foglio A4</button>
+            <small>PNG o WebP con centro trasparente, massimo 15 MB. Adattamento proporzionale automatico, senza ritagli; per coprire tutti i margini scegli lo stesso orientamento del foglio.</small>
             <div class="two-buttons" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
               <button id="prevFrame" class="button secondary small" type="button" aria-label="Cornice precedente della disciplina">← Precedente</button>
               <button id="nextFrame" class="button secondary small" type="button" aria-label="Cornice successiva della disciplina">Successiva →</button>
@@ -174,7 +179,7 @@
             <small id="frameNavStatus">Seleziona una cornice per scorrere la disciplina corrente</small>
             <div class="two-buttons">
               <button id="removeFrame" class="button ghost small" type="button">Elimina solo cornice</button>
-              <button id="lockFrameLayer" class="button lock-button" type="button" aria-pressed="false" aria-controls="frameStyle frameOpacity resetFrameOpacity prevFrame nextFrame removeFrame">Blocca cornice</button>
+              <button id="lockFrameLayer" class="button lock-button" type="button" aria-pressed="false" aria-controls="frameStyle frameOpacity resetFrameOpacity prevFrame nextFrame removeFrame loadPersonalFrame personalFrameFile fitPersonalFrame">Blocca cornice</button>
             </div>
             <label class="range-row">
               <span>Opacità cornice <output id="frameOpacityValue" for="frameOpacity">100%</output></span>
@@ -501,9 +506,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.12-ultra"></script>
+  <script src="js/pdf-vector.js?v=4.9.12-ultra-personal"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
   <script src="js/premium-frames.js?v=4.9.12-ultra"></script>
-  <script src="js/app.js?v=4.9.12-ultra"></script>
+  <script src="js/app.js?v=4.9.12-ultra-personal"></script>
 </body>
 </html>
