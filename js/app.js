@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.9-ultra";
+  const STUDIO_VERSION = "4.9.10-ultra-controls";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -36,6 +36,8 @@
     themeBackgroundOpacity: "100",
     frameOpacity: "100",
     themeBackgroundId: "classic",
+    themeBackgroundLocked: false,
+    frameLocked: false,
     backgroundOpacity: 100,
     backgroundScale: 100,
     backgroundX: W / 2,
@@ -571,6 +573,88 @@
     input.disabled=absent;
     $("resetFrameOpacity").disabled=absent||input.value==="100";
   }
+
+  const frameCatalogItem = id => premiumFrameCatalog.find(item => item.id === id) || null;
+  const frameGroupEntries = group => premiumFrameCatalog.filter(item => item.group === group);
+
+  function updateFrameNavigatorUI() {
+    const status = $("frameNavStatus");
+    const prev = $("prevFrame");
+    const next = $("nextFrame");
+    const current = frameCatalogItem($("frameStyle").value);
+    if (!current) {
+      if (status) status.textContent = "Seleziona una cornice per scorrere la disciplina corrente";
+      if (prev) prev.disabled = true;
+      if (next) next.disabled = true;
+      return;
+    }
+    const items = frameGroupEntries(current.group);
+    const index = Math.max(0, items.findIndex(item => item.id === current.id));
+    if (status) status.textContent = `${current.group} · ${index + 1} di ${items.length} · ${current.label}`;
+    const blocked = !!state.frameLocked || items.length <= 1;
+    if (prev) prev.disabled = blocked;
+    if (next) next.disabled = blocked;
+  }
+
+  function applyThemeBackgroundLockUI() {
+    const locked = !!state.themeBackgroundLocked;
+    ["themeSearch","themeBackgroundOpacity","resetThemeBackgroundOpacity","removeThemeBackground","locateTheme"].forEach(id => {
+      const el = $(id);
+      if (el) el.disabled = locked;
+    });
+    document.querySelectorAll('.theme-choice').forEach(btn => btn.disabled = locked);
+    const btn = $("lockThemeBackground");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(locked));
+      btn.textContent = locked ? "Sblocca sfondo" : "Blocca sfondo";
+      btn.classList.toggle("is-locked", locked);
+    }
+  }
+
+  function applyFrameLockUI() {
+    const locked = !!state.frameLocked;
+    ["frameStyle","removeFrame","frameOpacity","resetFrameOpacity"].forEach(id => {
+      const el = $(id);
+      if (el) el.disabled = locked || (id !== "frameStyle" && $("frameStyle").value === "none" && id !== "removeFrame");
+    });
+    const removeBtn = $("removeFrame");
+    if (removeBtn) removeBtn.disabled = locked || $("frameStyle").value === "none";
+    const btn = $("lockFrameLayer");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(locked));
+      btn.textContent = locked ? "Sblocca cornice" : "Blocca cornice";
+      btn.classList.toggle("is-locked", locked);
+    }
+    updateFrameNavigatorUI();
+  }
+
+  function moveFrameSelection(step) {
+    if (state.frameLocked) return;
+    const current = frameCatalogItem($("frameStyle").value);
+    if (!current) {
+      const first = premiumFrameCatalog[0];
+      if (!first) return;
+      $("frameStyle").value = first.id;
+      frameFailures.delete(first.id);
+      syncDesignUI();
+      saveSettings();
+      render();
+      setStatus(`Cornice «${first.label}» caricata`);
+      return;
+    }
+    const items = frameGroupEntries(current.group);
+    if (!items.length) return;
+    const index = items.findIndex(item => item.id === current.id);
+    const nextIndex = (index + step + items.length) % items.length;
+    const target = items[nextIndex];
+    if (!target) return;
+    $("frameStyle").value = target.id;
+    frameFailures.delete(target.id);
+    syncDesignUI();
+    saveSettings();
+    render();
+    setStatus(`Cornice «${target.label}» caricata`);
+  }
   function loadSettings() {
     try {
       const raw = JSON.parse(localStorage.getItem("k9-certificati-settings") || "{}");
@@ -582,6 +666,8 @@
       $("courseOutcome").value = escapeStored(saved.courseOutcome, "");
       $("thirdSignatureMode").value = ["off","auto","image","none"].includes(saved.thirdSignatureMode) ? saved.thirdSignatureMode : "off";
       restoreSignatureControls(saved);
+      state.themeBackgroundLocked = saved.themeBackgroundLocked === true;
+      state.frameLocked = saved.frameLocked === true;
       $("autoCertificateCode").checked = saved.autoCertificateCode !== false;
       for (const id of designIds.filter(k => k !== "designTheme")) {
         if (saved[id] !== undefined) $(id).value = ["themeBackgroundOpacity","frameOpacity"].includes(id) ? normalizeThemeOpacity(saved[id]) : saved[id];
@@ -595,6 +681,8 @@
       $("autoCertificateCode").checked = true;
       $("ornamentStyle").value = "none";
       restoreSignatureControls();
+      state.themeBackgroundLocked = false;
+      state.frameLocked = false;
     }
     syncAutomaticCode();
   }
@@ -611,6 +699,8 @@
     data.thirdSignatureMode = $("thirdSignatureMode").value;
     signatureControlIds.forEach(id => data[id] = $(id).value);
     data.signatureBlockLocked = state.signatureBlockLocked;
+    data.themeBackgroundLocked = state.themeBackgroundLocked;
+    data.frameLocked = state.frameLocked;
     data.autoCertificateCode = $("autoCertificateCode").checked;
     data.designTheme = selectedTheme;
     designIds.filter(id => id !== "designTheme").forEach(id => data[id] = $(id).value);
@@ -856,6 +946,8 @@
     $("removeThemeBackground").disabled=id==="none";
     $("removeFrame").disabled=$("frameStyle").value==="none";
     syncFrameOpacity();
+    applyThemeBackgroundLockUI();
+    applyFrameLockUI();
   }
   const normalizeThemeSearch=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("it").trim();
   populateFrameOptions();
@@ -1040,6 +1132,7 @@
     for(const control of controls)control.setOpen(control.group===nav.group);
     $("themeCount").textContent=`${visible.length} stili su ${catalogThemes.length}`;$("themeEmpty").classList.toggle("hidden",visible.length!==0);
     syncGallerySelection();
+    applyThemeBackgroundLockUI();
   }
   function syncGallerySelection(){
     const id=activeBackgroundId(),theme=themePalettes[id],visible=theme&&!archivedThemeIds.has(id);
@@ -1057,6 +1150,7 @@
   }
 
   async function applyCatalogTheme(id) {
+    if (state.themeBackgroundLocked) { setStatus("Sfondo bloccato", "warning"); return; }
     const theme = themePalettes[id];
     if (!theme) return;
     const photo=photoKeyFor(id);
@@ -3058,7 +3152,7 @@
 
   ["documentType", "certificateDate", ...textIds].forEach(id => {
     $(id).addEventListener("input", () => { deferSettingsSave(); queuePreviewRender(); });
-    $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
+    $(id).addEventListener("change", () => { if(id==="frameStyle" && state.frameLocked){syncDesignUI();return;} saveSettings(); queuePreviewRender(); });
   });
 
   $("downloadPdf").addEventListener("click", downloadPdf);
@@ -3252,6 +3346,8 @@
     const form = {};
     formIds.forEach(key => form[key] = $(key).value);
     form.signatureBlockLocked = state.signatureBlockLocked;
+    form.themeBackgroundLocked = state.themeBackgroundLocked;
+    form.frameLocked = state.frameLocked;
     return {
       version: 2, id, name, updatedAt: new Date().toISOString(), form,
       designTheme: selectedTheme,
@@ -3366,6 +3462,8 @@
       }
       if($("frameStyle").value!=="none"){try{await window.K9PremiumFrames.ensure($("frameStyle").value);}catch(error){console.warn(error);setStatus(error.message,"warning");}}
       restoreSignatureControls(data.form);
+      state.themeBackgroundLocked = data.form.themeBackgroundLocked === true;
+      state.frameLocked = data.form.frameLocked === true;
       state.backgroundImage=assets.background;state.backgroundBlob=assets.background?data.background.blob:null;
       state.backgroundScale=goodNumber(data.background?.scale,100,50,180);
       state.backgroundOpacity=goodNumber(data.background?.opacity,100,0,100);
@@ -3846,6 +3944,8 @@
     $("fontScale").value = "100";
     $("themeBackgroundOpacity").value = "100";
     $("frameOpacity").value = "100";
+    state.themeBackgroundLocked = false;
+    state.frameLocked = false;
     state.backgroundImage = null; state.backgroundBlob = null;
     state.backgroundScale = 100; state.backgroundOpacity = 100;
     state.backgroundX = W / 2; state.backgroundY = H / 2; state.backgroundLocked = false;
@@ -3959,29 +4059,50 @@
     const button=event.target.closest(".theme-choice");
     if(button&&$("themeGrid").contains(button))void selectGalleryBackground(button.dataset.theme);
   });
-  $("themeBackgroundOpacity").addEventListener("input",()=>{syncThemeOpacity();deferSettingsSave();queuePreviewRender();});
-  $("themeBackgroundOpacity").addEventListener("change",()=>{syncThemeOpacity();saveSettings();queuePreviewRender();});
+  $("themeBackgroundOpacity").addEventListener("input",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();deferSettingsSave();queuePreviewRender();});
+  $("themeBackgroundOpacity").addEventListener("change",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();saveSettings();queuePreviewRender();});
   $("resetThemeBackgroundOpacity").addEventListener("click",()=>{
+    if(state.themeBackgroundLocked)return;
     $("themeBackgroundOpacity").value="100";syncThemeOpacity();saveSettings();queuePreviewRender();
   });
-  $("frameOpacity").addEventListener("input",()=>{syncFrameOpacity();deferSettingsSave();queuePreviewRender();});
-  $("frameOpacity").addEventListener("change",()=>{syncFrameOpacity();saveSettings();queuePreviewRender();});
+  $("frameOpacity").addEventListener("input",()=>{if(state.frameLocked)return;syncFrameOpacity();deferSettingsSave();queuePreviewRender();});
+  $("frameOpacity").addEventListener("change",()=>{if(state.frameLocked)return;syncFrameOpacity();saveSettings();queuePreviewRender();});
   $("resetFrameOpacity").addEventListener("click",()=>{
+    if(state.frameLocked)return;
     $("frameOpacity").value="100";syncFrameOpacity();saveSettings();queuePreviewRender();
   });
   $("removeThemeBackground").addEventListener("click",()=>{
+    if(state.themeBackgroundLocked)return;
     $("themeBackgroundId").value="none";syncDesignUI();saveSettings();render();
   });
   $("removeFrame").addEventListener("click",()=>{
+    if(state.frameLocked)return;
     $("frameStyle").value="none";syncDesignUI();saveSettings();render();
   });
+    $("lockThemeBackground").addEventListener("click",()=>{
+    state.themeBackgroundLocked = !state.themeBackgroundLocked;
+    applyThemeBackgroundLockUI();
+    saveSettings();
+    scheduleAutosave();
+    setStatus(state.themeBackgroundLocked ? "Sfondo del tema bloccato" : "Sfondo del tema sbloccato");
+  });
+  $("lockFrameLayer").addEventListener("click",()=>{
+    state.frameLocked = !state.frameLocked;
+    applyFrameLockUI();
+    saveSettings();
+    scheduleAutosave();
+    setStatus(state.frameLocked ? "Cornice bloccata" : "Cornice sbloccata");
+  });
+  $("prevFrame").addEventListener("click",()=>moveFrameSelection(-1));
+  $("nextFrame").addEventListener("click",()=>moveFrameSelection(1));
   for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "courseOutcome"]) {
     $(id).addEventListener("input", () => {
+      if(id==="frameStyle" && state.frameLocked){syncDesignUI();return;}
       // Changing frame or colors must not change the background identity.
       if(id==="frameStyle")frameFailures.delete($("frameStyle").value);
       syncDesignUI();deferSettingsSave();queuePreviewRender();
     });
-    $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
+    $(id).addEventListener("change", () => { if(id==="frameStyle" && state.frameLocked){syncDesignUI();return;} saveSettings(); queuePreviewRender(); });
   }
 
   // I pannelli scorrono autonomamente, il foglio non partecipa allo scroll.
