@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.4";
+  const STUDIO_VERSION = "4.9.5";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -34,6 +34,7 @@
     thirdSignatureRole: "", thirdSignatureName: "",
     certificateCode: "", certificateDiscipline: "", courseHours: "", courseOutcome: "",
     themeBackgroundOpacity: "100",
+    themeBackgroundId: "classic",
     backgroundOpacity: 100,
     backgroundScale: 100,
     backgroundX: W / 2,
@@ -61,7 +62,7 @@
   };
 
   const textIds = ["recipientName", "bodyText", "courseName", "place", "leftSignatureRole", "leftSignatureName", "signatureRole", "signatureName", "thirdSignatureRole", "thirdSignatureName", "certificateCode", "certificateDiscipline", "courseHours"];
-  const designIds = ["designTheme", "accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "themeBackgroundOpacity"];
+  const designIds = ["designTheme", "accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "themeBackgroundOpacity", "themeBackgroundId"];
   const signatureControlDefaults = {signatureBlockScale: "100", signatureBlockX: "0", signatureBlockY: "0"};
   const signatureControlIds = Object.keys(signatureControlDefaults);
   const formIds = ["pageOrientation", "documentType", "certificateDate", ...textIds, "courseOutcome", "leftSignatureMode", "signatureMode", "thirdSignatureMode", ...signatureControlIds, ...designIds.filter(id => id !== "designTheme")];
@@ -562,7 +563,8 @@
   }
   function loadSettings() {
     try {
-      const saved = JSON.parse(localStorage.getItem("k9-certificati-settings") || "{}");
+      const raw = JSON.parse(localStorage.getItem("k9-certificati-settings") || "{}");
+      const saved = migrateLayers(raw,raw.designTheme||"classic");
       setPageOrientation(saved.pageOrientation, false);
       $("documentType").value = escapeStored(saved.documentType, defaults.documentType);
       textIds.forEach(id => { $(id).value = escapeStored(saved[id], defaults[id]); });
@@ -804,10 +806,44 @@
     return {group:theme.category==="Base"?"Classici":theme.category,family:""};
   }
   const galleryGroup=(id,theme)=>galleryPath(id,theme).group;
+  const premiumFrames = [
+    ["none","Senza cornice"], ["aurum","Aurum · oro inciso"], ["silver","Argento · acciaio satinato"],
+    ["regal","Regalia · oro e smalto blu"], ["walnut","Noce · legno intarsiato"],
+    ["carbon","Carbon · fibra tattica"], ["bronze","Bronzo · metallo anticato"],
+    ["forensic","Forensic · titanio e marcatori"], ["signal","Signal · metallo e luce blu"],
+    ["leather","Saddle · cuoio cucito"], ["marble","Carrara · marmo e ottone"],
+    ["laurel","Laurea · foglie dorate"], ["porcelain","Porcellana · smalto e oro rosa"],
+    ["rescue","Rescue · alluminio e inserti rossi"], ["obsidian","Obsidian · lacca nera e platino"]
+  ];
+  const frameKeys=new Set(premiumFrames.map(([id])=>id));
+  function defaultFrameFor(id){
+    const theme=themePalettes[id];if(!theme)return "aurum";
+    const group=galleryPath(id,theme).group;
+    return ({Mantrailing:"carbon",HRDD:"forensic",Detection:"signal",Dogsitter:"leather","K9 tattici generali":"carbon","SAR · ricerca e soccorso":"rescue",Premium:"regal",Accademici:"laurel",Cerimoniali:"aurum",Eleganti:"porcelain",Professionali:"silver",Natura:"walnut",Creativi:"marble"})[group]||"aurum";
+  }
+  function migrateLayers(form,themeId){
+    const f={...form};
+    if(!Object.hasOwn(f,"themeBackgroundId")){
+      const ornament=f.ornamentStyle;
+      f.themeBackgroundId=specialK9Ids.has(ornament)?ornament:themePalettes[themeId]?themeId:"none";
+    }
+    if(f.themeBackgroundId!=="none"&&!themePalettes[f.themeBackgroundId])f.themeBackgroundId="none";
+    if(!frameKeys.has(f.frameStyle)||(!Object.hasOwn(form,"themeBackgroundId")&&f.frameStyle==="none"&&((f.ornamentStyle&&f.ornamentStyle!=="none")||specialK9Ids.has(f.themeBackgroundId)))){
+      f.frameStyle=defaultFrameFor(f.themeBackgroundId==="none"?themeId:f.themeBackgroundId);
+    }
+    return f;
+  }
+  const activeBackgroundId=()=>$("themeBackgroundId").value;
+  function syncLayerControls(){
+    const id=activeBackgroundId();
+    $("backgroundThemeName").textContent=themePalettes[id]?.label||"Nessuno";
+    $("removeThemeBackground").disabled=id==="none";
+    $("removeFrame").disabled=$("frameStyle").value==="none";
+  }
   const normalizeThemeSearch=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("it").trim();
   // 4.9.4: separate, local photo layer. Each disciplinary theme retains its own
   // identifier and existing frame; opacity never affects the structural artwork.
-  const photoAssets=window.K9_REALISTIC_VERSION===STUDIO_VERSION ? (window.K9RealisticBackgrounds||{}) : {};
+  const photoAssets=window.K9_REALISTIC_VERSION==="4.9.4" ? (window.K9RealisticBackgrounds||{}) : {};
   const photoDecoded=new Map(), photoPending=new Map(), photoLayers=new Map(), photoRefreshPending=new Set(), photoFailures=new Set();
   for(const id of specialK9Ids){if(photoAssets[id])themePalettes[id].detail+=' · fondale similreale';}
   const photoKeyFor=ornament=>specialK9Ids.has(ornament)?ornament:null;
@@ -820,25 +856,25 @@
       const image=new Image();image.onload=()=>{
         if(!image.naturalWidth||!image.naturalHeight){reject(new Error('Fondale non valido'));return;}
         photoDecoded.set(id,image);
-        while(photoDecoded.size>18){const current=photoKeyFor($("ornamentStyle").value);const key=[...photoDecoded.keys()].find(k=>k!==current&&k!==id);if(!key)break;photoDecoded.delete(key);}
+        while(photoDecoded.size>18){const current=photoKeyFor(activeBackgroundId());const key=[...photoDecoded.keys()].find(k=>k!==current&&k!==id);if(!key)break;photoDecoded.delete(key);}
         resolve(image);
       };image.onerror=()=>reject(new Error('Impossibile caricare il fondale del tema'));image.src=photoAssets[id];
     }).finally(()=>photoPending.delete(id));
     photoPending.set(id,task);return task;
   }
   function requestSelectedPhoto(){
-    const key=photoKeyFor($("ornamentStyle").value);
+    const key=photoKeyFor(activeBackgroundId());
     if(!key||themeBackgroundAlpha()===0||photoDecoded.has(key)||photoRefreshPending.has(key)||photoFailures.has(key))return;
     photoRefreshPending.add(key);
     ensurePhoto(key).then(()=>{
-      if(!state.exporting && photoKeyFor($("ornamentStyle").value)===key && themeBackgroundAlpha()>0)render({visualOnly:true});
+      if(!state.exporting && photoKeyFor(activeBackgroundId())===key && themeBackgroundAlpha()>0)render({visualOnly:true});
     }).catch(error=>{
       photoFailures.add(key);
-      if(photoKeyFor($("ornamentStyle").value)===key)setStatus(error.message,'warning');
+      if(photoKeyFor(activeBackgroundId())===key)setStatus(error.message,'warning');
     }).finally(()=>photoRefreshPending.delete(key));
   }
   async function ensureActivePhoto(){
-    const id=photoKeyFor($("ornamentStyle").value);
+    const id=photoKeyFor(activeBackgroundId());
     if(id&&themeBackgroundAlpha()>0)await ensurePhoto(id);
   }
   function photoLayer(id){
@@ -927,7 +963,7 @@
       if(inner.childElementCount)return;
       const cards=document.createDocumentFragment();
       for(const [id,t] of [...items].sort((a,b)=>a[1].label.localeCompare(b[1].label,"it"))){
-        const button=document.createElement("button");button.type="button";button.className="theme-choice";button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(selectedTheme===id));if(selectedTheme===id)button.classList.add("selected");
+        const button=document.createElement("button");button.type="button";button.className="theme-choice";button.dataset.theme=id;button.setAttribute("aria-label",`Carica stile ${t.label}, ${t.detail}`);button.setAttribute("aria-pressed",String(activeBackgroundId()===id));if(activeBackgroundId()===id)button.classList.add("selected");
         const preview=document.createElement("canvas");preview.className="theme-preview";preview.dataset.ornament=t.ornament;preview.dataset.frame=t.frame;preview.dataset.themeId=id;preview.style.setProperty("--preset-accent",t.accent);preview.style.setProperty("--preset-ink",t.ink);preview.setAttribute("aria-hidden","true");preview.width=1;preview.height=1;preview.style.aspectRatio=currentOrientation()==="portrait"?"210 / 297":"297 / 210";
         if(thumbnailObserver)thumbnailObserver.observe(preview);else renderCachedThumbnail(preview,t,id);
         const title=document.createElement("strong"),detail=document.createElement("small");title.textContent=t.label;detail.textContent=t.detail.replace(/^(Mantrailing|HRDD|Detection|Dogsitter) · /,"");button.append(preview,title,detail);cards.appendChild(button);
@@ -965,17 +1001,17 @@
     syncGallerySelection();
   }
   function syncGallerySelection(){
-    const theme=themePalettes[selectedTheme],visible=theme&&!archivedThemeIds.has(selectedTheme);
-    const path=visible?galleryPath(selectedTheme,theme):null;
+    const id=activeBackgroundId(),theme=themePalettes[id],visible=theme&&!archivedThemeIds.has(id);
+    const path=visible?galleryPath(id,theme):null;
     $("themePath").textContent=path?[path.group,path.family].filter(Boolean).join(" / "):theme?"Stile storico · compatibile":"Stile personalizzato";
     $("locateTheme").disabled=!path;
     document.querySelectorAll(".theme-discipline").forEach(panel=>panel.classList.toggle("contains-selected",panel.dataset.group===path?.group));
     document.querySelectorAll(".theme-family").forEach(panel=>panel.classList.toggle("contains-selected",panel.closest(".theme-discipline")?.dataset.group===path?.group&&panel.dataset.family===path?.family));
   }
   function locateSelectedTheme(){
-    const theme=themePalettes[selectedTheme];if(!theme||archivedThemeIds.has(selectedTheme))return;
-    const path=galleryPath(selectedTheme,theme);$("themeSearch").value="";Object.assign(browseGallery,path);populateThemeGallery();
-    const selected=[...$("themeGrid").querySelectorAll(".theme-choice")].find(b=>b.dataset.theme===selectedTheme);
+    const id=activeBackgroundId(),theme=themePalettes[id];if(!theme||archivedThemeIds.has(id))return;
+    const path=galleryPath(id,theme);$("themeSearch").value="";Object.assign(browseGallery,path);populateThemeGallery();
+    const selected=[...$("themeGrid").querySelectorAll(".theme-choice")].find(b=>b.dataset.theme===id);
     if(selected)selected.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});
   }
 
@@ -985,7 +1021,7 @@
     selectedTheme = id;
     $("accentColor").value = theme.accent;
     $("inkColor").value = theme.ink;
-    $("frameStyle").value = theme.frame;
+    $("themeBackgroundId").value = id;
     $("ornamentStyle").value = theme.ornament;
     syncDesignUI(); saveSettings(); render();
     setStatus(`Stile «${theme.label}» caricato nel progetto`);
@@ -993,13 +1029,14 @@
 
   function syncDesignUI() {
     document.querySelectorAll(".theme-choice").forEach(btn => {
-      const chosen = btn.dataset.theme === selectedTheme;
+      const chosen = btn.dataset.theme === activeBackgroundId();
       btn.setAttribute("aria-pressed", String(chosen));
       btn.classList.toggle("selected", chosen);
     });
     $("fontScaleValue").value = `${$("fontScale").value}%`;
     syncThemeOpacity();
-    $("themeLoaded").textContent = selectedTheme === "custom" ? "Personalizzato" : (themePalettes[selectedTheme]?.label || "Classico");
+    $("themeLoaded").textContent = themePalettes[activeBackgroundId()]?.label || "Nessuno";
+    syncLayerControls();
     syncGallerySelection();
   }
 
@@ -2018,9 +2055,8 @@
       ctx=preview.getContext("2d");W=portrait?1190:1683;H=portrait?1683:1190;
       ctx.scale(preview.width/W,preview.height/H);
       ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
-      const photoId=photoKeyFor(theme.ornament),photoDrawn=drawPhotoBackground(photoId,1);
-      drawCatalogOrnament(theme.ornament,theme.accent,theme.ink,theme,photoDrawn?0:1);
-      drawFrame(theme.frame,theme.accent);
+      const id=Object.keys(themePalettes).find(k=>themePalettes[k]===theme);
+      drawIndependentBackground(id,1);
       const profile=layoutProfile(theme,theme.ornament);
       ctx.textAlign="center";ctx.textBaseline="middle";
       ctx.fillStyle=theme.accent;ctx.font=`700 ${portrait?93:100}px ${profile.title}`;ctx.fillText("ATTESTATO",W/2,H*.32);
@@ -2031,43 +2067,42 @@
       ctx.fillRect(W*.18,H*.82,W*.22,5);ctx.fillRect(W*.60,H*.82,W*.22,5);
     } finally {ctx=prior.ctx;W=prior.W;H=prior.H;}
   }
-  function drawBase() {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, W, H);
-    const opacity=themeBackgroundAlpha(),photoId=photoKeyFor($("ornamentStyle").value);
-    const photoDrawn=drawPhotoBackground(photoId,opacity);
-
-    if (state.backgroundImage) {
-      const scale = state.backgroundFitScale * (state.backgroundScale / 100);
-      drawImagePositioned(state.backgroundImage, scale, state.backgroundOpacity / 100, state.backgroundX, state.backgroundY);
-    }
-
-    // Le miniature e il calcolo dei margini conservano la resa originale;
-    // il documento usa la regolazione del progetto in anteprima, PDF e PNG.
-    drawCatalogOrnament(undefined,undefined,undefined,undefined,photoDrawn?0:opacity);
-    drawFrame($("frameStyle").value,designColor("accentColor", "#735a2f"));
-  }
-  function drawFrame(style,accent) {
-    if (style === "none") return;
-    ctx.save();
-    ctx.strokeStyle = accent;
-    if (style === "double") {
-      ctx.globalAlpha = .85; ctx.lineWidth = 4.5;
-      ctx.strokeRect(38, 38, W - 76, H - 76);
-      ctx.globalAlpha = .40; ctx.lineWidth = 2;
-      ctx.strokeRect(55, 55, W - 110, H - 110);
-    } else if (style === "single") {
-      ctx.globalAlpha = .7; ctx.lineWidth = 3;
-      ctx.strokeRect(40, 40, W - 80, H - 80);
-    } else if (style === "corners") {
-      ctx.globalAlpha = .82; ctx.lineWidth = 5;
-      const m = 43, arm = 158;
-      for (const [sx, sy] of [[1,1],[-1,1],[1,-1],[-1,-1]]) {
-        const x = sx === 1 ? m : W - m, y = sy === 1 ? m : H - m;
-        ctx.beginPath();ctx.moveTo(x+sx*arm,y);ctx.lineTo(x,y);ctx.lineTo(x,y+sy*arm);ctx.stroke();
-      }
+  // Fondali e cornici sono livelli indipendenti; nessuna decorazione storica
+  // viene più disegnata come bordo. La foto conserva l'opacità originale.
+  function drawIndependentBackground(id,alpha){
+    if(id==="none"||!id||alpha<=0)return;
+    if(photoKeyFor(id)){drawPhotoBackground(id,alpha);return;}
+    const t=themePalettes[id];if(!t)return;
+    const seed=[...id].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,17);
+    ctx.save();ctx.globalAlpha*=alpha;
+    const g=ctx.createRadialGradient(W*.5,H*.48,Math.min(W,H)*.13,W*.5,H*.48,Math.max(W,H)*.7);
+    g.addColorStop(0,"#ffffff00");g.addColorStop(.7,t.accent+"09");g.addColorStop(1,t.accent+"26");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    // Carta colorata e trama discreta, senza bordi incorporati.
+    ctx.strokeStyle=t.accent;ctx.lineWidth=1.1;ctx.globalAlpha=alpha*.075;
+    for(let i=0;i<19;i++){
+      const y=H*(.12+i*.043), shift=(seed%29)-14;
+      ctx.beginPath();ctx.moveTo(W*.06,y);
+      if(seed%3===0)ctx.bezierCurveTo(W*.20,y-25-shift,W*.26,y+25,W*.36,y-15);
+      else if(seed%3===1)ctx.lineTo(W*.32,y+shift);
+      else ctx.quadraticCurveTo(W*.18,y-35,W*.32,y+10);
+      ctx.stroke();ctx.beginPath();ctx.moveTo(W*.94,H-y);
+      ctx.quadraticCurveTo(W*.82,H-y+shift,W*.68,H-y-15);ctx.stroke();
     }
     ctx.restore();
+  }
+  function drawBase(){
+    ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
+    drawIndependentBackground(activeBackgroundId(),themeBackgroundAlpha());
+    if(state.backgroundImage){
+      const scale=state.backgroundFitScale*(state.backgroundScale/100);
+      drawImagePositioned(state.backgroundImage,scale,state.backgroundOpacity/100,state.backgroundX,state.backgroundY);
+    }
+    drawFrame($("frameStyle").value);
+  }
+  function drawFrame(style){
+    if(style==="none"||!frameKeys.has(style))return;
+    if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames)throw new Error("Archivio cornici non aggiornato: verifica js/premium-frames.js");
+    window.K9PremiumFrames.draw(ctx,W,H,style);
   }
 
   function fitFont(text, maxWidth, startSize, minSize, family, weight = "700") {
@@ -2224,29 +2259,8 @@
 
   // Spostamenti relativi all'area libera del foglio. Lo zero mantiene esattamente
   // la posizione storica. Coordinate esplicite per anteprima, PNG e testo vettoriale PDF.
-  const themeMaskCache=new Map();
-  function themeSafeArea(yStart=.24,yEnd=.88){
-    const ornament=$("ornamentStyle").value,frame=$("frameStyle").value;
-    const key=`${W}x${H}|${selectedTheme}|${ornament}|${frame}`;
-    let mask=themeMaskCache.get(key);
-    if(!mask){
-      const sample=document.createElement("canvas"),previous=ctx;
-      sample.width=Math.ceil(W/5);sample.height=Math.ceil(H/5);
-      const sx=sample.width/W,sy=sample.height/H;
-      try{ctx=sample.getContext("2d",{willReadFrequently:true});ctx.scale(sx,sy);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);drawCatalogOrnament(ornament,"#101010","#101010");drawFrame(frame,"#101010");
-        const pix=ctx.getImageData(0,0,sample.width,sample.height).data,rows=[];
-        for(let y=0;y<sample.height;y++){let l=0,r=0,center=0;for(let x=0;x<sample.width;x++){const i=(y*sample.width+x)*4;if(pix[i]>225&&pix[i+1]>225&&pix[i+2]>225)continue;
-          if(x<sample.width*.35)l=Math.max(l,x+1);else if(x>sample.width*.65)r=Math.max(r,sample.width-x);else center++;}rows.push({l:l/sx,r:r/sx,center:center/sample.width});}
-        mask={rows,sy};if(themeMaskCache.size>=180)themeMaskCache.delete(themeMaskCache.keys().next().value);themeMaskCache.set(key,mask);
-      }finally{ctx=previous;sample.width=1;sample.height=1;}
-    }
-    const {rows,sy}=mask;let left=72,right=72,top=25,bottom=H-32;
-    // Evita le righe decorative trasversali; non trattarle come due margini enormi.
-    for(let i=Math.floor(rows.length*yStart);i<Math.min(rows.length,Math.ceil(rows.length*yEnd));i++){const r=rows[i];if(r.center>.02)continue;left=Math.max(left,Math.min(W*.23,r.l+16));right=Math.max(right,Math.min(W*.23,r.r+16));}
-    for(let i=0;i<Math.floor(rows.length*.14);i++)if(rows[i].center>.06)top=Math.max(top,i/sy+15);
-    for(let i=rows.length-1;i>Math.floor(rows.length*.85);i--)if(rows[i].center>.06)bottom=Math.min(bottom,i/sy-16);
-    return {left,right,top,bottom};
-  }
+  // Same reserved print margins for all new frames (including none).
+  function themeSafeArea(){return {left:92,right:92,top:85,bottom:H-85};}
   function themeContentWidth(y, height=70){const safe=themeSafeArea(Math.max(0,(y-height/2)/H),Math.min(1,(y+height/2)/H));return Math.max(W*.54,W-2*Math.max(safe.left,safe.right));}
   function signatureGeometry() {
     const portrait = currentOrientation() === "portrait";
@@ -3290,9 +3304,10 @@
       setPageOrientation(data.form.pageOrientation,false);
       selectedTheme=data.designTheme === "custom" ? "custom" : themePalettes[data.designTheme] ? data.designTheme : "classic";
       const theme=themePalettes[selectedTheme] || themePalettes.classic;
-      const fallback={...defaults,certificateDate:todayISO(),leftSignatureMode:"auto",signatureMode:"auto",thirdSignatureMode:"off",accentColor:theme.accent,inkColor:theme.ink,frameStyle:theme.frame,ornamentStyle:theme.ornament,fontScale:"100",...signatureControlDefaults};
+      const migrated=migrateLayers(data.form,data.designTheme);
+      const fallback={...defaults,certificateDate:todayISO(),leftSignatureMode:"auto",signatureMode:"auto",thirdSignatureMode:"off",accentColor:theme.accent,inkColor:theme.ink,frameStyle:defaultFrameFor(selectedTheme),ornamentStyle:theme.ornament,fontScale:"100",...signatureControlDefaults};
       for(const id of formIds){
-        const field=$(id), value=typeof data.form[id]==="string"?data.form[id]:String(fallback[id]??"");
+        const field=$(id), value=typeof migrated[id]==="string"?migrated[id]:String(fallback[id]??"");
         field.value=id==="themeBackgroundOpacity"?normalizeThemeOpacity(value):value;
         if(field.tagName==="SELECT" && field.selectedIndex<0)field.value=String(fallback[id]??"");
       }
@@ -3558,7 +3573,7 @@
     return blobFingerprints.get(blob);
   }
   async function contentFingerprint(item){
-    const form=normalizeOpacityForm(item.form);
+    const form=normalizeOpacityForm(migrateLayers(item.form,item.designTheme));
     if(item.autoCertificateCode!==false)delete form.certificateCode;
     const background=item.background?{...item.background,blob:await blobFingerprint(item.background.blob)}:null;
     const logos=[];for(const logo of item.logos||[])logos.push({...logo,blob:await blobFingerprint(logo.blob)});
@@ -3574,7 +3589,7 @@
     if(opacity==="100")delete result.themeBackgroundOpacity;else result.themeBackgroundOpacity=opacity;
     return result;
   }
-  const portableContent=p=>canonicalJSON([normalizeOpacityForm(p.form),p.designTheme,p.background,p.logos,p.activeLogoIndex,p.leftSignature,p.rightSignature,p.thirdSignature,p.rosterText,p.autoCertificateCode]);
+  const portableContent=p=>canonicalJSON([normalizeOpacityForm(migrateLayers(p.form,p.designTheme)),p.designTheme,p.background,p.logos,p.activeLogoIndex,p.leftSignature,p.rightSignature,p.thirdSignature,p.rosterText,p.autoCertificateCode]);
   async function findImported(items,source){
     const root=lineage(source);if(!root)return null;
     const fingerprint=await contentFingerprint(source);
@@ -3768,7 +3783,8 @@
     selectedTheme = "classic";
     $("accentColor").value = themePalettes.classic.accent;
     $("inkColor").value = themePalettes.classic.ink;
-    $("frameStyle").value = themePalettes.classic.frame;
+    $("frameStyle").value = "aurum";
+    $("themeBackgroundId").value = "classic";
     $("ornamentStyle").value = "none";
     $("fontScale").value = "100";
     $("themeBackgroundOpacity").value = "100";
@@ -3889,9 +3905,15 @@
   $("resetThemeBackgroundOpacity").addEventListener("click",()=>{
     $("themeBackgroundOpacity").value="100";syncThemeOpacity();saveSettings();queuePreviewRender();
   });
+  $("removeThemeBackground").addEventListener("click",()=>{
+    $("themeBackgroundId").value="none";syncDesignUI();saveSettings();render();
+  });
+  $("removeFrame").addEventListener("click",()=>{
+    $("frameStyle").value="none";syncDesignUI();saveSettings();render();
+  });
   for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "courseOutcome"]) {
     $(id).addEventListener("input", () => {
-      if (["accentColor", "inkColor", "frameStyle", "ornamentStyle"].includes(id)) selectedTheme = "custom";
+      // Changing frame or colors must not change the background identity.
       syncDesignUI();deferSettingsSave();queuePreviewRender();
     });
     $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
