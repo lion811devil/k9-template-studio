@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.5";
+  const STUDIO_VERSION = "4.9.7-ultra";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -34,6 +34,7 @@
     thirdSignatureRole: "", thirdSignatureName: "",
     certificateCode: "", certificateDiscipline: "", courseHours: "", courseOutcome: "",
     themeBackgroundOpacity: "100",
+    frameOpacity: "100",
     themeBackgroundId: "classic",
     backgroundOpacity: 100,
     backgroundScale: 100,
@@ -62,7 +63,7 @@
   };
 
   const textIds = ["recipientName", "bodyText", "courseName", "place", "leftSignatureRole", "leftSignatureName", "signatureRole", "signatureName", "thirdSignatureRole", "thirdSignatureName", "certificateCode", "certificateDiscipline", "courseHours"];
-  const designIds = ["designTheme", "accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "themeBackgroundOpacity", "themeBackgroundId"];
+  const designIds = ["designTheme", "accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "themeBackgroundOpacity", "themeBackgroundId", "frameOpacity"];
   const signatureControlDefaults = {signatureBlockScale: "100", signatureBlockX: "0", signatureBlockY: "0"};
   const signatureControlIds = Object.keys(signatureControlDefaults);
   const formIds = ["pageOrientation", "documentType", "certificateDate", ...textIds, "courseOutcome", "leftSignatureMode", "signatureMode", "thirdSignatureMode", ...signatureControlIds, ...designIds.filter(id => id !== "designTheme")];
@@ -561,6 +562,15 @@
     $("themeBackgroundOpacityValue").value=`${input.value}%`;
     $("resetThemeBackgroundOpacity").disabled=input.value==="100";
   }
+  function frameAlpha(){return Number(normalizeThemeOpacity($("frameOpacity").value))/100;}
+  function syncFrameOpacity(){
+    const input=$("frameOpacity");
+    input.value=normalizeThemeOpacity(input.value);
+    $("frameOpacityValue").value=`${input.value}%`;
+    const absent=$("frameStyle").value==="none";
+    input.disabled=absent;
+    $("resetFrameOpacity").disabled=absent||input.value==="100";
+  }
   function loadSettings() {
     try {
       const raw = JSON.parse(localStorage.getItem("k9-certificati-settings") || "{}");
@@ -574,7 +584,7 @@
       restoreSignatureControls(saved);
       $("autoCertificateCode").checked = saved.autoCertificateCode !== false;
       for (const id of designIds.filter(k => k !== "designTheme")) {
-        if (saved[id] !== undefined) $(id).value = id === "themeBackgroundOpacity" ? normalizeThemeOpacity(saved[id]) : saved[id];
+        if (saved[id] !== undefined) $(id).value = ["themeBackgroundOpacity","frameOpacity"].includes(id) ? normalizeThemeOpacity(saved[id]) : saved[id];
       }
       if (saved.ornamentStyle === undefined) $("ornamentStyle").value = themePalettes[saved.designTheme]?.ornament || "none";
       selectedTheme = saved.designTheme === "custom" ? "custom" : themePalettes[saved.designTheme] ? saved.designTheme : "classic";
@@ -806,31 +816,37 @@
     return {group:theme.category==="Base"?"Classici":theme.category,family:""};
   }
   const galleryGroup=(id,theme)=>galleryPath(id,theme).group;
-  const premiumFrames = [
-    ["none","Senza cornice"], ["aurum","Aurum · oro inciso"], ["silver","Argento · acciaio satinato"],
-    ["regal","Regalia · oro e smalto blu"], ["walnut","Noce · legno intarsiato"],
-    ["carbon","Carbon · fibra tattica"], ["bronze","Bronzo · metallo anticato"],
-    ["forensic","Forensic · titanio e marcatori"], ["signal","Signal · metallo e luce blu"],
-    ["leather","Saddle · cuoio cucito"], ["marble","Carrara · marmo e ottone"],
-    ["laurel","Laurea · foglie dorate"], ["porcelain","Porcellana · smalto e oro rosa"],
-    ["rescue","Rescue · alluminio e inserti rossi"], ["obsidian","Obsidian · lacca nera e platino"]
-  ];
+  const premiumFrameCatalog = Array.isArray(window.K9PremiumFrames?.catalog) ? window.K9PremiumFrames.catalog : [];
+  const premiumFrames = [["none","Senza cornice"], ...premiumFrameCatalog.map(item => [item.id, item.label])];
   const frameKeys=new Set(premiumFrames.map(([id])=>id));
-  function defaultFrameFor(id){
-    const theme=themePalettes[id];if(!theme)return "aurum";
-    const group=galleryPath(id,theme).group;
-    return ({Mantrailing:"carbon",HRDD:"forensic",Detection:"signal",Dogsitter:"leather","K9 tattici generali":"carbon","SAR · ricerca e soccorso":"rescue",Premium:"regal",Accademici:"laurel",Cerimoniali:"aurum",Eleganti:"porcelain",Professionali:"silver",Natura:"walnut",Creativi:"marble"})[group]||"aurum";
+  // La selezione della cornice non è derivata dal tema, nemmeno in migrazione.
+  function populateFrameOptions(){
+    const select=$("frameStyle"); if(!select) return;
+    const current=select.value || "none";
+    select.replaceChildren(new Option("Senza cornice","none"));
+    for(const group of ["Mantrailing","HRDD","Detection","Dogsitter"]){
+      const items=premiumFrameCatalog.filter(item=>item.group===group);
+      if(!items.length) continue;
+      const optgroup=document.createElement("optgroup");
+      optgroup.label=`${group} · cornici Ultra`;
+      for(const item of items) optgroup.appendChild(new Option(item.label,item.id));
+      select.appendChild(optgroup);
+    }
+    select.value=frameKeys.has(current)?current:"none";
   }
   function migrateLayers(form,themeId){
     const f={...form};
-    if(!Object.hasOwn(f,"themeBackgroundId")){
+    // Recupera l'ID foto dalle vecchie versioni, ma rispetta sempre un'esplicita rimozione.
+    if(!Object.hasOwn(f,"themeBackgroundId") || f.themeBackgroundId==="" || f.themeBackgroundId==null){
       const ornament=f.ornamentStyle;
       f.themeBackgroundId=specialK9Ids.has(ornament)?ornament:themePalettes[themeId]?themeId:"none";
     }
-    if(f.themeBackgroundId!=="none"&&!themePalettes[f.themeBackgroundId])f.themeBackgroundId="none";
-    if(!frameKeys.has(f.frameStyle)||(!Object.hasOwn(form,"themeBackgroundId")&&f.frameStyle==="none"&&((f.ornamentStyle&&f.ornamentStyle!=="none")||specialK9Ids.has(f.themeBackgroundId)))){
-      f.frameStyle=defaultFrameFor(f.themeBackgroundId==="none"?themeId:f.themeBackgroundId);
+    if(f.themeBackgroundId!=="none"&&!themePalettes[f.themeBackgroundId]){
+      f.themeBackgroundId=specialK9Ids.has(f.ornamentStyle)?f.ornamentStyle:themePalettes[themeId]?themeId:"none";
     }
+    // Le cornici storiche non esistono più: nessuna cornice automatica.
+    if(!frameKeys.has(f.frameStyle))f.frameStyle="none";
+    f.frameOpacity=normalizeThemeOpacity(f.frameOpacity);
     return f;
   }
   const activeBackgroundId=()=>$("themeBackgroundId").value;
@@ -839,8 +855,11 @@
     $("backgroundThemeName").textContent=themePalettes[id]?.label||"Nessuno";
     $("removeThemeBackground").disabled=id==="none";
     $("removeFrame").disabled=$("frameStyle").value==="none";
+    syncFrameOpacity();
   }
   const normalizeThemeSearch=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("it").trim();
+  populateFrameOptions();
+
   // 4.9.4: separate, local photo layer. Each disciplinary theme retains its own
   // identifier and existing frame; opacity never affects the structural artwork.
   const photoAssets=window.K9_REALISTIC_VERSION==="4.9.4" ? (window.K9RealisticBackgrounds||{}) : {};
@@ -873,9 +892,26 @@
       if(photoKeyFor(activeBackgroundId())===key)setStatus(error.message,'warning');
     }).finally(()=>photoRefreshPending.delete(key));
   }
+  const frameRefreshPending=new Set(),frameFailures=new Set();
+  function requestSelectedFrame(){
+    const id=$("frameStyle").value;
+    const library=window.K9PremiumFrames;
+    if(id==="none"||frameAlpha()===0||!frameKeys.has(id)||!library?.ensure||library.isReady(id)||frameRefreshPending.has(id)||frameFailures.has(id))return;
+    frameRefreshPending.add(id);
+    library.ensure(id).then(()=>{
+      if(!state.exporting && $("frameStyle").value===id)render({visualOnly:true});
+    }).catch(error=>{frameFailures.add(id);if($("frameStyle").value===id)setStatus(error.message,"warning");})
+      .finally(()=>frameRefreshPending.delete(id));
+  }
   async function ensureActivePhoto(){
-    const id=photoKeyFor(activeBackgroundId());
-    if(id&&themeBackgroundAlpha()>0)await ensurePhoto(id);
+    const id=photoKeyFor(activeBackgroundId()),frame=$("frameStyle").value;
+    const tasks=[];
+    if(id&&themeBackgroundAlpha()>0)tasks.push(ensurePhoto(id));
+    if(frame!=="none"&&frameAlpha()>0){
+      if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames?.ensure)throw new Error("Archivio cornici non aggiornato: riapri l’app online");
+      tasks.push(window.K9PremiumFrames.ensure(frame));
+    }
+    await Promise.all(tasks);
   }
   function photoLayer(id){
     const portrait=H>W,key=(portrait?'P|':'L|')+id;
@@ -907,7 +943,12 @@
     if(!portrait&&!wide){const dw=h*iw/ih,lo=(w-dw)/2/w,hi=1-lo;const edge=g.createLinearGradient(0,0,w,0);for(const [at,a] of [[0,0],[lo,0],[lo+(hi-lo)*.15,1],[hi-(hi-lo)*.15,1],[hi,0],[1,0]])edge.addColorStop(at,`rgba(0,0,0,${a})`);g.fillStyle=edge;g.fillRect(0,0,w,h);}
     g.globalCompositeOperation='source-over';
     photoLayers.set(key,layer);
-    while(photoLayers.size>12){const oldest=photoLayers.keys().next().value,old=photoLayers.get(oldest);old.width=1;old.height=1;photoLayers.delete(oldest);}
+    while(photoLayers.size>12){
+      const active=(currentOrientation()==="portrait"?'P|':'L|')+activeBackgroundId();
+      const oldest=[...photoLayers.keys()].find(k=>k!==active&&k!==key);
+      if(!oldest)break;
+      const old=photoLayers.get(oldest);old.width=1;old.height=1;photoLayers.delete(oldest);
+    }
     return layer;
   }
   function drawPhotoBackground(id,alpha){
@@ -920,7 +961,7 @@
     const key=`${currentOrientation()}|${id}`;
     const cached=thumbnailCache.get(key);
     if(cached){thumbnailCache.delete(key);thumbnailCache.set(key,cached);canvas.width=cached.width;canvas.height=cached.height;canvas.getContext("2d").drawImage(cached,0,0);return;}
-    const photoId=photoKeyFor(theme.ornament);
+    const photoId=photoKeyFor(id);
     if(photoId&&!photoDecoded.has(photoId)&&!photoLayers.has((currentOrientation()==="portrait"?'P|':'L|')+photoId)){
       drawThemeThumbnail(canvas,theme);
       if(!photoFailures.has(photoId)){
@@ -1015,9 +1056,11 @@
     if(selected)selected.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});
   }
 
-  function applyCatalogTheme(id) {
+  async function applyCatalogTheme(id) {
     const theme = themePalettes[id];
     if (!theme) return;
+    const photo=photoKeyFor(id);
+    if(photo){photoFailures.delete(photo);await ensurePhoto(photo);}
     selectedTheme = id;
     $("accentColor").value = theme.accent;
     $("inkColor").value = theme.ink;
@@ -2100,9 +2143,13 @@
     drawFrame($("frameStyle").value);
   }
   function drawFrame(style){
-    if(style==="none"||!frameKeys.has(style))return;
-    if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames)throw new Error("Archivio cornici non aggiornato: verifica js/premium-frames.js");
-    window.K9PremiumFrames.draw(ctx,W,H,style);
+    if(style==="none"||frameAlpha()===0||!frameKeys.has(style))return;
+    if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames){
+      const message="Archivio cornici non aggiornato: chiudi e riapri l'app online";
+      if(state.exporting)throw new Error(message);
+      setStatus(message,"warning");return;
+    }
+    ctx.save();try{ctx.globalAlpha*=frameAlpha();const ready=window.K9PremiumFrames.draw(ctx,W,H,style);if(!ready&&state.exporting)throw new Error("Cornice non ancora disponibile");}finally{ctx.restore();}
   }
 
   function fitFont(text, maxWidth, startSize, minSize, family, weight = "700") {
@@ -2522,6 +2569,7 @@
     syncAutomaticCode();
     layoutWarnings = [];
     requestSelectedPhoto();
+    requestSelectedFrame();
     drawGraphics();
     drawTextLayout();
     if (showGrid) drawPreviewGrid(); // Solo anteprima, mai nel PDF o nel PNG.
@@ -3305,12 +3353,18 @@
       selectedTheme=data.designTheme === "custom" ? "custom" : themePalettes[data.designTheme] ? data.designTheme : "classic";
       const theme=themePalettes[selectedTheme] || themePalettes.classic;
       const migrated=migrateLayers(data.form,data.designTheme);
-      const fallback={...defaults,certificateDate:todayISO(),leftSignatureMode:"auto",signatureMode:"auto",thirdSignatureMode:"off",accentColor:theme.accent,inkColor:theme.ink,frameStyle:defaultFrameFor(selectedTheme),ornamentStyle:theme.ornament,fontScale:"100",...signatureControlDefaults};
+      const fallback={...defaults,certificateDate:todayISO(),leftSignatureMode:"auto",signatureMode:"auto",thirdSignatureMode:"off",accentColor:theme.accent,inkColor:theme.ink,frameStyle:"none",ornamentStyle:theme.ornament,fontScale:"100",...signatureControlDefaults};
+      populateFrameOptions();
       for(const id of formIds){
         const field=$(id), value=typeof migrated[id]==="string"?migrated[id]:String(fallback[id]??"");
-        field.value=id==="themeBackgroundOpacity"?normalizeThemeOpacity(value):value;
+        field.value=["themeBackgroundOpacity","frameOpacity"].includes(id)?normalizeThemeOpacity(value):value;
         if(field.tagName==="SELECT" && field.selectedIndex<0)field.value=String(fallback[id]??"");
       }
+      const photo=photoKeyFor(activeBackgroundId());
+      if(photo && themeBackgroundAlpha()>0){
+        try{await ensurePhoto(photo);}catch(error){photoFailures.add(photo);console.warn(error);}
+      }
+      if($("frameStyle").value!=="none"){try{await window.K9PremiumFrames.ensure($("frameStyle").value);}catch(error){console.warn(error);setStatus(error.message,"warning");}}
       restoreSignatureControls(data.form);
       state.backgroundImage=assets.background;state.backgroundBlob=assets.background?data.background.blob:null;
       state.backgroundScale=goodNumber(data.background?.scale,100,50,180);
@@ -3335,6 +3389,7 @@
   }
 
   function syncAllControls() {
+    populateFrameOptions();
     const hasBg = !!state.backgroundImage;
     $("backgroundTools").classList.toggle("hidden", !hasBg);
     $("backgroundScale").value = state.backgroundScale;
@@ -3587,6 +3642,8 @@
     const result={...form};
     const opacity=normalizeThemeOpacity(result.themeBackgroundOpacity);
     if(opacity==="100")delete result.themeBackgroundOpacity;else result.themeBackgroundOpacity=opacity;
+    const frame=normalizeThemeOpacity(result.frameOpacity);
+    if(frame==="100")delete result.frameOpacity;else result.frameOpacity=frame;
     return result;
   }
   const portableContent=p=>canonicalJSON([normalizeOpacityForm(migrateLayers(p.form,p.designTheme)),p.designTheme,p.background,p.logos,p.activeLogoIndex,p.leftSignature,p.rightSignature,p.thirdSignature,p.rosterText,p.autoCertificateCode]);
@@ -3783,11 +3840,12 @@
     selectedTheme = "classic";
     $("accentColor").value = themePalettes.classic.accent;
     $("inkColor").value = themePalettes.classic.ink;
-    $("frameStyle").value = "aurum";
+    $("frameStyle").value = "none";
     $("themeBackgroundId").value = "classic";
     $("ornamentStyle").value = "none";
     $("fontScale").value = "100";
     $("themeBackgroundOpacity").value = "100";
+    $("frameOpacity").value = "100";
     state.backgroundImage = null; state.backgroundBlob = null;
     state.backgroundScale = 100; state.backgroundOpacity = 100;
     state.backgroundX = W / 2; state.backgroundY = H / 2; state.backgroundLocked = false;
@@ -3896,14 +3954,20 @@
   populateThemeGallery();
   $("themeSearch").addEventListener("input", populateThemeGallery);
   $("locateTheme").addEventListener("click",locateSelectedTheme);
+  const selectGalleryBackground=guardAsync(applyCatalogTheme);
   $("themeGrid").addEventListener("click", event => {
-    const button = event.target.closest(".theme-choice");
-    if (button && $("themeGrid").contains(button)) applyCatalogTheme(button.dataset.theme);
+    const button=event.target.closest(".theme-choice");
+    if(button&&$("themeGrid").contains(button))void selectGalleryBackground(button.dataset.theme);
   });
   $("themeBackgroundOpacity").addEventListener("input",()=>{syncThemeOpacity();deferSettingsSave();queuePreviewRender();});
   $("themeBackgroundOpacity").addEventListener("change",()=>{syncThemeOpacity();saveSettings();queuePreviewRender();});
   $("resetThemeBackgroundOpacity").addEventListener("click",()=>{
     $("themeBackgroundOpacity").value="100";syncThemeOpacity();saveSettings();queuePreviewRender();
+  });
+  $("frameOpacity").addEventListener("input",()=>{syncFrameOpacity();deferSettingsSave();queuePreviewRender();});
+  $("frameOpacity").addEventListener("change",()=>{syncFrameOpacity();saveSettings();queuePreviewRender();});
+  $("resetFrameOpacity").addEventListener("click",()=>{
+    $("frameOpacity").value="100";syncFrameOpacity();saveSettings();queuePreviewRender();
   });
   $("removeThemeBackground").addEventListener("click",()=>{
     $("themeBackgroundId").value="none";syncDesignUI();saveSettings();render();
@@ -3914,6 +3978,7 @@
   for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "courseOutcome"]) {
     $(id).addEventListener("input", () => {
       // Changing frame or colors must not change the background identity.
+      if(id==="frameStyle")frameFailures.delete($("frameStyle").value);
       syncDesignUI();deferSettingsSave();queuePreviewRender();
     });
     $(id).addEventListener("change", () => { saveSettings(); queuePreviewRender(); });
@@ -4235,6 +4300,9 @@
         await registration.update();
       } catch(error) { console.warn("Controllo aggiornamento offline non riuscito", error); }
     };
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      setStatus("Aggiornamento disponibile: chiudi e riapri l’app online dopo il salvataggio.");
+    });
     window.addEventListener("load", checkWorker, {once:true});
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && navigator.onLine) void checkWorker();
