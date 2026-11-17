@@ -332,3 +332,10 @@ I modelli per disciplina sono **locali al dispositivo**, non sincronizzati onlin
 - Lo stile scelto è conservato nel progetto esistente, nell'autosalvataggio, nei modelli per disciplina e nei backup. Aprire un progetto precedente senza decorazione continua a funzionare: la decorazione predefinita è «Nessuna».
 - La ricerca e il filtro **non** applicano uno stile; l'applicazione avviene solo quando si tocca la scheda di uno stile.
 - Il campo «Decorazione grafica» permette di disabilitare o modificare un motivo. La personalizzazione di colori, cornice o decorazione non cancella il progetto: lo stile diventa «Personalizzato».
+
+
+## Aggiornamento 4.9.10
+- pulsanti Precedente / Successiva per scorrere le cornici della disciplina già selezionata
+- blocco / sblocco dedicato per cornice Ultra indipendente
+- blocco / sblocco dedicato per sfondo indipendente
+- salvataggio di questi blocchi anche nei progetti e nell’ultimo lavoro locale

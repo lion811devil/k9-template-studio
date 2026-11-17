@@ -1,5 +1,5 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.9-ultra";
+const VERSION = "4.9.10-ultra-controls";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
 const CACHE = `${PREFIX}${VERSION}`;
