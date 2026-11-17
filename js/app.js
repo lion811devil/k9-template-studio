@@ -1,7 +1,8 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.12-ultra";
+  const STUDIO_VERSION = "4.9.12-ultra-personal";
+  const FRAME_LIBRARY_VERSION = "4.9.12-ultra";
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -56,6 +57,7 @@
     logos: [],
     activeLogoIndex: -1,
     backgroundBlob: null,
+    personalFrameImage: null, personalFrameBlob: null, personalFrameName: "",
     leftSignatureImage: null, leftSignatureBlob: null,
     signatureImage: null, signatureBlob: null,
     thirdSignatureImage: null, thirdSignatureBlob: null,
@@ -575,6 +577,7 @@
     $("resetFrameOpacity").disabled=absent||state.frameLocked||input.value==="100";
   }
 
+  const PERSONAL_FRAME = "__personal_frame__";
   const frameCatalogItem = id => premiumFrameCatalog.find(item => item.id === id) || null;
   const frameGroupEntries = group => premiumFrameCatalog.filter(item => item.group === group);
 
@@ -583,6 +586,10 @@
     const prev = $("prevFrame");
     const next = $("nextFrame");
     const current = frameCatalogItem($("frameStyle").value);
+    if ($("frameStyle").value===PERSONAL_FRAME) {
+      status.textContent = "Cornice personale · " + (state.personalFrameName || "PNG");
+      prev.disabled = next.disabled = true; return;
+    }
     if (!current) {
       if (status) status.textContent = "Seleziona una cornice per scorrere la disciplina corrente";
       if (prev) prev.disabled = true;
@@ -626,11 +633,15 @@
       btn.textContent = locked ? "Sblocca cornice" : "Blocca cornice";
       btn.classList.toggle("is-locked", locked);
     }
+    $("personalFrameFile").disabled=locked;
+    $("loadPersonalFrame").disabled=locked;
+    $("fitPersonalFrame").disabled=locked || $("frameStyle").value!==PERSONAL_FRAME || !state.personalFrameImage;
+    $("personalFrameInfo").textContent=state.personalFrameImage ? `${state.personalFrameName} · ${state.personalFrameImage.naturalWidth} × ${state.personalFrameImage.naturalHeight} px` : "Nessuna cornice personale caricata";
     updateFrameNavigatorUI();
   }
 
   function moveFrameSelection(step) {
-    if (state.frameLocked) return;
+    if (state.frameLocked || $("frameStyle").value===PERSONAL_FRAME) return;
     const current = frameCatalogItem($("frameStyle").value);
     if (!current) {
       const first = premiumFrameCatalog[0];
@@ -673,6 +684,7 @@
       for (const id of designIds.filter(k => k !== "designTheme")) {
         if (saved[id] !== undefined) $(id).value = ["themeBackgroundOpacity","frameOpacity"].includes(id) ? normalizeThemeOpacity(saved[id]) : saved[id];
       }
+      if(!$("frameStyle").value)$("frameStyle").value="none";
       if (saved.ornamentStyle === undefined) $("ornamentStyle").value = themePalettes[saved.designTheme]?.ornament || "none";
       selectedTheme = saved.designTheme === "custom" ? "custom" : themePalettes[saved.designTheme] ? saved.designTheme : "classic";
       syncDesignUI();
@@ -909,12 +921,13 @@
   const galleryGroup=(id,theme)=>galleryPath(id,theme).group;
   const premiumFrameCatalog = Array.isArray(window.K9PremiumFrames?.catalog) ? window.K9PremiumFrames.catalog : [];
   const premiumFrames = [["none","Senza cornice"], ...premiumFrameCatalog.map(item => [item.id, item.label])];
-  const frameKeys=new Set(premiumFrames.map(([id])=>id));
+  const frameKeys=new Set([...premiumFrames.map(([id])=>id),PERSONAL_FRAME]);
   // La selezione della cornice non è derivata dal tema, nemmeno in migrazione.
   function populateFrameOptions(){
     const select=$("frameStyle"); if(!select) return;
     const current=select.value || "none";
     select.replaceChildren(new Option("Senza cornice","none"));
+    if(state.personalFrameImage)select.add(new Option("Personale · "+state.personalFrameName,PERSONAL_FRAME));
     for(const group of ["Mantrailing","HRDD","Detection","Dogsitter"]){
       const items=premiumFrameCatalog.filter(item=>item.group===group);
       if(!items.length) continue;
@@ -989,7 +1002,7 @@
   function requestSelectedFrame(){
     const id=$("frameStyle").value;
     const library=window.K9PremiumFrames;
-    if(id==="none"||frameAlpha()===0||!frameKeys.has(id)||!library?.ensure||library.isReady(id)||frameRefreshPending.has(id)||frameFailures.has(id))return;
+    if(id===PERSONAL_FRAME||id==="none"||frameAlpha()===0||!frameKeys.has(id)||!library?.ensure||library.isReady(id)||frameRefreshPending.has(id)||frameFailures.has(id))return;
     frameRefreshPending.add(id);
     library.ensure(id).then(()=>{
       if(!state.exporting && $("frameStyle").value===id)render({visualOnly:true});
@@ -1000,8 +1013,9 @@
     const id=photoKeyFor(activeBackgroundId()),frame=$("frameStyle").value;
     const tasks=[];
     if(id&&themeBackgroundAlpha()>0)tasks.push(ensurePhoto(id));
-    if(frame!=="none"&&frameAlpha()>0){
-      if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames?.ensure)throw new Error("Archivio cornici non aggiornato: riapri l’app online");
+    if(frame===PERSONAL_FRAME && frameAlpha()>0 && !state.personalFrameImage)throw new Error("Cornice personale non disponibile");
+    if(frame!==PERSONAL_FRAME&&frame!=="none"&&frameAlpha()>0){
+      if(window.K9_FRAME_VERSION!==FRAME_LIBRARY_VERSION||!window.K9PremiumFrames?.ensure)throw new Error("Archivio cornici non aggiornato: riapri l’app online");
       tasks.push(window.K9PremiumFrames.ensure(frame));
     }
     await Promise.all(tasks);
@@ -2238,9 +2252,19 @@
     }
     drawFrame($("frameStyle").value);
   }
+  function personalFrameRect(i,w,h){
+    const scale=Math.min(w/i.naturalWidth,h/i.naturalHeight);
+    const width=i.naturalWidth*scale,height=i.naturalHeight*scale;
+    return [(w-width)/2,(h-height)/2,width,height];
+  }
   function drawFrame(style){
     if(style==="none"||frameAlpha()===0||!frameKeys.has(style))return;
-    if(window.K9_FRAME_VERSION!==STUDIO_VERSION||!window.K9PremiumFrames){
+    if(style===PERSONAL_FRAME){
+      const image=state.personalFrameImage;
+      if(!image){if(state.exporting)throw new Error("Cornice personale mancante");return;}
+      ctx.save();try{ctx.globalAlpha*=frameAlpha();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(image,...personalFrameRect(image,W,H));}finally{ctx.restore();}return;
+    }
+    if(window.K9_FRAME_VERSION!==FRAME_LIBRARY_VERSION||!window.K9PremiumFrames){
       const message="Archivio cornici non aggiornato: chiudi e riapri l'app online";
       if(state.exporting)throw new Error(message);
       setStatus(message,"warning");return;
@@ -2717,8 +2741,34 @@
   }
 
   function checkImageBudget(image,replaced=null){
-    const total=[state.backgroundImage,...state.logos.map(l=>l.image),state.leftSignatureImage,state.signatureImage,state.thirdSignatureImage].reduce((n,i)=>n+imagePixels(i),0);
+    const total=[state.backgroundImage,state.personalFrameImage,...state.logos.map(l=>l.image),state.leftSignatureImage,state.signatureImage,state.thirdSignatureImage].reduce((n,i)=>n+imagePixels(i),0);
     if(total-imagePixels(replaced)+imagePixels(image)>MAX_PROJECT_PIXELS)throw new Error("Limite immagini del progetto: 100 megapixel complessivi. Riduci una delle immagini prima di caricarla.");
+  }
+  function personalFrameMessage(image){
+    const rect=personalFrameRect(image,W,H);
+    return (rect[0]>W*.015||rect[1]>H*.015) ? "Cornice adattata senza deformazioni; restano margini. Per riempire il foglio usa un PNG dello stesso orientamento A4." : "Cornice personale adattata al foglio A4";
+  }
+  async function importPersonalFrame(file){
+    if(!file||state.frameLocked)return;
+    // Android can omit a MIME type when the source is a file manager.
+    let blob=file;
+    if(!blob.type && /\.png$/i.test(file.name||""))blob=new Blob([file],{type:"image/png"});
+    if(!blob.type && /\.webp$/i.test(file.name||""))blob=new Blob([file],{type:"image/webp"});
+    if(!/^image\/(png|webp)$/.test(blob.type))throw new Error("Seleziona una cornice PNG o WebP con trasparenza");
+    const image=await imageFromBlob(blob);
+    checkImageBudget(image,state.personalFrameImage);
+    // Inspect the centre only; never erase or recolour the source pixels.
+    const sample=document.createElement("canvas");sample.width=sample.height=32;
+    const sc=sample.getContext("2d",{willReadFrequently:true});
+    sc.drawImage(image,0,0,32,32);
+    const pixels=sc.getImageData(8,8,16,16).data;
+    let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]<250)transparent++;
+    if(!transparent)throw new Error("Il centro non risulta trasparente: scegli il PNG originale con apertura trasparente");
+    if(state.frameLocked)return;
+    state.personalFrameImage=image;state.personalFrameBlob=blob;
+    state.personalFrameName=String(file.name||"Cornice personale").slice(0,150);
+    populateFrameOptions();$("frameStyle").value=PERSONAL_FRAME;
+    syncDesignUI();saveSettings();render();setStatus(personalFrameMessage(image));
   }
   function setBackground(img, blob) {
     checkImageBudget(img,state.backgroundImage);
@@ -3354,6 +3404,7 @@
       version: 2, id, name, updatedAt: new Date().toISOString(), form,
       designTheme: selectedTheme,
       importSourceKey:state.importSourceKey,
+      personalFrame: state.personalFrameBlob ? {blob:state.personalFrameBlob,name:state.personalFrameName} : null,
       background: state.backgroundImage ? {
         blob: state.backgroundBlob, scale: state.backgroundScale,
         opacity: state.backgroundOpacity, x: state.backgroundX,
@@ -3436,11 +3487,13 @@
     let pixels=0;
     const decode=async blob=>{const image=await imageFromBlob(blob);pixels+=imagePixels(image);if(pixels>MAX_PROJECT_PIXELS)throw new Error("Le immagini del progetto superano il limite di memoria (100 megapixel complessivi)");return image;};
     const background=data.background ? await decode(data.background.blob) : null;
+    const personalFrame=data.personalFrame ? await decode(data.personalFrame.blob) : null;
+    if(data.form.frameStyle===PERSONAL_FRAME && !personalFrame)throw new Error("Cornice personale mancante nel progetto");
     const logos=[];
     for(const entry of data.logos){if(!entry || typeof entry!=="object")throw new Error("Logo non valido");logos.push(await decode(entry.blob));}
     const signatures={};
     for(const key of ["leftSignature","rightSignature","thirdSignature"]) signatures[key]=data[key]==null?null:await decode(data[key]);
-    return {background,logos,signatures};
+    return {background,logos,signatures,personalFrame};
   }
   async function restoreSnapshot(data, prepared=null) {
     const assets=prepared || await prepareSnapshot(data); // nessuna mutazione dell'editor prima della verifica completa
@@ -3452,6 +3505,9 @@
       const theme=themePalettes[selectedTheme] || themePalettes.classic;
       const migrated=migrateLayers(data.form,data.designTheme);
       const fallback={...defaults,certificateDate:todayISO(),leftSignatureMode:"auto",signatureMode:"auto",thirdSignatureMode:"off",accentColor:theme.accent,inkColor:theme.ink,frameStyle:"none",ornamentStyle:theme.ornament,fontScale:"100",...signatureControlDefaults};
+      state.personalFrameImage=assets.personalFrame||null;
+      state.personalFrameBlob=assets.personalFrame?data.personalFrame.blob:null;
+      state.personalFrameName=assets.personalFrame?String(data.personalFrame.name||"Cornice personale").slice(0,150):"";
       populateFrameOptions();
       for(const id of formIds){
         const field=$(id), value=typeof migrated[id]==="string"?migrated[id]:String(fallback[id]??"");
@@ -3462,7 +3518,7 @@
       if(photo && themeBackgroundAlpha()>0){
         try{await ensurePhoto(photo);}catch(error){photoFailures.add(photo);console.warn(error);}
       }
-      if($("frameStyle").value!=="none"){try{await window.K9PremiumFrames.ensure($("frameStyle").value);}catch(error){console.warn(error);setStatus(error.message,"warning");}}
+      if($("frameStyle").value!==PERSONAL_FRAME&&$("frameStyle").value!=="none"){try{await window.K9PremiumFrames.ensure($("frameStyle").value);}catch(error){console.warn(error);setStatus(error.message,"warning");}}
       restoreSignatureControls(data.form);
       state.themeBackgroundLocked = data.form.themeBackgroundLocked === true;
       state.frameLocked = data.form.frameLocked === true;
@@ -3658,7 +3714,7 @@
   const base64Bytes=str=>Uint8Array.from(atob(str),c=>c.charCodeAt(0));
   const MAX_PROJECT_BACKUP=80*1048576, MAX_ARCHIVE_BACKUP=180*1048576;
   function checkBackupEstimate(items,limit){
-    const blobBytes=items.reduce((sum,item)=>sum+[item.background?.blob,...item.logos.map(l=>l.blob),item.leftSignature,item.rightSignature,item.thirdSignature].reduce((n,b)=>n+(b?.size||0),0),0);
+    const blobBytes=items.reduce((sum,item)=>sum+[item.personalFrame?.blob,item.background?.blob,...item.logos.map(l=>l.blob),item.leftSignature,item.rightSignature,item.thirdSignature].reduce((n,b)=>n+(b?.size||0),0),0);
     const factor=$("encryptBackup").checked?16/9:4/3;
     if(blobBytes*factor>limit)throw new Error(`Backup oltre ${Math.round(limit/1048576)} MB: riduci le immagini o esporta i singoli progetti.`);
   }
@@ -3732,7 +3788,9 @@
     if(item.autoCertificateCode!==false)delete form.certificateCode;
     const background=item.background?{...item.background,blob:await blobFingerprint(item.background.blob)}:null;
     const logos=[];for(const logo of item.logos||[])logos.push({...logo,blob:await blobFingerprint(logo.blob)});
-    const doc=canonicalJSON([form,item.designTheme,background,logos,item.activeLogoIndex??-1,await blobFingerprint(item.leftSignature),await blobFingerprint(item.rightSignature),await blobFingerprint(item.thirdSignature),item.rosterText||"",item.autoCertificateCode!==false]);
+    const content=[form,item.designTheme,background,logos,item.activeLogoIndex??-1,await blobFingerprint(item.leftSignature),await blobFingerprint(item.rightSignature),await blobFingerprint(item.thirdSignature),item.rosterText||"",item.autoCertificateCode!==false];
+    if(item.personalFrame)content.push({name:item.personalFrame.name,blob:await blobFingerprint(item.personalFrame.blob)});
+    const doc=canonicalJSON(content);
     if(!globalThis.crypto?.subtle)return doc;
     return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(doc))),b=>b.toString(16).padStart(2,"0")).join("");
   }
@@ -3746,7 +3804,7 @@
     if(frame==="100")delete result.frameOpacity;else result.frameOpacity=frame;
     return result;
   }
-  const portableContent=p=>canonicalJSON([normalizeOpacityForm(migrateLayers(p.form,p.designTheme)),p.designTheme,p.background,p.logos,p.activeLogoIndex,p.leftSignature,p.rightSignature,p.thirdSignature,p.rosterText,p.autoCertificateCode]);
+  const portableContent=p=>canonicalJSON([normalizeOpacityForm(migrateLayers(p.form,p.designTheme)),p.designTheme,p.background,p.personalFrame||null,p.logos,p.activeLogoIndex,p.leftSignature,p.rightSignature,p.thirdSignature,p.rosterText,p.autoCertificateCode]);
   async function findImported(items,source){
     const root=lineage(source);if(!root)return null;
     const fingerprint=await contentFingerprint(source);
@@ -3758,7 +3816,7 @@
   }
   async function decodePortable(entry){
     if(!entry||entry.version!==2||!entry.form||typeof entry.form!=="object"||Array.isArray(entry.form)||!Array.isArray(entry.logos)||entry.logos.length>MAX_LOGOS)throw new Error("Progetto non valido");
-    const data={...entry,background:entry.background?{...entry.background,blob:await requiredImageBlob(entry.background.blob)}:null,logos:[],leftSignature:await dataURLToBlob(entry.leftSignature),rightSignature:await dataURLToBlob(entry.rightSignature),thirdSignature:await dataURLToBlob(entry.thirdSignature)};
+    const data={...entry,personalFrame:entry.personalFrame?{name:String(entry.personalFrame.name||"Cornice personale").slice(0,150),blob:await requiredImageBlob(entry.personalFrame.blob)}:null,background:entry.background?{...entry.background,blob:await requiredImageBlob(entry.background.blob)}:null,logos:[],leftSignature:await dataURLToBlob(entry.leftSignature),rightSignature:await dataURLToBlob(entry.rightSignature),thirdSignature:await dataURLToBlob(entry.thirdSignature)};
     for(const l of entry.logos){if(!l || typeof l!=="object")throw new Error("Logo non valido");data.logos.push({...l,blob:await requiredImageBlob(l.blob)});}
     delete data.contentFingerprint;await prepareSnapshot(data);return data;
   }
@@ -3788,6 +3846,7 @@
     const logos=[];for(const l of item.logos)logos.push({...l,blob:await blobToDataURL(l.blob)});
     return {
       ...item,
+      personalFrame: item.personalFrame ? {...item.personalFrame,blob:await blobToDataURL(item.personalFrame.blob)} : null,
       background: item.background ? {...item.background, blob: await blobToDataURL(item.background.blob)} : null,
       logos,
       leftSignature: item.leftSignature ? await blobToDataURL(item.leftSignature) : null,
@@ -3948,6 +4007,8 @@
     $("frameOpacity").value = "100";
     state.themeBackgroundLocked = false;
     state.frameLocked = false;
+    state.personalFrameImage=null;state.personalFrameBlob=null;state.personalFrameName="";
+    $("personalFrameFile").value="";
     state.backgroundImage = null; state.backgroundBlob = null;
     state.backgroundScale = 100; state.backgroundOpacity = 100;
     state.backgroundX = W / 2; state.backgroundY = H / 2; state.backgroundLocked = false;
@@ -4079,8 +4140,12 @@
   });
   $("removeFrame").addEventListener("click",()=>{
     if(state.frameLocked)return;
+    if($("frameStyle").value===PERSONAL_FRAME){state.personalFrameImage=null;state.personalFrameBlob=null;state.personalFrameName="";$("personalFrameFile").value="";populateFrameOptions();}
     $("frameStyle").value="none";syncDesignUI();saveSettings();render();
   });
+  $("loadPersonalFrame").addEventListener("click",()=>{if(!state.frameLocked)$("personalFrameFile").click();});
+  $("personalFrameFile").addEventListener("change",guardAsync(async e=>{const file=e.target.files[0];e.target.value="";await importPersonalFrame(file);}));
+  $("fitPersonalFrame").addEventListener("click",()=>{if(state.frameLocked||$("frameStyle").value!==PERSONAL_FRAME||!state.personalFrameImage)return;render();setStatus(personalFrameMessage(state.personalFrameImage));});
     $("lockThemeBackground").addEventListener("click",()=>{
     state.themeBackgroundLocked = !state.themeBackgroundLocked;
     applyThemeBackgroundLockUI();
