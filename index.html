@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.5">
+  <link rel="stylesheet" href="css/style.css?v=4.9.7-ultra">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.5</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.7-ultra</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -165,15 +165,21 @@
         <div class="panel-body design-area">
           <p class="mini-heading">Archivio sfondi grafici · pronti da caricare<span id="studioVersion"></span></p>
           <div class="layer-controls">
-            <label for="frameStyle"><strong>1. Cornice indipendente</strong></label>
-            <select id="frameStyle"><option value="none">Senza cornice</option><option value="aurum" selected>Aurum · oro inciso</option><option value="silver">Argento · acciaio satinato</option><option value="regal">Regalia · oro e smalto blu</option><option value="walnut">Noce · legno intarsiato</option><option value="carbon">Carbon · fibra tattica</option><option value="bronze">Bronzo · metallo anticato</option><option value="forensic">Forensic · titanio e marcatori</option><option value="signal">Signal · metallo e luce blu</option><option value="leather">Saddle · cuoio cucito</option><option value="marble">Carrara · marmo e ottone</option><option value="laurel">Laurea · foglie dorate</option><option value="porcelain">Porcellana · smalto e oro rosa</option><option value="rescue">Rescue · alluminio e inserti rossi</option><option value="obsidian">Obsidian · lacca nera e platino</option></select>
+            <label for="frameStyle"><strong>1. Cornice Ultra indipendente</strong></label>
+            <select id="frameStyle"><option value="none">Senza cornice</option></select>
             <button id="removeFrame" class="button ghost small" type="button">Elimina solo cornice</button>
+            <label class="range-row">
+              <span>Opacità cornice <output id="frameOpacityValue" for="frameOpacity">100%</output></span>
+              <input id="frameOpacity" type="range" min="0" max="100" step="1" value="100" aria-describedby="frameOpacityHelp">
+            </label>
+            <small id="frameOpacityHelp">0% invisibile · 100% originale. Il fondale, i testi, i loghi e le firme non cambiano.</small>
+            <button id="resetFrameOpacity" class="button ghost small" type="button" disabled>Ripristina opacità cornice</button>
             <div class="layer-divider"></div>
             <strong>2. Sfondo indipendente</strong>
             <small>Sfondo attivo: <b id="backgroundThemeName">Classico</b></small>
             <input id="themeBackgroundId" type="hidden" value="classic">
             <button id="removeThemeBackground" class="button ghost small" type="button">Elimina solo fondale del tema</button>
-            <small>Seleziona un fondale dall'archivio. La cornice scelta rimane invariata.</small>
+            <small>Seleziona un fondale dall'archivio. La cornice scelta rimane invariata, anche se assente.</small>
           </div>
           <div class="theme-toolbar theme-search-only">
             <label>Cerca per disciplina, categoria o nome<input type="search" id="themeSearch" placeholder="Es. HRDD griglie, Dogsitter botanici, oro" autocomplete="off" aria-label="Cerca nell'archivio degli stili"></label>
@@ -484,9 +490,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.5"></script>
+  <script src="js/pdf-vector.js?v=4.9.7-ultra"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
-  <script src="js/premium-frames.js?v=4.9.5"></script>
-  <script src="js/app.js?v=4.9.5"></script>
+  <script src="js/premium-frames.js?v=4.9.7-ultra"></script>
+  <script src="js/app.js?v=4.9.7-ultra"></script>
 </body>
 </html>

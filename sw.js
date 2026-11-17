@@ -1,5 +1,5 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.5";
+const VERSION = "4.9.7-ultra";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
 const CACHE = `${PREFIX}${VERSION}`;
@@ -20,7 +20,7 @@ self.addEventListener("install", event=>event.waitUntil((async()=>{
     const app=await (await cache.match(urlFor(versioned("./js/app.js")))).text();
     if (!app.includes(`const STUDIO_VERSION = "${VERSION}";`)) throw new Error("JavaScript non aggiornato");
     const frames=await (await cache.match(urlFor(versioned("./js/premium-frames.js")))).text();
-    if(!frames.includes(`K9_FRAME_VERSION = "${VERSION}"`))throw new Error("Cornici non aggiornate");
+    if(!frames.includes(`K9_FRAME_VERSION = "${VERSION}"`) || (frames.match(/data:image\/png;base64,/g)||[]).length!==40)throw new Error("Archivio cornici Ultra incompleto");
     const photos=await (await cache.match(urlFor("./js/realistic-backgrounds.js?v=4.9.4"))).text();
     if(!photos.includes(`K9_REALISTIC_VERSION = "4.9.4";`) || (photos.match(/data:image\/jpeg;base64,/g)||[]).length!==120) throw new Error("Archivio fondali incompleto");
   } catch(error) {await caches.delete(CACHE);throw error;}
