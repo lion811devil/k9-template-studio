@@ -595,3 +595,9 @@ body{min-height:0}
 
 /* 4.9.18: due filtri compatti, senza alterare l’anteprima fissa. */
 .frame-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.frame-filters label{min-width:0}.frame-filters select{width:100%;min-width:0}.quick-pdf-actions,.finish-actions{grid-template-columns:1fr}.finish-actions .button{width:100%}
+
+/* 4.9.19: cursori nativi, precisione e area di contatto su smartphone. */
+input[type="range"]{touch-action:none;min-width:0;box-sizing:border-box;user-select:none;-webkit-user-select:none}
+input[type="range"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+.range-row output{white-space:nowrap;flex-shrink:0}
+@media (pointer:coarse){input[type="range"],.position-row input[type="range"]{height:44px;min-height:44px}}
