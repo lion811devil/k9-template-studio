@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.18-clean-studio">
+  <link rel="stylesheet" href="css/style.css?v=4.9.19-precision-controls">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.18-clean-studio</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.19-precision-controls</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -21,7 +21,7 @@
       <div id="status" class="status preview-feedback is-idle" role="status" aria-live="polite">Pronto</div>
       <div class="preview-mini-tools">
         <button id="downloadPdf" class="button primary pdf-button" type="button">Scarica PDF</button>
-        <button id="togglePreviewGrid" class="button ghost small" type="button" aria-pressed="false" aria-label="Griglia e allineamento magnetico" title="Attiva la griglia e l’aggancio dei cursori di posizione">Griglia</button>
+        <button id="togglePreviewGrid" class="button ghost small" type="button" aria-pressed="false" aria-label="Griglia di riferimento" title="Mostra la griglia senza spostare gli elementi">Griglia</button>
       </div>
     </section>
 
@@ -224,7 +224,7 @@
                 <option value="none">Nessuna</option><option value="topline">Linee cerimoniali</option><option value="arch">Arco</option><option value="petals">Petali</option><option value="laurel">Alloro</option><option value="filigree">Filigrana</option><option value="crown">Corona geometrica</option><option value="diamonds">Rombi</option><option value="rays">Raggi</option><option value="radial">Archi concentrici</option><option value="rings">Cerchi</option><option value="columns">Colonne</option><option value="sideband">Fasce laterali</option><option value="stripes">Strisce</option><option value="lines">Righe sottili</option><option value="steps">Angoli a gradini</option><option value="network">Rete geometrica</option><option value="grid">Griglia</option><option value="tiles">Mosaico</option><option value="diagonal">Tagli diagonali</option><option value="waves">Onde</option><option value="contours">Curve di livello</option><option value="ribbon">Nastro</option><option value="imperial">Imperiale</option><option value="baroque">Cerimoniale</option><option value="deco">Art déco</option><option value="academy">Accademia</option><option value="sash">Fasce diagonali</option><option value="facet">Poligoni corporate</option><option value="tactical">Tattico</option><option value="rescue">Soccorso</option><option value="techpro">Tecnico professionale</option><option value="editorial">Editoriale</option><option value="medallion">Albo d’onore</option><option value="folio">Diploma fine</option><option value="regalia">Regalia</option><option value="guilloche">Guilloché</option><option value="rosette">Rosone d’autore</option><option value="venetian">Veneziano</option><option value="renaissance">Rinascimento</option><option value="laurelSeal">Laurea d’onore</option><option value="engraved">Incisione nobile</option><option value="cameo">Cammeo</option><option value="lattice">Merletto geometrico</option><option value="fanDeco">Déco ventaglio</option><option value="pearl">Perla</option><option value="ribbonSeal">Nastro d’onore</option><option value="aurora">Aurora</option><option value="prism">Prisma</option><option value="horizon">Orizzonte</option><option value="origami">Origami</option><option value="monolith">Monolite</option><option value="ascent">Ascesa</option><option value="folioModern">Portfolio</option><option value="spectrum">Spettro</option><option value="arcadia">Arcadia</option><option value="bridge">Ponte istituzionale</option><option value="ripple">Onde d’acciaio</option><option value="minimalLux">Linea esclusiva</option><option value="command">Comando K9</option><option value="fieldMap">Cartografia SAR</option><option value="radar">Radar Detection</option><option value="signal">Segnale operativo</option><option value="compass">Bussola SAR</option><option value="trace">Traccia olfattiva</option><option value="hexTech">Esagono tecnico</option><option value="shieldPro">Scudo professionale</option><option value="pulse">Impulso</option><option value="gridPro">Coordinate</option><option value="mountain">Vetta</option><option value="current">Corrente</option>
               <option value="signet">Sigillo notarile</option><option value="silk">Seta cerimoniale</option><option value="archivist">Archivio storico</option><option value="rational">Razionalista</option><option value="brocade">Broccato</option><option value="sundial">Meridiana</option><option value="inlay">Intarsio</option><option value="emboss">Rilievo nobile</option><option value="botanical">Erbario inciso</option><option value="bookplate">Ex libris</option><option value="rivet">Rivetto tecnico</option><option value="parallels">Parallele</option><option value="marquetry">Marqueterie</option><option value="palazzo">Palazzo</option><option value="cadenza">Cadenza</option><option value="keystone">Chiave di volta</option><option value="ribbonFold">Nastro ripiegato</option><option value="folioTab">Segnalibro</option><option value="chevronRail">Binario operativo</option><option value="relay">Relè SAR</option><option value="scanline">Scansione HRDD</option><option value="ledger">Registro d’onore</option><option value="starChart">Carta stellare</option><option value="quartz">Quarzo</option><option value="weave">Trama d’autore</option><option value="wreathMedal">Medaglia civica</option><option value="folioRail">Margine editoriale</option><option value="aureole">Aureola d’onore</option><option value="magistraleUHD">Magistrale</option><option value="senatoUHD">Senato</option><option value="noirUHD">Prestigio noir</option><option value="atlasUHD">Atlante prime</option><option value="dogeUHD">Doge</option><option value="vellumUHD">Pergamena editoriale</option><option value="orbitaleUHD">Orbitale</option><option value="sentinelUHD">Sentinella</option><option value="triageUHD">Triage SAR</option><option value="forenseUHD">Forense</option><option value="heliosUHD">Helios</option><option value="mintUHD">Prestige mint</option><option value="spectrumUHD">Spectrum tech</option><option value="vettaUHD">Vetta civica</option><option value="mareaUHD">Marea</option><option value="opaleUHD">Opale</option><option value="florealeUHD">Floreale nobile</option><option value="palinsestoUHD">Palinsesto</option><option value="incisioneUHD">Incisione blu</option><option value="prismaUHD">Prisma nobile</option><option value="notarileUHD">Notarile</option><option value="ducalPro">Ducale</option><option value="silhouettePro">Silhouette</option><option value="arcTriomphePro">Arco di trionfo</option><option value="mosaicPro">Mosaico bizantino</option><option value="engravedVinePro">Vite ornamentale</option><option value="fleurPro">Fleur de lys</option><option value="crownRibbonPro">Corona di merito</option><option value="quillPro">Penna d’autore</option><option value="laureatePro">Laureato</option><option value="crestPro">Stemma d’onore</option><option value="terracesPro">Terrazze</option><option value="vectorCutPro">Vettore</option><option value="foldedPagePro">Piega editoriale</option><option value="crescentPro">Luna crescente</option><option value="modularPro">Modulo</option><option value="contourFieldPro">Profilo di terreno</option><option value="rescueBandPro">Unità soccorso</option><option value="trackRoutePro">Percorso operativo</option><option value="sensorPro">Sensore</option><option value="coordinateLPro">Riferimento forense</option><option value="cedarPro">Cedro</option><option value="tesseraPro">Tessera</option><option value="lacquerPro">Lacca</option><option value="halftonePro">Mezzatinta</option><option value="sigApex">Apex Command</option><option value="sigTrail">K9 Trace</option><option value="sigRescue">Rescue Beacon</option><option value="sigForensic">Forensic Evidence</option><option value="sigNight">Night Recon</option><option value="sigAurum">Aurum Intaglio</option><option value="sigChateau">Château</option><option value="sigLumiere">Lumière</option><option value="sigPorcelain">Porcellana</option><option value="sigEclipse">Eclisse</option><option value="sigDiplomat">Diplomat</option><option value="sigAlma">Alma Mater</option><option value="sigMonograph">Monograph</option><option value="sigHelix">Helix Research</option><option value="sigMarble">Marmo di Carrara</option><option value="sigHorizon">Horizon Relief</option><optgroup label="Mantrailing"><option value="k9mt01">Trail Command</option><option value="k9mt02">Urban Track</option><option value="k9mt03">Night Scent</option><option value="k9mt04">Forest Line</option><option value="k9mt05">Compass Elite</option><option value="k9mt06">Route of Honor</option><option value="k9mt07">Alpine Pursuit</option><option value="k9mt08">Trail Atlas</option><option value="k9mt09">Scent Corridor</option><option value="k9mt10">Operational Track</option><option value="k9mt11">Pathfinder</option><option value="k9mt12">K9 Meridian</option><option value="k9mt13">Silent Trail</option><option value="k9mt14">Trail Heritage</option><option value="k9mt15">Waypoint</option><option value="k9mt16">Terra Incognita</option><option value="k9mt17">Street Grid</option><option value="k9mt18">Ridge Patrol</option><option value="k9mt19">Trail Compass</option><option value="k9mt20">Scent Navigator</option><option value="k9mt21">Field Notes</option><option value="k9mt22">Trail Ribbon</option><option value="k9mt23">Map of Merit</option><option value="k9mt24">Olfactory Journey</option><option value="k9mt25">Search Horizon</option><option value="k9mt26">Trail Expedition</option><option value="k9mt27">Trace &amp; Honor</option><option value="k9mt28">K9 Cartographer</option><option value="k9mt29">Trail Vanguard</option><option value="k9mt30">Mantrailing Laureate</option></optgroup><optgroup label="HRDD"><option value="k9hr01">Forensic Command</option><option value="k9hr02">Evidence Archive</option><option value="k9hr03">Recovery Grid</option><option value="k9hr04">Stratigraphy</option><option value="k9hr05">Forensic Meridian</option><option value="k9hr06">Site Survey</option><option value="k9hr07">Silent Recovery</option><option value="k9hr08">Forensic Atlas</option><option value="k9hr09">Evidence Corridor</option><option value="k9hr10">Scene Documentation</option><option value="k9hr11">Ground Recon</option><option value="k9hr12">Recovery Protocol</option><option value="k9hr13">Forensic Ledger</option><option value="k9hr14">HRDD Honor</option><option value="k9hr15">Site Marker</option><option value="k9hr16">Layer Analysis</option><option value="k9hr17">Sector Survey</option><option value="k9hr18">Forensic Field</option><option value="k9hr19">Recovery Compass</option><option value="k9hr20">Evidence Path</option><option value="k9hr21">Field Register</option><option value="k9hr22">Forensic Insignia</option><option value="k9hr23">Archive of Merit</option><option value="k9hr24">Subsurface</option><option value="k9hr25">Recovery Horizon</option><option value="k9hr26">Search Sector</option><option value="k9hr27">Forensic Distinction</option><option value="k9hr28">Evidence Matrix</option><option value="k9hr29">HRDD Vanguard</option><option value="k9hr30">Recovery Laureate</option></optgroup><optgroup label="Detection"><option value="k9dt01">Detection Command</option><option value="k9dt02">Target Scent</option><option value="k9dt03">Olfactory Precision</option><option value="k9dt04">Scent Dynamics</option><option value="k9dt05">Sensor Elite</option><option value="k9dt06">Detection Honors</option><option value="k9dt07">Signal Vector</option><option value="k9dt08">Detection Atlas</option><option value="k9dt09">Scent Channel</option><option value="k9dt10">Alert Response</option><option value="k9dt11">Precision Array</option><option value="k9dt12">Detection Meridian</option><option value="k9dt13">Silent Signal</option><option value="k9dt14">Detection Heritage</option><option value="k9dt15">Target Lock</option><option value="k9dt16">Scent Spectrum</option><option value="k9dt17">Detection Matrix</option><option value="k9dt18">Signal Field</option><option value="k9dt19">Olfactory Compass</option><option value="k9dt20">Scent Navigator</option><option value="k9dt21">Detection Log</option><option value="k9dt22">Detection Insignia</option><option value="k9dt23">Precision Merit</option><option value="k9dt24">Scent Flow</option><option value="k9dt25">Signal Horizon</option><option value="k9dt26">Detection Lab</option><option value="k9dt27">Alert &amp; Honor</option><option value="k9dt28">Sensor Network</option><option value="k9dt29">Detection Vanguard</option><option value="k9dt30">Detection Laureate</option></optgroup><optgroup label="Dogsitter"><option value="k9ds01">Canine Care</option><option value="k9ds02">Companion Atelier</option><option value="k9ds03">Trusted Paws</option><option value="k9ds04">Garden of Care</option><option value="k9ds05">Care Signature</option><option value="k9ds06">Companion Honor</option><option value="k9ds07">Paw Heritage</option><option value="k9ds08">Canine Atelier</option><option value="k9ds09">Gentle Walk</option><option value="k9ds10">Care &amp; Trust</option><option value="k9ds11">Paw &amp; Leaf</option><option value="k9ds12">Companion House</option><option value="k9ds13">Tender Care</option><option value="k9ds14">Canine Heritage</option><option value="k9ds15">Paw Jewel</option><option value="k9ds16">Garden Companion</option><option value="k9ds17">Care Mosaic</option><option value="k9ds18">Walking Club</option><option value="k9ds19">Companion Compass</option><option value="k9ds20">Paw Journey</option><option value="k9ds21">Care Journal</option><option value="k9ds22">Ribbon of Trust</option><option value="k9ds23">Care Merit</option><option value="k9ds24">Gentle Flow</option><option value="k9ds25">Companion Horizon</option><option value="k9ds26">Canine Wellness</option><option value="k9ds27">Paw Distinction</option><option value="k9ds28">Care Collective</option><option value="k9ds29">Dogsitter Prestige</option><option value="k9ds30">Companion Laureate</option></optgroup></select></div>
             <label class="full-field range-row">
-              <span>Dimensione dei testi <output id="fontScaleValue">100%</output></span>
+              <span>Dimensione dei testi <output id="fontScaleValue" for="fontScale">100%</output></span>
               <input id="fontScale" type="range" min="85" max="110" value="100" step="1">
             </label>
           </div>
@@ -245,22 +245,22 @@
 
           <div id="backgroundTools" class="image-tools hidden">
             <label class="range-row">
-              <span>Opacità immagine caricata <output id="backgroundOpacityValue">100%</output></span>
+              <span>Opacità immagine caricata <output id="backgroundOpacityValue" for="backgroundOpacity">100%</output></span>
               <input id="backgroundOpacity" type="range" min="0" max="100" value="100">
             </label>
             <label class="range-row">
-              <span>Dimensione <output id="backgroundScaleValue">100%</output></span>
+              <span>Dimensione <output id="backgroundScaleValue" for="backgroundScale">100%</output></span>
               <input id="backgroundScale" type="range" min="50" max="180" value="100">
             </label>
             <div class="position-controls" aria-label="Posizione sfondo">
               <label class="range-row position-row">
-                <span>Posizione orizzontale <output id="backgroundXValue">50%</output></span>
-                <input id="backgroundX" type="range" min="0" max="100" value="50">
+                <span>Posizione orizzontale <output id="backgroundXValue" for="backgroundX">50%</output></span>
+                <input id="backgroundX" type="range" min="0" max="100" value="50" step="0.1">
                 <small>Sinistra ↔ Destra</small>
               </label>
               <label class="range-row position-row">
-                <span>Posizione verticale <output id="backgroundYValue">50%</output></span>
-                <input id="backgroundY" type="range" min="0" max="100" value="50">
+                <span>Posizione verticale <output id="backgroundYValue" for="backgroundY">50%</output></span>
+                <input id="backgroundY" type="range" min="0" max="100" value="50" step="0.1">
                 <small>Alto ↕ Basso</small>
               </label>
             </div>
@@ -333,16 +333,16 @@
           <div class="position-controls wide" aria-label="Posizione e dimensione del blocco firme">
             <strong>Posizione e dimensione del blocco firme</strong>
             <label class="range-row">
-              <span>Dimensione <output id="signatureBlockScaleValue">100%</output></span>
+              <span>Dimensione <output id="signatureBlockScaleValue" for="signatureBlockScale">100%</output></span>
               <input id="signatureBlockScale" type="range" min="50" max="115" value="100" step="1">
             </label>
             <label class="range-row position-row">
-              <span>Spostamento orizzontale <output id="signatureBlockXValue">0%</output></span>
+              <span>Spostamento orizzontale <output id="signatureBlockXValue" for="signatureBlockX">0%</output></span>
               <input id="signatureBlockX" type="range" min="-100" max="100" value="0" step="1">
               <small>Sinistra ↔ Destra</small>
             </label>
             <label class="range-row position-row">
-              <span>Spostamento verticale <output id="signatureBlockYValue">0%</output></span>
+              <span>Spostamento verticale <output id="signatureBlockYValue" for="signatureBlockY">0%</output></span>
               <input id="signatureBlockY" type="range" min="-100" max="100" value="0" step="1">
               <small>Alto ↕ Basso</small>
             </label>
@@ -350,7 +350,7 @@
               <button id="resetSignatureBlock" class="button secondary" type="button">Posizione e dimensione iniziali</button>
               <button id="lockSignatureBlock" class="button lock-button" type="button" aria-pressed="false" aria-controls="signatureBlockScale signatureBlockX signatureBlockY resetSignatureBlock">Blocca firme</button>
             </div>
-            <small>I cursori spostano e ridimensionano insieme le firme, i ruoli, i nomi e le righe. Lo 0% indica la posizione iniziale; lo spostamento è proporzionale allo spazio disponibile sul foglio.</small>
+            <small>I cursori spostano e ridimensionano insieme le firme, i ruoli, i nomi e le righe. Lo 0% indica la posizione iniziale; lo spostamento è proporzionale allo spazio disponibile. La dimensione effettiva può essere limitata dai margini e dai testi.</small>
           </div>
 
           <div class="signature-fields wide">
@@ -439,19 +439,19 @@
 
           <div id="logoTools" class="image-tools hidden">
             <label class="range-row">
-              <span>Dimensione <output id="logoScaleValue">100%</output></span>
+              <span>Dimensione <output id="logoScaleValue" for="logoScale">100%</output></span>
               <input id="logoScale" type="range" min="20" max="300" value="100">
             </label>
 
             <div class="position-controls" aria-label="Posizione logo">
               <label class="range-row position-row">
-                <span>Posizione orizzontale <output id="logoXValue">50%</output></span>
-                <input id="logoX" type="range" min="0" max="100" value="50">
+                <span>Posizione orizzontale <output id="logoXValue" for="logoX">50%</output></span>
+                <input id="logoX" type="range" min="0" max="100" value="50" step="0.1">
                 <small>Sinistra ↔ Destra</small>
               </label>
               <label class="range-row position-row">
-                <span>Posizione verticale <output id="logoYValue">13%</output></span>
-                <input id="logoY" type="range" min="0" max="100" value="13">
+                <span>Posizione verticale <output id="logoYValue" for="logoY">13%</output></span>
+                <input id="logoY" type="range" min="0" max="100" value="13" step="0.1">
                 <small>Alto ↕ Basso</small>
               </label>
             </div>
@@ -511,9 +511,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.18-clean-studio"></script>
+  <script src="js/pdf-vector.js?v=4.9.19-precision-controls"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
   <script src="js/premium-frames.js?v=4.9.17-a4-personal"></script>
-  <script src="js/app.js?v=4.9.18-clean-studio"></script>
+  <script src="js/app.js?v=4.9.19-precision-controls"></script>
 </body>
 </html>

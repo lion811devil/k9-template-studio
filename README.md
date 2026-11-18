@@ -1,3 +1,15 @@
+# K9 Template Studio 4.9.19 — Precision Controls
+
+Aggiornamento cumulativo rispetto alla 4.9.17/4.9.18.
+- Tutti i 13 cursori condividono la stessa gestione di input e change.
+- Coordinate sfondo personale e loghi: passo 0,1%; nessun aggancio automatico alla griglia.
+- La griglia resta un riferimento esclusivamente visivo, non esportato.
+- Opacità, scala, posizione, blocchi e salvataggio restano indipendenti.
+- Le firme indicano la scala effettiva quando limitata dai margini.
+- Aggiornamento dell’anteprima per frame e salvataggio differito durante i movimenti.
+- Migliore area di contatto su dispositivi touch.
+- Nessun cambiamento agli asset e ai dati dei progetti.
+
 # K9 Template Studio — 4.9.18 Clean Studio
 
 Aggiornamento dalla repository 4.9.17 A4 Personal. Applicazione statica per GitHub Pages; nessun Supabase. L'archivio locale, i progetti, i modelli, la cronologia e il formato dei backup non cambiano.

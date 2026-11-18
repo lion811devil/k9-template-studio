@@ -1,5 +1,5 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.18-clean-studio";
+const VERSION = "4.9.19-precision-controls";
 const FRAME_VERSION = "4.9.17-a4-personal";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
