@@ -592,3 +592,6 @@ body{min-height:0}
 
 /* 4.9.5: controlli indipendenti, senza nuove fasce in anteprima. */
 .layer-controls{display:grid;gap:8px;padding:12px;border:1px solid #d8e3eb;border-radius:12px;background:#f5f8fb;margin-bottom:12px}.layer-controls strong{font-size:13px;color:#274058}.layer-controls small{font-size:11px;color:#566b7e}.layer-controls select{width:100%}.layer-divider{height:1px;background:#d8e3eb;margin:3px 0}
+
+/* 4.9.18: due filtri compatti, senza alterare l’anteprima fissa. */
+.frame-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.frame-filters label{min-width:0}.frame-filters select{width:100%;min-width:0}.quick-pdf-actions,.finish-actions{grid-template-columns:1fr}.finish-actions .button{width:100%}
