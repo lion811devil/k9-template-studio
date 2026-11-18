@@ -1,8 +1,8 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.17-a4-personal";
-  const FRAME_LIBRARY_VERSION = STUDIO_VERSION;
+  const STUDIO_VERSION = "4.9.18-clean-studio";
+  const FRAME_LIBRARY_VERSION = "4.9.17-a4-personal"; // asset invariati, versione indipendente
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -427,10 +427,18 @@
       finally {pendingEditorOperations--;setEditorBusy(false);if(dirty) scheduleAutosave();}
     };
   }
+  function trimExportCaches(){
+    const active=photoKeyFor(activeBackgroundId());
+    for(const [id] of photoDecoded)if(id!==active)photoDecoded.delete(id);
+    for(const [id,c] of photoLayers)if(id!==`${currentOrientation()==="portrait"?"P":"L"}|${active}`){c.width=c.height=1;photoLayers.delete(id);}
+    for(const c of thumbnailCache.values())c.width=c.height=1;
+    thumbnailCache.clear();
+  }
   function beginExport() {
     if (state.exporting || pendingEditorOperations || !state.initialized) { if (!state.exporting) setStatus("Completa prima l'operazione in corso"); return false; }
     clearTimeout(autosaveTimer);clearTimeout(settingsSaveTimer);saveSettings();
     if(dirty||pendingPreviewFrame)void persistCurrentSnapshot();
+    trimExportCaches();
     state.exporting=true;exportLock=true;
     document.activeElement?.blur();
     document.body.setAttribute("aria-busy","true");
@@ -477,7 +485,7 @@
 
   function applyBackgroundLockUI() {
     const locked = !!state.backgroundLocked;
-    ["backgroundOpacity","backgroundScale","backgroundX","backgroundY","fitBackground"].forEach(id => {
+    ["backgroundOpacity","backgroundScale","backgroundX","backgroundY","fitBackground","backgroundFile","removeBackground"].forEach(id => {
       const el = $(id);
       if (el) el.disabled = locked;
     });
@@ -565,7 +573,7 @@
     input.value=normalizeThemeOpacity(input.value);
     $("themeBackgroundOpacityValue").value=`${input.value}%`;
     input.disabled=state.themeBackgroundLocked;
-    $("resetThemeBackgroundOpacity").disabled=state.themeBackgroundLocked||input.value==="100";
+
   }
   function frameAlpha(){return Number(normalizeThemeOpacity($("frameOpacity").value))/100;}
   function syncFrameOpacity(){
@@ -574,41 +582,26 @@
     $("frameOpacityValue").value=`${input.value}%`;
     const absent=$("frameStyle").value==="none";
     input.disabled=absent||state.frameLocked;
-    $("resetFrameOpacity").disabled=absent||state.frameLocked||input.value==="100";
+
   }
 
   const PERSONAL_FRAME = "__personal_frame__";
   const frameCatalogItem = id => premiumFrameCatalog.find(item => item.id === id) || null;
-  const frameGroupEntries = group => premiumFrameCatalog.filter(item => item.group === group);
 
   function updateFrameNavigatorUI() {
-    const status = $("frameNavStatus");
-    const prev = $("prevFrame");
-    const next = $("nextFrame");
-    const current = frameCatalogItem($("frameStyle").value);
-    if ($("frameStyle").value===PERSONAL_FRAME) {
-      status.textContent = "Cornice personale · " + (state.personalFrameName || "PNG");
-      prev.disabled = next.disabled = true; return;
-    }
-    if (!current) {
-      if (status) status.textContent = "Seleziona una cornice per scorrere la disciplina corrente";
-      if (prev) prev.disabled = true;
-      if (next) next.disabled = true;
-      return;
-    }
-    const items = frameGroupEntries(current.group);
-    const index = Math.max(0, items.findIndex(item => item.id === current.id));
-    if (status) status.textContent = `${current.group} · ${index + 1} di ${items.length} · ${current.label}`;
-    const blocked = !!state.frameLocked || items.length <= 1;
-    if (prev) prev.disabled = blocked;
-    if (next) next.disabled = blocked;
+    const status=$("frameNavStatus"),prev=$("prevFrame"),next=$("nextFrame");
+    const current=frameCatalogItem($("frameStyle").value),items=filteredFrameEntries();
+    const index=items.findIndex(item=>item.id===current?.id);
+    const count=`${$("frameDiscipline").value} · ${items.length} cornici`;
+    status.textContent=index>=0?`${count} · ${index+1}/${items.length} · ${current.label}`:current?`${count} · attiva: ${current.label} (fuori filtro)` : $("frameStyle").value===PERSONAL_FRAME?`${count} · personale attiva` : count;
+    prev.disabled=next.disabled=state.frameLocked||!items.length||(items.length===1&&index===0);
   }
 
   function applyThemeBackgroundLockUI() {
     const locked = !!state.themeBackgroundLocked;
-    ["themeSearch","themeBackgroundOpacity","resetThemeBackgroundOpacity","removeThemeBackground","locateTheme"].forEach(id => {
+    ["themeSearch","themeBackgroundOpacity","removeThemeBackground","locateTheme"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked || (id==="resetThemeBackgroundOpacity" && $("themeBackgroundOpacity").value==="100") || (id==="removeThemeBackground" && activeBackgroundId()==="none") || (id==="locateTheme" && (!themePalettes[activeBackgroundId()] || archivedThemeIds.has(activeBackgroundId())));
+      if (el) el.disabled = locked || (id==="removeThemeBackground" && activeBackgroundId()==="none") || (id==="locateTheme" && (!themePalettes[activeBackgroundId()] || archivedThemeIds.has(activeBackgroundId())));
     });
     document.querySelectorAll('.theme-choice').forEach(btn => btn.disabled = locked);
     const btn = $("lockThemeBackground");
@@ -621,9 +614,10 @@
 
   function applyFrameLockUI() {
     const locked = !!state.frameLocked;
-    ["frameStyle","removeFrame","frameOpacity","resetFrameOpacity"].forEach(id => {
+    $("frameDiscipline").disabled=$("frameCollection").disabled=locked;
+    ["frameStyle","removeFrame","frameOpacity"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked || (id !== "frameStyle" && $("frameStyle").value === "none") || (id==="resetFrameOpacity" && $("frameOpacity").value==="100");
+      if (el) el.disabled = locked || (id !== "frameStyle" && $("frameStyle").value === "none");
     });
     const removeBtn = $("removeFrame");
     if (removeBtn) removeBtn.disabled = locked || $("frameStyle").value === "none";
@@ -635,37 +629,18 @@
     }
     $("personalFrameFile").disabled=locked;
     $("loadPersonalFrame").disabled=locked;
-    $("fitPersonalFrame").disabled=locked || $("frameStyle").value!==PERSONAL_FRAME || !state.personalFrameImage;
+
     $("personalFrameInfo").textContent=state.personalFrameImage ? `${state.personalFrameName} · ${state.personalFrameImage.naturalWidth} × ${state.personalFrameImage.naturalHeight} px` : "Nessuna cornice personale caricata";
     updateFrameNavigatorUI();
   }
 
   function moveFrameSelection(step) {
-    if (state.frameLocked || $("frameStyle").value===PERSONAL_FRAME) return;
-    const current = frameCatalogItem($("frameStyle").value);
-    if (!current) {
-      const first = premiumFrameCatalog[0];
-      if (!first) return;
-      $("frameStyle").value = first.id;
-      frameFailures.delete(first.id);
-      syncDesignUI();
-      saveSettings();
-      render();
-      setStatus(`Cornice «${first.label}» caricata`);
-      return;
-    }
-    const items = frameGroupEntries(current.group);
-    if (!items.length) return;
-    const index = items.findIndex(item => item.id === current.id);
-    const nextIndex = (index + step + items.length) % items.length;
-    const target = items[nextIndex];
-    if (!target) return;
-    $("frameStyle").value = target.id;
-    frameFailures.delete(target.id);
-    syncDesignUI();
-    saveSettings();
-    render();
-    setStatus(`Cornice «${target.label}» caricata`);
+    if(state.frameLocked)return;
+    const items=filteredFrameEntries();if(!items.length)return;
+    const index=items.findIndex(item=>item.id===$("frameStyle").value);
+    const target=items[index<0?(step<0?items.length-1:0):(index+step+items.length)%items.length];
+    $("frameStyle").value=target.id;frameFailures.delete(target.id);
+    syncDesignUI();saveSettings();render();setStatus(`Cornice «${target.label}» caricata`);
   }
   function loadSettings() {
     try {
@@ -682,6 +657,7 @@
       state.frameLocked = saved.frameLocked === true;
       $("autoCertificateCode").checked = saved.autoCertificateCode !== false;
       for (const id of designIds.filter(k => k !== "designTheme")) {
+        if(id==="frameStyle"){selectFrameValue(saved[id]||"none");continue;}
         if (saved[id] !== undefined) $(id).value = ["themeBackgroundOpacity","frameOpacity"].includes(id) ? normalizeThemeOpacity(saved[id]) : saved[id];
       }
       if(!$("frameStyle").value)$("frameStyle").value="none";
@@ -923,20 +899,24 @@
   const premiumFrames = [["none","Senza cornice"], ...premiumFrameCatalog.map(item => [item.id, item.label])];
   const frameKeys=new Set([...premiumFrames.map(([id])=>id),PERSONAL_FRAME]);
   // La selezione della cornice non è derivata dal tema, nemmeno in migrazione.
-  function populateFrameOptions(){
-    const select=$("frameStyle"); if(!select) return;
-    const current=select.value || "none";
+  function filteredFrameEntries(){
+    const group=$("frameDiscipline").value, collection=$("frameCollection").value;
+    return premiumFrameCatalog.filter(item=>item.group===group && (collection==="all" || (collection==="duo"?!!item.a4Block:!item.a4Block)));
+  }
+  function populateFrameOptions(current=$("frameStyle").value || "none"){
+    const select=$("frameStyle"), items=filteredFrameEntries();
     select.replaceChildren(new Option("Senza cornice","none"));
     if(state.personalFrameImage)select.add(new Option("Personale · "+state.personalFrameName,PERSONAL_FRAME));
-    for(const group of ["Mantrailing","HRDD","Detection","Dogsitter"]){
-      const items=premiumFrameCatalog.filter(item=>item.group===group);
-      if(!items.length) continue;
-      const optgroup=document.createElement("optgroup");
-      optgroup.label=`${group} · ${items.length} cornici`;
-      for(const item of items) optgroup.appendChild(new Option(item.label,item.id));
-      select.appendChild(optgroup);
-    }
+    const active=frameCatalogItem(current);
+    if(active&&!items.some(item=>item.id===current))select.add(new Option("Attiva · "+active.label,current));
+    for(const item of items)select.add(new Option(item.label,item.id));
     select.value=frameKeys.has(current)?current:"none";
+    if(select.selectedIndex<0)select.value="none";
+  }
+  function selectFrameValue(id){
+    const item=frameCatalogItem(id);
+    if(item){$("frameDiscipline").value=item.group;const collection=$("frameCollection");if(collection.value!=="all" && (collection.value==="duo")!==!!item.a4Block)collection.value=item.a4Block?"duo":"legacy";}
+    populateFrameOptions(id);
   }
   function migrateLayers(form,themeId){
     const f={...form};
@@ -1193,1013 +1173,6 @@
     syncGallerySelection();
   }
 
-  // Motivi leggeri ai margini: conservano leggibili i testi A4 in ogni orientamento.
-  // Sono disegnati anche in drawGraphics(), quindi compaiono in PDF e PNG.
-  // 4.9.2: original illustrated, resolution-independent artwork. All dimensions
-  // are in stage units; the same paths are drawn at preview and print resolution.
-  function illustratedDiscipline(theme, A, D, n, discipline, backgroundAlpha=1) {
-    const u=Math.min(W,H)/1190, w=W/u,h=H/u, portrait=h>w;
-    const pale='#ffffff', rail=portrait?134:168, style=n%10, edition=Math.floor(n/10)%3;
-    const name=discipline==='SAR · ricerca e soccorso'?'RICERCA E SOCCORSO':discipline==='K9 tattici generali'?'UNITÀ CINOFILA':discipline.toUpperCase();
-    const legacy=n>=30, sar=discipline==='SAR · ricerca e soccorso', generic=discipline==='K9 tattici generali';
-    const mt=discipline==='Mantrailing'||discipline==='SAR · ricerca e soccorso'||discipline==='K9 tattici generali', hr=discipline==='HRDD', dt=discipline==='Detection', ds=discipline==='Dogsitter';
-    ctx.save();ctx.scale(u,u);ctx.lineCap='round';ctx.lineJoin='round';
-    const path=(d,c,fill=true,z=2,alpha=1)=>{ctx.save();ctx.globalAlpha*=alpha;ctx.lineWidth=z;ctx[fill?'fillStyle':'strokeStyle']=c;const p=new Path2D(d);fill?ctx.fill(p):ctx.stroke(p);ctx.restore();};
-    const rect=(x,y,X,Y,c,a=1)=>{ctx.save();ctx.globalAlpha*=a;ctx.fillStyle=c;ctx.fillRect(x,y,X,Y);ctx.restore();};
-    const line=(x,y,X,Y,c=A,z=1.6,a=1)=>path(`M${x} ${y}L${X} ${Y}`,c,false,z,a);
-    const circle=(x,y,r,c=A,fill=false,z=2,a=1)=>{ctx.save();ctx.globalAlpha*=a;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx[fill?'fillStyle':'strokeStyle']=c;ctx.lineWidth=z;fill?ctx.fill():ctx.stroke();ctx.restore();};
-    const at=(x,y,s,f,flip=1)=>{ctx.save();ctx.translate(x,y);ctx.scale(s*flip,s);try{f();}finally{ctx.restore();}};
-    const text=(s,x,y,size,c,weight='600',family='Arial')=>{ctx.save();ctx.fillStyle=c;ctx.font=`${weight} ${size}px ${family}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();};
-    const frame=(m,c=A,z=2,a=1)=>path(`M${m} ${m}H${w-m}V${h-m}H${m}Z`,c,false,z,a);
-    const gradient=(x,y,X,Y,c1,c2)=>{const g=ctx.createLinearGradient(x,y,X,Y);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;};
-    // Anatomically recognisable working dog: head lowered, tail, harness and four limbs.
-    // A second, seated dog and a spaniel head give each discipline its own imagery.
-    function dog(c=A,mode=0,detail=pale){
-      if(mode===1){
-        path('M-45 45 Q-55 28 -47 4 L-32 -15 -27 -48 -9 -25 Q6 -29 18 -17 L34 -11 45 -4 41 7 23 12 19 28 Q37 48 41 69 L61 74 61 83 18 83 4 56 -6 73 -28 75 -30 83 -59 83 -59 73 -44 66 Q-64 66 -76 55 -83 45 -78 35 -71 54 -53 51Z',c);
-        path('M-26 -22L-24 -40 -15 -23M-20 4Q0 18 22 11M-38 26Q-13 27 8 20M6 34Q-12 51 -3 65',detail,false,2.7,.8);circle(12,-12,2.5,detail,true);path('M41 -7L46 -4 42 1',D);
-      }else if(mode===2){
-        path('M-61 31 Q-71 4 -51 -23 Q-42 -49 -12 -57 Q21 -63 40 -42 Q52 -23 51 -10 L76 7 Q81 16 67 25 L36 31 Q28 51 4 62 L-22 80 -66 80 Q-49 62 -54 48Z',c);
-        path('M-35 -45 Q-58 -38 -62 -10 Q-67 25 -49 39 Q-32 42 -29 15 Q-24 -11 -12 -34Z',D,true,2,.58);
-        path('M-25 -30Q-33 -1 -41 17M-16 35Q13 47 35 30M-34 55L15 62',detail,false,3,.85);circle(31,-16,3,detail,true);path('M72 5L81 11 74 17 65 13Z',D);
-      }else{
-        path('M-90 1 Q-108 -9 -119 -30 Q-122 -36 -126 -31 Q-125 -10 -103 13 L-88 20 Q-82 32 -75 39 L-87 69 -105 75 -105 84 -78 84 -64 48 -53 36 -30 42 7 38 24 37 36 49 42 76 62 80 65 88 36 88 25 75 16 52 5 47 -1 63 -12 80 -28 80 -29 88 -3 88 17 68 31 51 44 35 Q52 24 56 10 L72 2 91 7 106 1 118 -2 122 -10 107 -15 86 -19 79 -30 66 -35 49 -62 46 -35 34 -28 Q9 -18 -17 -21 L-54 -22 Q-77 -22 -90 1Z',c);
-        path('M49 -34L51 -50 61 -35M48 -14Q57 0 75 1M-69 7Q-54 21 -45 36M-14 -16L-4 35M-14 -16Q8 -29 27 -15L18 35M-6 5L22 1',detail,false,3,.9);circle(80,-18,2.8,detail,true);path('M116 -13L123 -10 119 -5 111 -8Z',D);
-      }
-    }
-    function handler(c){path('M-12 -62A11 11 0 1 1 10 -62A11 11 0 1 1 -12 -62 M-16 -48L12 -48 23 -9 43 3 39 12 13 2 5 -18 8 21 25 69 13 75 -8 39 -24 77 -38 73 -18 25 -23 -4 -36 15 -45 11 -29 -40Z',c);path('M-17 -38L11 -39M-16 -17L8 -17',pale,false,2,.8);}
-    function paw(c){for(const [x,y,rx,ry,a] of [[-25,-15,9,14,-.45],[-9,-31,10,15,-.15],[11,-31,10,15,.15],[27,-14,9,14,.45]]){ctx.save();ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,a,0,Math.PI*2);ctx.fill();ctx.restore();}path('M-28 22Q-37 4 -15 -6Q0 -17 15 -6Q37 4 28 22Q23 34 8 26Q0 21 -8 26Q-23 34 -28 22Z',c);}
-    function tree(x,y,s,c){at(x,y,s,()=>{path('M0 -48L-24 -10 -12 -10 -31 15 -15 15 -39 43 -5 43 -5 55 5 55 5 43 39 43 15 15 31 15 12 -10 24 -10Z',c);});}
-    function compass(c){circle(0,0,50,c,false,2);circle(0,0,43,c,false,1);for(let i=0;i<16;i++){let a=i*Math.PI/8;line(Math.cos(a)*43,Math.sin(a)*43,Math.cos(a)*48,Math.sin(a)*48,c,1);}path('M0 -39L11 -8 39 0 11 8 0 39 -11 8 -39 0 -11 -8Z',c,false,2);path('M0 -39L11 -8 0 0 -11 -8Z',c);text('N',0,-62,12,c,'700');}
-    function scent(c){for(let k=0;k<4;k++)path(`M-45 ${-28+k*17} C-17 ${-53+k*17} 5 ${-4+k*17} 46 ${-34+k*17}`,c,false,2.3-k*.26,.9);for(let k=0;k<9;k++)circle(28+(k%3)*13,-24+Math.floor(k/3)*15,2+(k%2),c,true,1,.8);}
-    function terrain(c){for(let k=0;k<6;k++){let y=-55+k*19;path(`M-66 ${y}Q-43 ${y-26} -13 ${y-5}T36 ${y+1}T69 ${y-19}`,c,false,1.8,.55);} }
-    function grid(c){for(let k=-60;k<=60;k+=20){line(k,-58,k,58,c,1,.55);line(-60,k,60,k,c,1,.55);}path('M-60 -40V-60H-40M40 -60H60V-40M60 40V60H40M-40 60H-60V40',c,false,3);}
-    function flag(c){path('M-30 55V-48H37L13 -29 37 -10H-30',c,false,3);circle(-30,-48,3,c,true);path('M-12 53L0 28 12 53Z',c);text('01',0,43,12,pale,'700');}
-    function boxSearch(c){for(let k=0;k<3;k++){let x=-66+k*48;path(`M${x} 18l35 -9 12 13 -35 10Z M${x} 18v27l12 11 35 -10V22M${x+12} 32v24`,c,false,2.8);circle(x+23,22,3,c,true);}}
-    function home(c){path('M-65 -9L0 -61 65 -9M-49 -14V57H49V-14M-17 57V23Q0 6 17 23V57',c,false,4);at(0,-8,.42,()=>paw(c));path('M-62 57H62',c,false,3);}
-    function collar(c){path('M-63 8Q-61 -30 0 -29Q61 -30 63 8Q61 35 0 35Q-61 35 -63 8Z M-49 8Q-42 -15 0 -15Q42 -15 49 8Q42 20 0 20Q-42 20 -49 8Z',c,false,3);path('M-12 22H12V41H-12Z',c,false,3);circle(0,49,9,c,false,2);path('M10 52Q42 65 64 42Q80 24 62 -2',c,false,3);}
-    function laurel(c){for(const side of [-1,1])at(0,0,1,()=>{path('M0 53Q-56 29 -51 -44',c,false,2);for(let k=0;k<6;k++){let x=-20-k*6,y=42-k*16;path(`M${x} ${y}q-25 -8 -13 -24q14 3 13 24M${x} ${y}q23 -7 17 -22q-14 1 -17 22`,c,true,1,.87);}},side);}
-    // Distinct scenes, not merely icons or changed palettes. Each is rendered at
-    // the top or side of the sheet on a locally clipped illustration panel.
-    function scene(kind,c,secondary){
-      if(sar){
-        path('M-68 24L-32 -33 -10 -6 17 -48 66 24Z',secondary,false,2.5);path('M-68 25H66',secondary,false,1.5);at(-18,13,.44,()=>dog(c,0));path('M42 -54V-22M26 -38H58',c,false,5);if(kind%2)at(35,48,.3,()=>compass(c));else circle(42,-38,20,c,false,1.5);
-      }else if(generic){
-        at(-18,3,.54,()=>dog(c,kind%3));path('M35 48L47 8 59 48Z M31 48H63',secondary,false,2.8);path('M31 -35L47 -45 63 -35V-12L47 0 31 -12Z',secondary,false,2);path('M39 -22L45 -16 56 -29',c,false,2.4);
-      }else if(mt){
-        if(kind===0){terrain(secondary);at(-42,-20,.54,()=>handler(c));at(24,10,.46,()=>dog(c,0));path('M-21 -14Q4 -23 10 5',c,false,2.2);}
-        else if(kind===1){terrain(secondary);for(let k=0;k<4;k++)tree(-50+k*32,-36+(k%2)*12,.36,secondary);at(0,11,.49,()=>dog(c,0));path('M-55 54Q-27 38 5 52T59 42',c,false,2);}
-        else if(kind===2){grid(secondary);path('M-57 42L-28 22 -34 -9 12 -18 22 12 54 -34',c,false,3.5);for(const [x,y] of [[-57,42],[-34,-9],[22,12],[54,-34]])circle(x,y,5,c,true);at(40,43,.39,()=>compass(c));}
-        else if(kind===3){for(let k=0;k<5;k++)path(`M${-60+k*25} -52v${39+k%2*14}h${17+k%2*6}v${-39-k%2*14}Z`,secondary,true,1,.7);at(0,21,.5,()=>dog(c,0));path('M-60 53H60',c,false,2);}
-        else {at(0,-9,.63,()=>dog(c,2));at(0,46,.45,()=>compass(secondary));}
-      }else if(hr){
-        if(kind===0){grid(secondary);at(-6,11,.49,()=>dog(c,0));at(44,-34,.45,()=>flag(c));}
-        else if(kind===1){terrain(secondary);for(let k=0;k<5;k++)line(-62,30+k*7,62,30+k*7,secondary,1.3);at(-5,-3,.45,()=>dog(c,0));at(49,10,.48,()=>flag(c));}
-        else if(kind===2){grid(secondary);at(-26,-8,.7,()=>flag(c));path('M3 -49H59V40H3Z M13 -35H49M13 -22H49M13 -9H49M13 4H40',c,false,2);circle(39,32,15,c,false,2);}
-        else if(kind===3){path('M-60 -40H-2L8 -30H60V48H-60Z M-60 -19H60',secondary,false,3);at(0,9,.49,()=>dog(c,0));circle(43,-31,8,c,false,2);}
-        else{at(0,-5,.6,()=>dog(c,1));at(44,-37,.42,()=>flag(secondary));line(-58,55,58,55,c,2);}
-      }else if(dt){
-        if(kind===0){at(-6,-15,.52,()=>dog(c,0));at(1,29,.84,()=>boxSearch(secondary));}
-        else if(kind===1){at(-35,0,.55,()=>dog(c,2));at(37,-10,.63,()=>scent(secondary));circle(53,-37,5,c,false,2);}
-        else if(kind===2){for(let r=15;r<=58;r+=14)circle(0,0,r,secondary,false,1.5);line(-65,0,65,0,secondary,1);line(0,-65,0,65,secondary,1);at(0,0,.48,()=>dog(c,2));}
-        else if(kind===3){at(-31,-5,.57,()=>dog(c,1));at(35,17,.55,()=>boxSearch(secondary));path('M19 -21L29 -11 50 -35',c,false,4);}
-        else{at(-14,0,.53,()=>dog(c,2));for(let k=0;k<5;k++)circle(48,-37+k*17,3+k*.7,secondary,true);}
-      }else if(ds){
-        if(kind===0){at(10,-15,.83,()=>home(secondary));at(-13,16,.47,()=>dog(c,1));}
-        else if(kind===1){at(-34,-20,.54,()=>handler(secondary));at(24,14,.46,()=>dog(c,0));path('M-14 -7Q10 -23 25 7',c,false,2.3);}
-        else if(kind===2){at(0,0,.95,()=>laurel(secondary));at(0,-5,.86,()=>paw(c));}
-        else if(kind===3){at(0,-16,.65,()=>dog(c,2));at(0,42,.73,()=>collar(secondary));}
-        else{at(-27,-9,.61,()=>dog(c,1));at(29,7,.49,()=>dog(secondary,2));path('M-54 53Q0 44 54 53',c,false,2);}
-      }
-    }
-    function badge(x,y,r,kind,form,dark=false){at(x,y,r/73,()=>{
-      const base=dark?D:pale, fg=dark?pale:D, secondary=dark?A:A;
-      if(form===0){circle(0,0,72,base,true);circle(0,0,70,A,false,2.8);circle(0,0,64,fg,false,1,.7);}
-      if(form===1){path('M0 -76L62 -54V22Q55 51 0 76Q-55 51 -62 22V-54Z',base);path('M0 -76L62 -54V22Q55 51 0 76Q-55 51 -62 22V-54Z',A,false,3);path('M0 -67L54 -48V20Q47 47 0 66Q-47 47 -54 20V-48Z',fg,false,1,.75);}
-      if(form===2){path('M-60 -70H60L74 -56V56L60 70H-60L-74 56V-56Z',base);path('M-60 -70H60L74 -56V56L60 70H-60L-74 56V-56Z',A,false,3);path('M-57 -62H57L65 -54V54L57 62H-57L-65 54V-54Z',fg,false,1,.65);}
-      if(form===3){path('M-67 67V-10Q-67 -70 0 -74Q67 -70 67 -10V67Z',base);path('M-67 67V-10Q-67 -70 0 -74Q67 -70 67 -10V67Z',A,false,3);}
-      at(0,0,.86,()=>scene(kind,fg,secondary));
-    });}
-    const decorative=(x,y,c,kind)=>at(x,y,.58,()=>{if(mt){kind%2?compass(c):terrain(c);}else if(hr){kind%2?flag(c):grid(c);}else if(dt){kind%2?scent(c):boxSearch(c);}else{kind%2?paw(c):laurel(c);}});
-    // Restrict substantial artwork to peripheral zones. No fixed graphic under
-    // the editable title, name, body, course or signature text.
-    function panel(side,from,to,width,dark){const x=side===0?0:w-width;const g=gradient(x,0,x+width,0,side===0?(dark?D:A):A,side===0?A:(dark?D:A));rect(x,from,width,to-from,g,dark?1:.10);line(side===0?width:w-width,from,side===0?width:w-width,to,A,2.4);}
-    function corner(x,y,sx,sy,kind){ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);path('M0 0H175L143 26H48L26 48V143L0 175Z',D);path('M0 0H143L118 13H40L13 40V118L0 143Z',A);for(let k=0;k<4;k++)line(22+k*9,12,12,22+k*9,pale,1,.66);ctx.restore();}
-    const Y=h*.52, x=rail*.51, r=rail*.43, kind=(n+edition*2)%5, other=(kind+2+edition)%5;
-    // Rich engraved scenery in the paper itself, deliberately below the 10% ink
-    // threshold so normal text and user artwork remain readable. No opaque center.
-    if(backgroundAlpha>0){
-      ctx.save();ctx.globalAlpha=.055*backgroundAlpha;
-      at(w/2,h*.51,Math.min(w,h)*.0045,()=>scene(kind,D,A));
-      ctx.restore();
-    }
-    // Each discipline uses its own engraved marginal language. The actual side
-    // scene is continuous rather than a row of repeated clip-art symbols.
-    if(backgroundAlpha>0) for(const side of [0,1]) {
-      const X=side===0?0:w;
-      ctx.save();ctx.globalAlpha*=backgroundAlpha;ctx.translate(X,0);ctx.scale(side===0?1:-1,1);
-      ctx.beginPath();ctx.rect(0,0,rail*.88,h);ctx.clip();
-      const wash=ctx.createLinearGradient(0,0,rail*.88,0);wash.addColorStop(0,A+'26');wash.addColorStop(1,A+'00');rect(0,0,rail*.88,h,wash);
-      if(mt){for(let i=0;i<8;i++){const xx=8+i*17;path(`M${xx} 0Q${xx+45} ${h*.13} ${xx+3} ${h*.27}T${xx+3} ${h*.54}T${xx+3} ${h*.81}T${xx} ${h}`,A,false,1.4,.35);} }
-      else if(hr){for(let y=75;y<h;y+=32){line(4,y,rail*.88,y,A,1,.25);line(4,y,12+(Math.round(y/32)%5===0?24:8),y,D,1.5,.5);}for(let j=0;j<4;j++)line(12+j*24,0,12+j*24,h,A,1,.22);}
-      else if(dt){for(let j=0;j<6;j++){let x0=10+j*19;path(`M${x0} 0C${x0+100} ${h*.27} ${x0-70} ${h*.38} ${x0} ${h*.5}S${x0-80} ${h*.8} ${x0} ${h}`,A,false,1.5,.34);} }
-      else{for(let i=0;i<2;i++){const xx=21+i*40;path(`M${xx} 0Q${xx+45} ${h*.2} ${xx} ${h*.4}T${xx} ${h*.8}T${xx} ${h}`,A,false,1.5,.40);for(let y=96;y<h-70;y+=86){path(`M${xx} ${y}q40 -35 26 -53q-27 11 -26 53M${xx} ${y}q-28 -27 -30 -43q30 8 30 43`,A,true,1,.22);}}}
-      ctx.restore();
-    }
-    // The thirty designs use ten distinct frame architectures and three different
-    // arrangements of illustrations. Shared motifs do not imply shared layouts.
-    switch(style){
-      case 0: frame(18,D,4);frame(29,A,1.4);panel(0,0,h,rail*.78,true);panel(1,0,h,rail*.78,true);for(const y of [h*.20,h*.80]){decorative(x*.77,y,pale,n);decorative(w-x*.77,y,pale,n+1);}for(let i=0;i<5;i++){line(15,100+i*6,rail*.70,100+i*6,pale,1,.34);line(w-rail*.70,h-100-i*6,w-15,h-100-i*6,pale,1,.34);}badge(x,Y,r,kind,1,true);badge(w-x,Y,r,other,1,true);break;
-      case 1: frame(27,A,3);frame(38,D,1);for(const [X,Y0,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])corner(X,Y0,sx,sy,n);badge(rail*.63,h*.27,r*1.08,kind,2);badge(w-rail*.63,h*.73,r*1.08,other,2);line(rail*.63,h*.38,rail*.63,h*.86,A,1.8);line(w-rail*.63,h*.14,w-rail*.63,h*.62,A,1.8);break;
-      case 2: frame(22,A,2.5);frame(32,A,1);for(const X of [x,w-x]){path(`M${X} 115Q${X-40} ${h*.33} ${X} ${h*.5}T${X} ${h-115}`,A,false,2.3,.65);badge(X,h*.23,r*.92,kind,0);badge(X,h*.78,r*.92,other,0);}break;
-      case 3: panel(0,0,h,rail*.88,true);path(`M${rail*.88} 0L${rail+18} 80V${h-80}L${rail*.88} ${h}`,A,false,3);line(w-26,30,w-26,h-30,D,3);badge(rail*.47,h*.37,r,kind,2,true);badge(rail*.47,h*.67,r,other,2,true);for(let y=150;y<h-100;y+=105)decorative(w-x*.5,y,A,n);break;
-      case 4: frame(23,A,2);for(const X of [x,w-x]){path(`M${X-28} 70V${h-70}M${X+28} 70V${h-70}`,A,false,1.5,.66);badge(X,Y,r,kind,3);decorative(X,h*.23,A,n);decorative(X,h*.79,A,n+1);}break;
-      case 5: frame(18,D,1);frame(26,A,3);for(const [X,Y0] of [[x,h*.20],[w-x,h*.20],[x,h*.80],[w-x,h*.80]])badge(X,Y0,r*.86,(kind+(Y0>h/2?2:0)+(X>w/2?1:0))%5,0);break;
-      case 6: for(const [X,Y0,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]])corner(X,Y0,sx,sy,n);for(const X of [x,w-x]){rect(X-3,200,6,h-400,A,.85);badge(X,h*.42,r,kind,1,true);badge(X,h*.68,r*.80,other,0);}break;
-      case 7: panel(0,58,h-58,rail*.85,false);panel(1,58,h-58,rail*.85,false);frame(18,D,2);for(const X of [x,w-x]){badge(X,h*.30,r*.9,kind,2);badge(X,h*.63,r*.9,other,3);for(let y=h*.43;y<h*.53;y+=24)circle(X,y,3,A,true);}break;
-      case 8: frame(26,A,2);for(const X of [x,w-x]){for(let k=0;k<4;k++)path(`M${X-38+k*8} 90V${h-90}`,A,false,1,.55);badge(X,Y,r*1.06,kind,0,true);decorative(X,h*.20,A,n);decorative(X,h*.80,A,n+1);}break;
-      case 9: frame(18,A,3);frame(27,D,1);for(const X of [x,w-x]){path(`M${X-32} 100Q${X+28} ${h*.29} ${X-32} ${h*.5}T${X-32} ${h-100} M${X+32} 100Q${X-28} ${h*.29} ${X+32} ${h*.5}T${X+32} ${h-100}`,A,false,1.8);badge(X,h*.34,r*.96,kind,3);badge(X,h*.68,r*.96,other,1);}break;
-    }
-    // Large scene panels in the upper margin: landscape composition at left,
-    // a secondary disciplinary motif at right. These are not official logos.
-    if(![0,2,3,5].includes(style)){
-      const yy=110;
-      for(const side of [0,1]){const xx=side? w-rail*.55:rail*.55;
-        ctx.save();ctx.beginPath();ctx.rect(side?w-rail:0,66,rail,128);ctx.clip();
-        ctx.globalAlpha=.55;at(xx,yy+16,rail*.0065,()=>scene(side?other:kind,D,A));ctx.restore();
-      }
-    }
-    if(edition===1){const metallic=theme.profile==='ceremony'?'#A68A51':A;for(const X of [x,w-x]){line(X-25,70,X+25,70,metallic,2);line(X-25,h-70,X+25,h-70,metallic,2);at(X,h-95,.44,()=>laurel(metallic));}}
-    if(edition===2){for(const X of [x,w-x]){for(let j=0;j<4;j++){line(X-26+j*6,76,X-9+j*6,61,A,1.6);line(X-26+j*6,h-76,X-9+j*6,h-61,A,1.6);}}}
-    // The pre-existing discipline-specific models are deliberately distinct from
-    // the 30 new designs: preserve a separate folio architecture for these IDs.
-    if(legacy){const l=rail*.9;for(const [xx,sx] of [[0,1],[w,-1]]){ctx.save();ctx.translate(xx,0);ctx.scale(sx,1);path(`M0 0H${l}L${l*.56} 62H0Z`,D);path(`M0 ${h}H${l}L${l*.56} ${h-62}H0Z`,D);for(let j=0;j<3;j++){line(6,22+j*9,l*.51,22+j*9,A,1.5);line(6,h-22-j*9,l*.51,h-22-j*9,A,1.5);}ctx.restore();}}
-    // Edition differences are structural: cartouche, engraved header, or double
-    // ornamental rule. The caption identifies the actual discipline at a glance.
-    const bw=Math.min(w-2*rail-36,550), cx=w/2;
-    if(edition===0){path(`M${cx-bw/2} 22H${cx+bw/2}L${cx+bw/2-26} 59H${cx-bw/2+26}Z`,D);line(cx-bw/2+22,55,cx+bw/2-22,55,A,2);text(name,cx,39,23,pale,'700');}
-    else if(edition===1){line(cx-bw/2,32,cx-155,32,A,2);line(cx+155,32,cx+bw/2,32,A,2);circle(cx-bw/2,32,4,A,true);circle(cx+bw/2,32,4,A,true);text(name,cx,38,24,D,'700','Georgia');line(cx-115,57,cx+115,57,A,1);}
-    else{path(`M${cx-bw/2} 24H${cx+bw/2}V58H${cx-bw/2}Z`,pale);path(`M${cx-bw/2} 24H${cx+bw/2}V58H${cx-bw/2}Z`,A,false,2);text(name,cx,41,22,D,'700');}
-    // Bottom ornament sits below the signature safe area; no invented logos,
-    // accreditation or certification marks are printed.
-    line(cx-105,h-29,cx-19,h-29,A,1.6);line(cx+19,h-29,cx+105,h-29,A,1.6);
-    at(cx,h-29,.23,()=>{if(ds)paw(A);else if(mt)compass(A);else if(hr)flag(A);else scent(A);});
-    ctx.restore();
-  }
-  // Retain the visual architecture of general themes. Add category-specific
-  // engraved edge finishing, not a universal overlay across the content area.
-  function refinedGeneralEdge(theme,A,D,backgroundAlpha=1){
-    const category=theme.category, s=Math.min(W,H)/1190, w=W/s,h=H/s;
-    ctx.save();ctx.scale(s,s);ctx.lineCap='round';
-    const stroke=(d,c,z=1,a=1)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=z;ctx.globalAlpha=a;ctx.stroke(new Path2D(d));ctx.restore();};
-    const fill=(d,c,a=1)=>{ctx.save();ctx.fillStyle=c;ctx.globalAlpha=a;ctx.fill(new Path2D(d));ctx.restore();};
-    if(backgroundAlpha>0){
-      ctx.save();ctx.globalAlpha*=backgroundAlpha;
-      const soft=ctx.createLinearGradient(0,0,38,0);soft.addColorStop(0,A+'22');soft.addColorStop(1,A+'00');ctx.fillStyle=soft;ctx.fillRect(0,0,38,h);
-      const other=ctx.createLinearGradient(w-38,0,w,0);other.addColorStop(0,A+'00');other.addColorStop(1,A+'22');ctx.fillStyle=other;ctx.fillRect(w-38,0,38,h);
-      ctx.restore();
-    }
-    const serif=['Premium','Cerimoniali','Accademici','Eleganti','Base'].includes(category);
-    for(const [x,y,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]]){
-      ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);
-      if(serif){stroke('M7 112V7H112M13 82V13H82',A,1.8,.9);for(let i=0;i<4;i++){const t=17+i*14;stroke(`M7 ${t}Q23 ${t-8} 13 ${t-16}M${t} 7Q${t-8} 23 ${t-16} 13`,A,1,.78);}fill('M9 9L18 9 9 18Z',D,.8);}
-      else if(category==='Creativi'){for(let i=0;i<3;i++)stroke(`M${7+i*5} 100V${7+i*5}H${100-i*12}`,A,2,.8-i*.13);}
-      else if(category==='Natura e K9'||category==='Natura'){stroke('M10 100Q5 50 10 10Q50 5 100 10',A,1.5,.9);for(let i=0;i<5;i++){let y0=18+i*15;fill(`M10 ${y0}q18 -13 15 -20q-16 5 -15 20M${y0} 10q-13 18 -20 15q5 -16 20 -15`,A,.75);}}
-      else{fill('M0 0H107L85 8H8V85L0 107Z',D,.91);stroke('M13 80V13H80',A,2,.9);for(let i=0;i<4;i++)stroke(`M3 ${25+i*10}H10M${25+i*10} 3V10`,A,1.3,.8);}
-      ctx.restore();
-    }
-    ctx.restore();
-  }
-
-  function drawCatalogOrnament(ornament = $("ornamentStyle").value, color = designColor("accentColor", "#735a2f"), ink = designColor("inkColor", "#26231f"), theme = themePalettes[selectedTheme], backgroundAlpha=1) {
-    const id = Object.keys(themePalettes).find(key => themePalettes[key] === theme);
-    if(specialK9Ids.has(ornament)) {
-      const t=themePalettes[ornament]; illustratedDiscipline(t,color,ink,t.layout,t.discipline,backgroundAlpha); return;
-    }
-    if(theme && id && !archivedThemeIds.has(id) && theme.ornament===ornament) {
-      const group=galleryPath(id,theme).group;
-      if(["Mantrailing","HRDD","Detection","Dogsitter","K9 tattici generali","SAR · ricerca e soccorso"].includes(group)) {
-        const related=catalogThemes.filter(([key,t])=>!specialK9Ids.has(key)&&galleryPath(key,t).group===group);
-        const number=related.findIndex(([key])=>key===id);
-        illustratedDiscipline(theme,color,ink,30+Math.max(0,number),group,backgroundAlpha);return;
-      }
-      refinedGeneralEdge(theme,color,ink,backgroundAlpha);
-    }
-    drawLegacyCatalogOrnament(ornament,color,ink);
-  }
-  function drawLegacyCatalogOrnament(ornament, color, ink) {
-    if (!ornament || ornament === "none") return;
-    if (specialK9Ids.has(ornament)) { drawSpecialK9(ornament,color,ink); return; }
-    if (signatureThemeIds.has(ornament)) { drawSignatureCollection(ornament,color,ink); return; }
-    if (professionalOrnaments.has(ornament)) { drawProfessionalOrnament(ornament,color,ink); return; }
-    const m = Math.max(34, Math.min(W, H) * .042);
-    const a = Math.min(W, H) * .14;
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    const line = (x1,y1,x2,y2,width=2,alpha=.4) => {
-      ctx.globalAlpha=alpha;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-    };
-    const circle = (x,y,r,alpha=.26,filled=false) => {
-      ctx.globalAlpha=alpha;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);filled?ctx.fill():ctx.stroke();
-    };
-    const poly = (points,alpha=.1) => {
-      ctx.globalAlpha=alpha;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();
-    };
-    const top = m + 33, bottom = H-m-33;
-    const corners = [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]];
-    switch (ornament) {
-      case "topline":
-        for (const y of [top, top+16, bottom-16, bottom]) line(m+20,y,W-m-20,y,y===top||y===bottom?3:1.5,.33);
-        circle(W/2,top+8,10,.58,true);circle(W/2,bottom-8,10,.58,true);break;
-      case "arch":
-        ctx.globalAlpha=.38;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(m+35,H-m-20);ctx.lineTo(m+35,m+2);ctx.quadraticCurveTo(W/2,-m*1.1,W-m-35,m+2);ctx.lineTo(W-m-35,H-m-20);ctx.stroke();
-        line(m+54,H-m-50,W-m-54,H-m-50,2,.18);break;
-      case "petals":
-      case "laurel":
-      case "filigree":
-        corners.forEach(([x,y,sx,sy])=>{
-          for(let i=1;i<=5;i++){
-            const dx=sx*(i*16+8),dy=sy*(i*10+7);
-            ctx.globalAlpha=.28;ctx.lineWidth=2;
-            ctx.beginPath();ctx.moveTo(x+dx,y);ctx.quadraticCurveTo(x+dx+sx*15,y+sy*12,x+dx,y+sy*27);ctx.stroke();
-            if(ornament!=="filigree")circle(x+dx+sx*6,y+dy,2.7,.26,true);
-          }
-        });
-        if(ornament==="filigree") {line(m+90,top,W-m-90,top,2,.15);line(m+90,bottom,W-m-90,bottom,2,.15);}
-        break;
-      case "crown":
-      case "diamonds":
-        for(const y of [top,bottom]){
-          line(m+65,y,W-m-65,y,2,.32);
-          for(const dx of [-52,0,52]){
-            const x=W/2+dx;
-            poly([[x,y-13],[x+13,y],[x,y+13],[x-13,y]],dx===0?.38:.18);
-          }
-        }break;
-      case "rays":
-      case "radial":
-      case "rings":
-        corners.forEach(([x,y])=>{
-          if(ornament==="rays"){
-            for(let i=0;i<8;i++){
-              const th=i*Math.PI/4;
-              line(x+Math.cos(th)*45,y+Math.sin(th)*45,x+Math.cos(th)*(a+.5),y+Math.sin(th)*(a+.5),2,.14);
-            }
-          }else for(let r=35;r<=a;r+=27)circle(x,y,r,.13);
-        });break;
-      case "columns":
-      case "sideband":
-        for(const x of [m+14,W-m-14]){
-          ctx.globalAlpha=ornament==="sideband"?.10:.18;
-          ctx.fillRect(x-10,m+40,20,H-2*m-80);
-          line(x-20,m+40,x-20,H-m-40,1.5,.30);
-        }break;
-      case "stripes":
-      case "lines":
-        for(let i=0;i<4;i++){
-          const y=m+10+i*13;
-          line(m+20,y,W-m-20,y,ornament==="stripes"?5:1.5,.10+i*.045);
-          line(m+20,H-y,W-m-20,H-y,ornament==="stripes"?5:1.5,.10+i*.045);
-        }break;
-      case "steps":
-        corners.forEach(([x,y,sx,sy])=>{
-          for(let i=0;i<4;i++){
-            const d=18+i*23;line(x+sx*d,y,x+sx*d,y+sy*(a-d/3),2,.22);
-            line(x,y+sy*d,x+sx*(a-d/3),y+sy*d,2,.22);
-          }
-        });break;
-      case "network":
-      case "grid":
-      case "tiles":
-        corners.forEach(([x,y,sx,sy])=>{
-          for(let i=0;i<4;i++)for(let j=0;j<4;j++){
-            const px=x+sx*(i*32),py=y+sy*(j*32);
-            if(ornament==="tiles") {ctx.globalAlpha=.065;ctx.fillRect(px,py,19*sx,19*sy);}
-            else {circle(px,py,ornament==="grid"?1.5:3,.19,true);
-              if(ornament==="network"&&i<3&&j%2===0)line(px,py,px+sx*32,py+sy*32,1,.13);}
-          }
-        });break;
-      case "diagonal":
-        poly([[0,0],[a*1.5,0],[0,a*.72]],.105);
-        poly([[W,H],[W-a*1.5,H],[W,H-a*.72]],.105);
-        line(m+10,top,W/2-a,top,2,.20);line(W/2+a,bottom,W-m-10,bottom,2,.20);break;
-      case "waves":
-      case "contours":
-        for(const y0 of [top,bottom])for(let i=0;i<3;i++){
-          const y=y0+i*15*(y0===top?1:-1);
-          ctx.globalAlpha=.12+i*.05;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(m+10,y);
-          ctx.bezierCurveTo(W*.26,y-25,W*.34,y+25,W*.5,y);
-          ctx.bezierCurveTo(W*.66,y-25,W*.74,y+25,W-m-10,y);ctx.stroke();
-        }break;
-      case "ribbon":
-        ctx.globalAlpha=.10;ctx.fillRect(0,0,W,90);ctx.fillRect(0,H-90,W,90);
-        line(0,100,W,100,4,.35);line(0,H-100,W,H-100,4,.35);break;
-      default: break;
-    }
-    ctx.restore();
-  }
-
-  // Grafica originale procedurale, in coordinate A4: tutte le decorazioni restano ai bordi.
-  // Signature Collection: original decorative artwork in stage coordinates, not bitmap templates.
-  // Keep central field unobstructed; the same drawing path is used for preview and UHD output.
-  // Native-resolution artwork. Edge-only architecture keeps the certificate text area clear.
-  function drawSpecialK9(id,A,D){
-    const t=themePalettes[id], n=t.layout, discipline=t.discipline, dog=discipline==='Dogsitter', hr=discipline==='HRDD', dt=discipline==='Detection', mt=discipline==='Mantrailing';
-    const u=Math.min(W,H)/1190, w=W/u,h=H/u, T=Math.PI*2, paper='#ffffff';
-    ctx.save();ctx.scale(u,u);ctx.lineCap='round';ctx.lineJoin='round';
-    const stroke=(c,z,f,alpha=1)=>{ctx.save();ctx.strokeStyle=c;ctx.lineWidth=z;ctx.globalAlpha=alpha;ctx.beginPath();f(ctx);ctx.stroke();ctx.restore();};
-    const shape=(c,f,alpha=1)=>{ctx.save();ctx.fillStyle=c;ctx.globalAlpha=alpha;ctx.beginPath();f(ctx);ctx.fill();ctx.restore();};
-    const rect=(c,x,y,X,Y,a=1)=>shape(c,q=>q.rect(x,y,X,Y),a);
-    const line=(c,x,y,X,Y,z=1,a=1)=>stroke(c,z,q=>{q.moveTo(x,y);q.lineTo(X,Y);},a);
-    const poly=(c,pts,a=1)=>shape(c,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},a);
-    const outline=(c,pts,z=2,a=1)=>stroke(c,z,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},a);
-    const circle=(c,x,y,r,z=1,a=1)=>stroke(c,z,q=>q.arc(x,y,r,0,T),a);
-    const dot=(c,x,y,r,a=1)=>shape(c,q=>q.arc(x,y,r,0,T),a);
-    const at=(x,y,sx,sy,f)=>{ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);try{f();}finally{ctx.restore();}};
-    const corners=f=>{for(const [x,y,sx,sy] of [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]])at(x,y,sx,sy,f);};
-    const sides=f=>{at(0,0,1,1,f);at(w,0,-1,1,f);};
-    const ends=f=>{at(0,0,1,1,f);at(0,h,1,-1,f);};
-    const border=(m,z=2,c=A)=>stroke(c,z,q=>q.rect(m,m,w-2*m,h-2*m));
-    const diamond=(x,y,r,c=A)=>outline(c,[[x-r,y],[x,y-r],[x+r,y],[x,y+r]],1.8);
-    const leaf=(x,y,r,angle,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);shape(c,q=>{q.moveTo(-r,0);q.quadraticCurveTo(0,-r*.9,r,0);q.quadraticCurveTo(0,r*.9,-r,0);},.8);line(paper,-r*.7,0,r*.7,0,.8,.8);ctx.restore();};
-    const rosette=(x,y,r,k,c=A)=>stroke(c,1.5,q=>{for(let i=0;i<=180;i++){const a=i*T/180,rr=r*(.79+.21*Math.cos(k*a));const X=x+rr*Math.cos(a),Y=y+rr*Math.sin(a);i?q.lineTo(X,Y):q.moveTo(X,Y);}q.closePath();});
-    // Distinct engraved visual languages: a route with waypoints, an evidence grid,
-    // concentric olfactory waves, or a paw with four digital pads and a leaf.
-    function emblem(x,y,r,c=A,variant=n){at(x,y,r/25,r/25,()=>{
-      if(mt){stroke(c,2.4,q=>{q.moveTo(-20,16);q.bezierCurveTo(-12,2,4,21,3,0);q.bezierCurveTo(2,-15,16,-7,20,-19);});for(const [X,Y] of [[-20,16],[3,0],[20,-19]]){circle(c,X,Y,3.5,1.5);dot(c,X,Y,1.1);}if(variant%3===0){line(c,-14,-17,-14,-7,1.2);line(c,-19,-12,-9,-12,1.2);}}
-      else if(hr){outline(c,[[-19,-19],[19,-19],[19,19],[-19,19]],1.7);for(let j=-9;j<=9;j+=9){line(c,j,-18,j,18,1,.7);line(c,-18,j,18,j,1,.7);}outline(c,[[-9,-8],[10,-8],[10,8],[-9,8]],2);dot(c,0,0,2);if(variant%2===0){line(c,-24,-24,-14,-24,1.5);line(c,-24,-24,-24,-14,1.5);}}
-      else if(dt){for(let j=1;j<=3;j++)stroke(c,1.8,q=>q.arc(0,0,j*7,Math.PI*.12,Math.PI*1.83));dot(c,0,0,3);line(c,0,0,22,-10,1.5);circle(c,22,-10,2.6,1.3);}
-      else {shape(c,q=>{q.moveTo(-13,12);q.bezierCurveTo(-20,3,-8,-6,0,-3);q.bezierCurveTo(8,-6,20,3,13,12);q.bezierCurveTo(9,18,4,10,0,12);q.bezierCurveTo(-4,10,-9,18,-13,12);});for(const [X,Y,R] of [[-15,-7,-.5],[-6,-15,-.18],[6,-15,.18],[15,-7,.5]])shape(c,q=>q.ellipse(X,Y,4.4,6.4,R,0,T));}
-    });}
-    // Fine pattern repeated within the edge only. Each discipline has a different topology.
-    function edgePattern(x,y,X,Y,step=48,c=A){let L=Math.hypot(X-x,Y-y);if(!L)return;let a=Math.atan2(Y-y,X-x);ctx.save();ctx.translate(x,y);ctx.rotate(a);try{for(let z=step/2;z<L-step/3;z+=step){if(mt){stroke(c,1.4,q=>{q.moveTo(z-20,0);q.bezierCurveTo(z-8,-10,z+8,10,z+20,0);});dot(c,z,0,2);}else if(hr){line(c,z-17,-7,z+17,-7,1);line(c,z-17,7,z+17,7,1);for(let j=-12;j<=12;j+=6)line(c,z+j,-7,z+j+4,7,1,.8);diamond(z,0,3,c);}else if(dt){for(let j=0;j<3;j++)stroke(c,1.4,q=>q.arc(z-11,0,5+j*5,-.75,.75));dot(c,z-11,0,1.9);}else{leaf(z-6,0,8,-.65,c);leaf(z+6,0,8,.65,c);dot(c,z,0,1.3);}}}finally{ctx.restore();}}
-    function plaque(x,y,r,form=0){if(form===0){circle(D,x,y,r,2);circle(A,x,y,r-5,1);emblem(x,y,r*.54);}else if(form===1){diamond(x,y,r,D);diamond(x,y,r-5);emblem(x,y,r*.48);}else{outline(D,[[x-r,y-r*.68],[x+r,y-r*.68],[x+r,y+r*.24],[x,y+r],[x-r,y+r*.24]],2);emblem(x,y,r*.48);}}
-    // Dedicated border architectures, not palette variants of the Mantrailing line.
-    function drawForensic(){
-      const mark=(x,y,r=26)=>{outline(D,[[x-r,y-r],[x+r,y-r],[x+r,y+r],[x-r,y+r]],2.2);for(let i=1;i<=3;i++){line(A,x-r+i*r/2,y-r,x-r+i*r/2,y+r,1,.65);line(A,x-r,y-r+i*r/2,x+r,y-r+i*r/2,1,.65);}diamond(x,y,r*.43,D);dot(A,x,y,3);};
-      const ticks=(x,y,X,Y,space=22)=>{let L=Math.hypot(X-x,Y-y),a=Math.atan2(Y-y,X-x);ctx.save();ctx.translate(x,y);ctx.rotate(a);line(D,0,0,L,0,1.7);for(let i=0,z=0;z<=L;z+=space,i++)line(A,z,0,z,i%5===0?15:6,i%5===0?2:1);ctx.restore();};
-      const strata=(x,y,X,Y,amp=8)=>{for(let k=0;k<5;k++)stroke(k%2?A:D,k===0?2.5:1.2,q=>{for(let i=0;i<=50;i++){let z=i/50,xx=x+(X-x)*z,yy=y+(Y-y)*z+(k-2)*7+amp*Math.sin(z*T*2+k*.45);i?q.lineTo(xx,yy):q.moveTo(xx,yy);}},.85);};
-      const tab=(x,y,sx=1,sy=1)=>at(x,y,sx,sy,()=>{poly(D,[[0,0],[132,0],[111,33],[58,33],[58,90],[0,90]],.95);line(A,8,8,116,8,2);mark(29,43,16);});
-      const specimen=(x,y,r=24)=>{circle(A,x,y,r,1.6);circle(D,x,y,r-5,2);line(D,x-r-7,y,x+r+7,y,1);line(D,x,y-r-7,x,y+r+7,1);dot(A,x,y,3);};
-      switch(n){
-      case 0: rect(D,0,0,w,27);rect(A,0,28,w,6);corners(()=>{stroke(D,3,q=>{q.moveTo(18,180);q.lineTo(18,52);q.lineTo(132,52);});mark(50,83,26);});ends(()=>ticks(165,47,w-165,47,32));break;
-      case 1: rect(D,0,0,48,h);for(let y=45;y<h-30;y+=84){rect(paper,11,y,25,48,.85);mark(24,y+24,9);}rect(A,49,0,5,h);ends(()=>{line(D,92,27,w-90,27,3);line(A,92,40,w*.55,40,2);});break;
-      case 2: ends(()=>{for(let x=90;x<w-85;x+=85){mark(x,29,22);line(A,x+27,29,x+58,29,1);}});sides(()=>ticks(28,70,28,h-70,24));break;
-      case 3: ends(()=>strata(0,38,w,38,12));sides(()=>{for(let y=110;y<h-60;y+=118){strata(12,y,83,y+18,5);dot(A,46,y+32,3);}});break;
-      case 4: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.31,0],[w*.24,35],[75,35],[75,142],[0,142]]);ticks(88,47,w*.24,47,16);mark(37,70,23);});for(const [x,y] of [[w-45,45],[45,h-45]])specimen(x,y,28);break;
-      case 5: border(16,1,D);corners(()=>{for(let k=0;k<5;k++)line(A,20,20+k*13,98,20+k*13,1);mark(54,54,22);});sides(()=>{line(D,53,120,53,h-120,1.6);for(let y=165;y<h-130;y+=115)specimen(53,y,23);});break;
-      case 6: sides(()=>{rect(D,0,0,18,h);rect(A,22,0,5,h);for(let y=60;y<h-25;y+=102){outline(A,[[35,y],[72,y],[72,y+53],[35,y+53]],1.5);line(D,35,y+53,72,y,1.5);dot(D,53,y+27,4);}});break;
-      case 7: corners(()=>{for(let k=0;k<6;k++)stroke(A,1.4,q=>{q.moveTo(12+k*14,120);q.lineTo(12+k*14,12+k*14);q.lineTo(120,12+k*14);});mark(32,32,15);});ends(()=>{ticks(150,31,w-150,31,25);});break;
-      case 8: for(const [x,s] of [[0,1],[w,-1]])at(x,0,s,1,()=>{for(let i=0,y=0;y<h;y+=h/7,i++){poly(i%2?A:D,[[0,y],[60,y+14],[46,y+h/7-14],[0,y+h/7]],.86);if(i%2)mark(24,y+h/14,14);}});break;
-      case 9: corners(()=>tab(0,0));sides(()=>{for(let y=150;y<h-110;y+=75){line(D,25,y,76,y,1.5);line(A,25,y+7,52,y+7,3);}});break;
-      case 10: ends(()=>{for(let x=0,i=0;x<w;x+=w/14,i++)poly(i%2?A:D,[[x,0],[x+w/14,0],[x+w/14-16,24],[x+16,24]],.9);});sides(()=>{ticks(34,75,34,h-75,21);for(let y=130;y<h-70;y+=150)mark(71,y,19);});break;
-      case 11: border(39,1,A);corners(()=>{line(D,18,18,126,18,4);line(D,18,18,18,126,4);specimen(56,56,25);});ends(()=>{line(D,w*.26,19,w*.74,19,2);mark(w/2,43,23);});break;
-      case 12: rect(D,0,0,12,h);rect(D,w-12,0,12,h);for(let y=80,i=0;y<h-65;y+=85,i++){rect(A,21,y,44,7);rect(D,w-65,y+13,44,7);if(i%3===0){mark(43,y+38,15);mark(w-43,y+38,15);}}ends(()=>{line(A,89,19,w-89,19,2);});break;
-      case 13: ends(()=>{rect(A,24,24,w-48,39,.11);for(let x=72;x<w-65;x+=66)specimen(x,43,15);});sides(()=>{line(D,22,105,22,h-105,2);line(A,31,105,31,h-105,1);});break;
-      case 14: corners(()=>{outline(D,[[18,18],[119,18],[119,55],[55,55],[55,119],[18,119]],2.5);mark(37,37,15);});sides(()=>{for(let y=155;y<h-130;y+=103){outline(A,[[24,y],[63,y],[63,y+42],[24,y+42]],1.5);line(D,24,y+42,63,y,1);}});break;
-      case 15: ends(()=>{for(let j=0;j<5;j++)stroke(j%2?D:A,1.5,q=>{q.moveTo(0,12+j*9);q.bezierCurveTo(w*.25,4+j*9,w*.56,24+j*9,w,12+j*9);});});sides(()=>{for(let y=120;y<h-85;y+=99){strata(8,y,70,y+20,6);specimen(37,y+30,13);}});break;
-      case 16: corners(()=>{for(let i=0;i<4;i++)for(let j=0;j<4;j++){let x=20+i*25,y=20+j*25;rect((i+j)%2?A:D,x,y,20,20,(i+j)%2?.45:.9);}mark(69,69,13);});ends(()=>ticks(138,22,w-138,22,20));break;
-      case 17: sides(()=>{for(let y=32,i=0;y<h-45;y+=64,i++){const x=i%2?31:13;poly(i%2?A:D,[[x,y],[x+42,y],[x+42,y+32],[x+9,y+47],[x,y+47]],.9);line(paper,x+10,y+8,x+10,y+32,1.4);}});ends(()=>line(D,100,24,w-100,24,2));break;
-      case 18: ends(()=>{for(const x of [w*.16,w*.5,w*.84]){specimen(x,36,26);line(A,x-90,36,x-36,36,1.5);line(A,x+36,36,x+90,36,1.5);}});sides(()=>ticks(37,105,37,h-105,30));break;
-      case 19: sides(()=>{for(let y=70,i=0;y<h-40;y+=90,i++){let x=i%2?70:28;mark(x,y,17);if(y+90<h-40)line(D,x,y+19,i%2?28:70,y+71,1.8);}});ends(()=>{line(A,w*.30,30,w*.70,30,4);});break;
-      case 20: ends(()=>{rect(D,0,0,w,15);ticks(30,27,w-30,27,20);});sides(()=>{for(let y=95;y<h-60;y+=130){rect(A,18,y,46,24,.23);mark(41,y+12,9);line(D,18,y+35,63,y+35,2);line(A,18,y+45,48,y+45,1);}});break;
-      case 21: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(A,[[0,0],[w*.35,0],[w*.27,47],[0,47]],.8);poly(D,[[0,0],[w*.28,0],[w*.2,34],[0,34]]);for(let x=25;x<w*.2;x+=26)line(paper,x,6,x+13,26,1.5);});sides(()=>{line(D,30,95,30,h-95,2);for(let y=135;y<h-110;y+=110)mark(55,y,15);});break;
-      case 22: corners(()=>{poly(D,[[0,0],[117,0],[117,41],[64,41],[64,117],[0,117]],.85);outline(A,[[8,8],[105,8],[105,30],[54,30],[54,105],[8,105]],2);specimen(31,31,19);});ends(()=>ticks(150,30,w-150,30,27));break;
-      case 23: sides(()=>{for(let j=0;j<4;j++)stroke(j%2?D:A,1.7,q=>{for(let i=0;i<=100;i++){let y=h*i/100,x=22+j*10+8*Math.sin(y/h*T*5+j*.4);i?q.lineTo(x,y):q.moveTo(x,y);}});});ends(()=>{for(let x=135;x<w-100;x+=110)mark(x,31,18);});break;
-      case 24: ends(()=>{for(let i=0;i<5;i++){let Y=4+i*9;rect(i%2?D:A,0,Y,w*.42-i*25,6,.84);rect(i%2?A:D,w-(w*.42-i*25),Y,w*.42-i*25,6,.84);}specimen(w/2,31,18);});sides(()=>ticks(24,100,24,h-100,21));break;
-      case 25: sides(()=>{for(let y=45,i=0;y<h-40;y+=78,i++){outline(i%2?A:D,[[12,y],[77,y],[68,y+48],[12,y+48]],2.4);rect(A,12,y,7,48,.85);mark(44,y+24,14);}});break;
-      case 26: border(19,1,A);corners(()=>{for(let i=0;i<4;i++)diamond(50,50,18+i*11,i%2?D:A);specimen(50,50,13);});ends(()=>{line(D,112,19,w-112,19,2);edgePattern(125,36,w-125,36,54);});break;
-      case 27: ends(()=>{for(let x=90;x<w-85;x+=54){line(D,x,10,x+30,46,1.6);line(A,x+30,10,x,46,1.6);}line(A,30,50,w-30,50,2);});sides(()=>{for(let y=95;y<h-75;y+=85)mark(32,y,20);});break;
-      case 28: corners(()=>{stroke(D,7,q=>{q.moveTo(14,158);q.lineTo(14,73);q.lineTo(73,14);q.lineTo(158,14);});stroke(A,2,q=>{q.moveTo(29,158);q.lineTo(29,80);q.lineTo(80,29);q.lineTo(158,29);});mark(60,60,18);});break;
-      case 29: border(28,1,D);ends(()=>{for(let x=115;x<w-100;x+=76){diamond(x,45,19);mark(x,45,9);}});sides(()=>{line(A,43,100,43,h-100,2);for(let y=125;y<h-90;y+=74){diamond(43,y,24,D);specimen(43,y,11);}});break;
-      }
-    }
-    function drawDetection(){
-      const wave=(x,y,r,c=A,count=4,angle=0)=>at(x,y,1,1,()=>{ctx.save();ctx.rotate(angle);for(let j=1;j<=count;j++)stroke(c,1.9,q=>q.arc(0,0,r*j/count,-Math.PI*.72,Math.PI*.72),1-j*.11);dot(c,0,0,3);ctx.restore();});
-      const hex=(x,y,r,c=A,z=2)=>outline(c,Array.from({length:6},(_,i)=>[x+r*Math.cos(i*T/6),y+r*Math.sin(i*T/6)]),z);
-      const signal=(x,y,X,Y,amp=12,c=A)=>stroke(c,2.1,q=>{for(let i=0;i<=100;i++){let t=i/100,xx=x+(X-x)*t,yy=y+(Y-y)*t+amp*Math.sin(t*T*5)*(.35+.65*Math.sin(t*Math.PI));i?q.lineTo(xx,yy):q.moveTo(xx,yy);}});
-      const nodes=(x,y,X,Y,step=70)=>{const L=Math.hypot(X-x,Y-y);line(D,x,y,X,Y,1.4);for(let z=step/2;z<L;z+=step){let f=z/L,xx=x+(X-x)*f,yy=y+(Y-y)*f;dot(paper,xx,yy,7);circle(A,xx,yy,6,2);dot(D,xx,yy,2);}};
-      const target=(x,y,r=25)=>{for(let i=1;i<=3;i++)circle(i%2?D:A,x,y,r*i/3,1.7);line(A,x-r-6,y,x+r+6,y,1);line(A,x,y-r-6,x,y+r+6,1);dot(D,x,y,2.5);};
-      switch(n){
-      case 0: ends(()=>{poly(D,[[0,0],[w*.44,0],[w*.39,28],[95,28],[0,100]]);poly(A,[[w,0],[w*.67,0],[w*.71,19],[w,19]]);signal(w*.44,43,w*.94,43,9);});sides(()=>{for(let y=130;y<h-80;y+=95)wave(29,y,25,A,3);});break;
-      case 1: corners(()=>{target(50,50,33);line(D,50,90,50,170,3);line(D,90,50,170,50,3);});ends(()=>nodes(190,29,w-190,29,57));break;
-      case 2: sides(()=>{for(let y=45;y<h-30;y+=83){for(let i=1;i<=3;i++)circle(i%2?A:D,31,y,7*i,1.8);line(A,31,y,69,y-16,1.7);dot(D,69,y-16,3);}});ends(()=>{line(D,105,26,w-105,26,3);signal(w*.30,42,w*.70,42,9);});break;
-      case 3: ends(()=>{for(let j=0;j<4;j++)signal(0,11+j*10,w,11+j*10,5+j,A);});sides(()=>{line(D,29,90,29,h-90,3);for(let y=125;y<h-80;y+=95)target(49,y,16);});break;
-      case 4: corners(()=>{poly(D,[[0,0],[151,0],[151,28],[67,28],[28,67],[28,151],[0,151]]);wave(29,29,56,paper,4);line(A,35,161,35,210,3);line(A,161,35,210,35,3);});break;
-      case 5: ends(()=>{line(D,100,30,w-100,30,2);for(const x of [w*.18,w*.5,w*.82]){dot(paper,x,30,23);hex(x,30,23,D,2.3);target(x,30,12);}});sides(()=>{for(let y=120;y<h-80;y+=103)hex(35,y,25,A,1.8);});break;
-      case 6: for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.33,0],[w*.26,37],[72,37],[0,112]]);poly(A,[[0,8],[w*.23,8],[w*.2,23],[62,23],[0,85]]);});sides(()=>{for(let y=155;y<h-100;y+=60)poly(A,[[18,y],[46,y+16],[18,y+32],[18,y+23],[34,y+16],[18,y+9]]);});break;
-      case 7: corners(()=>{for(let i=0;i<3;i++)for(let j=0;j<3-i;j++){let x=25+i*35,y=25+j*39;hex(x,y,20,(i+j)%2?D:A,2);dot(D,x,y,2.5);}});ends(()=>nodes(150,29,w-150,29,53));break;
-      case 8: rect(A,w-55,0,55,h,.15);rect(D,w-12,0,12,h);for(let y=50;y<h-35;y+=65)wave(w-38,y,25,D,4,Math.PI);ends(()=>{line(D,25,20,w-75,20,4);signal(75,43,w-95,43,8);});break;
-      case 9: ends(()=>{for(let x=15;x<w-15;x+=58){poly(D,[[x,0],[x+22,0],[x+41,22],[x+19,22]],.9);poly(A,[[x+26,0],[x+42,0],[x+59,22],[x+45,22]],.9);}});sides(()=>{nodes(32,80,32,h-80,75);});break;
-      case 10: corners(()=>{for(let j=0;j<3;j++)stroke(j%2?A:D,2.6,q=>{q.moveTo(12+j*15,122);q.lineTo(12+j*15,60-j*10);q.lineTo(60-j*10,12+j*15);q.lineTo(122,12+j*15);});target(63,63,22);});break;
-      case 11: ends(()=>{for(let x=90;x<w-75;x+=110)wave(x,28,29,A,3,Math.PI*.5);line(D,22,12,w-22,12,1.7);});sides(()=>{line(A,40,110,40,h-110,2);for(let y=145;y<h-110;y+=115)hex(40,y,24,D);});break;
-      case 12: sides(()=>{line(D,17,0,17,h,5);for(let y=110;y<h-75;y+=120){wave(22,y,56,A,4);dot(D,22,y,3);}});break;
-      case 13: border(16,1,D);ends(()=>{for(let j=0;j<3;j++)line(A,70,26+j*9,w-70,26+j*9,1.3);for(const x of [w*.22,w*.5,w*.78]){dot(paper,x,35,21);target(x,35,18);}});sides(()=>nodes(31,80,31,h-80,72));break;
-      case 14: corners(()=>{stroke(D,3,q=>{q.moveTo(15,120);q.lineTo(15,15);q.lineTo(120,15);});stroke(A,4,q=>q.arc(15,15,100,0,Math.PI/2));target(15,15,27);});ends(()=>signal(150,33,w-150,33,9));break;
-      case 15: ends(()=>{const grad=ctx.createLinearGradient(0,0,w,0);grad.addColorStop(0,D);grad.addColorStop(.5,A);grad.addColorStop(1,D);rect(grad,0,0,w,24);for(let x=60;x<w-50;x+=72){for(let k=0;k<4;k++)rect(k%2?A:D,x+k*7,35,4,6+k*4,.85);}});sides(()=>{for(let y=120;y<h-80;y+=110)wave(28,y,28);});break;
-      case 16: sides(()=>{for(let y=30;y<h-25;y+=51){hex(22,y,24,D,1.8);hex(58,y+26,24,A,1.8);dot(A,22,y,3);}});ends(()=>line(D,110,25,w-110,25,3));break;
-      case 17: ends(()=>{for(let x=0,i=0;x<w;x+=w/10,i++){const Y=i%2?18:0;poly(i%2?A:D,[[x,Y],[x+w/10-8,Y],[x+w/10-22,Y+22],[x,Y+22]],.88);}});sides(()=>{for(let y=85;y<h-65;y+=92)target(35,y,22);});break;
-      case 18: ends(()=>{target(w/2,35,26);line(A,80,35,w*.43,35,2);line(A,w*.57,35,w-80,35,2);});corners(()=>{for(let a=0;a<=Math.PI/2;a+=Math.PI/12)line(D,Math.cos(a)*32,Math.sin(a)*32,Math.cos(a)*125,Math.sin(a)*125,1.4,.75);wave(12,12,91,A,5);});break;
-      case 19: sides(()=>{for(let y=45,i=0;y<h-40;y+=81,i++){const x=i%2?70:20;hex(x,y,18,A,2);dot(D,x,y,4);if(y+81<h-40)line(D,x,y+18,i%2?20:70,y+63,2);}});ends(()=>signal(w*.22,30,w*.78,30,13));break;
-      case 20: rect(D,0,0,w,17);rect(A,0,h-17,w,17);sides(()=>{for(let y=65,i=0;y<h-50;y+=80,i++){for(let j=0;j<5;j++)rect((i+j)%2?A:D,20+j*10,y+36-(j+1)*6,6,(j+1)*6,.8);}});break;
-      case 21: for(const [x,y,sx,sy] of [[w,0,-1,1],[0,h,1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.30,0],[w*.24,51],[0,51]]);poly(A,[[0,35],[w*.24,35],[w*.21,51],[0,51]]);for(let x=28;x<w*.18;x+=40)wave(x,23,18,paper,3);});sides(()=>{nodes(33,105,33,h-105,68);});break;
-      case 22: corners(()=>{hex(50,50,44,D,3);hex(50,50,34,A,1.6);wave(50,50,21,A,3);line(D,50,96,50,155,2);line(D,96,50,155,50,2);});ends(()=>line(A,180,23,w-180,23,2));break;
-      case 23: sides(()=>{for(let j=0;j<5;j++)stroke(j%2?D:A,1.8,q=>{for(let i=0;i<=120;i++){let y=h*i/120,x=15+j*12+9*Math.sin(y/h*T*4+j*.7);i?q.lineTo(x,y):q.moveTo(x,y);}});});ends(()=>{signal(100,23,w-100,23,7);});break;
-      case 24: ends(()=>{rect(D,0,0,w,10);for(let x=30;x<w-20;x+=27){let z=8+18*(.5+.5*Math.sin(x/w*T*4));rect(A,x,14,8,z,.88);}});sides(()=>{for(let y=110;y<h-80;y+=105)hex(34,y,24,D);});break;
-      case 25: ends(()=>{for(let x=60;x<w-45;x+=82){hex(x,27,25,A,2);wave(x,27,12,D,3);}});sides(()=>{line(D,23,75,23,h-75,2);line(A,63,75,63,h-75,2);for(let y=100;y<h-60;y+=79)line(A,23,y,63,y+25,1.5);});break;
-      case 26: corners(()=>{for(let i=0;i<4;i++)hex(49,49,15+i*12,i%2?A:D,1.5);wave(49,49,18,A,3);});ends(()=>{line(D,125,20,w-125,20,2);nodes(155,42,w-155,42,60);});break;
-      case 27: sides(()=>{for(let y=25;y<h-20;y+=70){line(D,14,y,62,y+40,1.7);line(A,62,y+40,14,y+70,1.7);dot(A,14,y,3);dot(D,62,y+40,3);}});ends(()=>{for(let x=100;x<w-85;x+=75)hex(x,30,19,A);});break;
-      case 28: corners(()=>{poly(D,[[0,0],[176,0],[126,45],[45,126],[0,176],[0,132],[31,88],[88,31],[132,0]],.9);stroke(A,2.6,q=>{q.moveTo(14,144);q.lineTo(65,68);q.lineTo(144,14);});wave(26,26,26,paper,3);});break;
-      case 29: border(25,1,D);ends(()=>{for(let x=120;x<w-110;x+=75){wave(x,38,20,A,3,Math.PI/2);dot(D,x,38,2);}});sides(()=>{for(let y=105;y<h-80;y+=66){hex(40,y,21,A,1.7);target(40,y,12);}});break;
-      }
-    }
-    function drawCare(){
-      const paw=(x,y,r=24,c=A)=>emblem(x,y,r,c);
-      const sprig=(x,y,len,angle=0,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);stroke(c,1.7,q=>{q.moveTo(0,0);q.quadraticCurveTo(8,-len*.55,0,-len);});for(let i=1;i<=5;i++){let Y=-len*i/6,X=4*Math.sin(i/6*Math.PI);leaf(X-6,Y,10+i*.7,-.65,c);leaf(X+7,Y-5,10+i*.7,.55,c);}ctx.restore();};
-      const scallop=(x,y,X,Y,period=64,c=A)=>{const L=Math.hypot(X-x,Y-y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(Y-y,X-x));stroke(c,2.1,q=>{q.moveTo(0,0);for(let a=0;a<L;a+=period){const b=Math.min(period,L-a);q.quadraticCurveTo(a+b/2,18,a+b,0);}});ctx.restore();};
-      const flower=(x,y,r=18)=>{rosette(x,y,r,5,A);rosette(x,y,r*.72,5,D);dot(A,x,y,3);};
-      const ribbon=(x,y,span,c=A)=>shape(c,q=>{q.moveTo(x,y);q.bezierCurveTo(x+span*.25,y+23,x+span*.75,y-15,x+span,y);q.lineTo(x+span,y+15);q.bezierCurveTo(x+span*.75,y,x+span*.25,y+38,x,y+15);q.closePath();},.72);
-      const med=(x,y,r=33)=>{circle(A,x,y,r,1.8);circle(D,x,y,r-6,1);paw(x,y,r*.55);};
-      const soft=(x,y,span,sy)=>at(x,y,1,sy,()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(span,0);q.bezierCurveTo(span*.55,55,30,12,0,105);q.closePath();},.23);stroke(A,2.4,q=>{q.moveTo(0,105);q.bezierCurveTo(30,12,span*.55,55,span,0);});});
-      switch(n){
-      case 0: corners(()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(210,0);q.bezierCurveTo(100,24,50,65,0,175);q.closePath();},.24);sprig(30,120,80,.45);sprig(145,18,75,-1.3);paw(44,44,25);});break;
-      case 1: border(23,1,A);ends(()=>{ribbon(60,17,w-120);for(const x of [w*.2,w*.5,w*.8]){dot(paper,x,32,21);med(x,32,19);}});break;
-      case 2: sides(()=>{for(let y=60,i=0;y<h-30;y+=95,i++){paw(i%2?56:30,y,23);stroke(A,1.2,q=>q.arc(43,y,33,Math.PI*.7,Math.PI*1.55),.55);}});ends(()=>line(A,110,24,w-110,24,1.5));break;
-      case 3: corners(()=>{sprig(35,150,127,.15);sprig(145,35,123,-Math.PI/2);flower(37,37,22);paw(78,78,19);});ends(()=>{line(D,185,26,w-185,26,1);});break;
-      case 4: ends(()=>{for(const [x,sx] of [[0,1],[w,-1]])at(x,0,sx,1,()=>{stroke(A,2.5,q=>{q.moveTo(24,98);q.bezierCurveTo(13,10,86,10,185,30);});sprig(120,30,83,-1.3);});med(w/2,38,31);});sides(()=>line(A,21,118,21,h-118,1.3));break;
-      case 5: border(33,1,D);corners(()=>{med(62,62,35);for(let i=0;i<4;i++){leaf(38+i*17,109,11,-.55);leaf(109,38+i*17,11,.55);}});ends(()=>{line(A,130,22,w-130,22,1.6);});break;
-      case 6: soft(0,0,w*.28,1);soft(0,h,w*.28,-1);for(const [x,y] of [[45,45],[45,h-45]])paw(x,y,25);sides(()=>{scallop(18,115,18,h-115,72);});break;
-      case 7: sides(()=>{rect(A,15,0,52,h,.12);for(let y=65;y<h-40;y+=90){med(41,y,22);flower(41,y+38,9);}});ends(()=>scallop(95,26,w-95,26,70));break;
-      case 8: rect(A,0,0,28,h,.25);stroke(D,1.7,q=>{q.moveTo(41,0);q.bezierCurveTo(89,h*.3,8,h*.65,41,h);});for(let y=60,i=0;y<h-35;y+=100,i++)paw(49+15*Math.sin(i),y,19);ends(()=>{line(A,94,26,w-80,26,2);});break;
-      case 9: ends(()=>{for(let x=65;x<w-60;x+=65){leaf(x-10,27,13,-.55);paw(x+11,32,12);}});sides(()=>{line(A,31,72,31,h-72,1.6);for(let y=105;y<h-70;y+=130)sprig(31,y+30,45,.15);});break;
-      case 10: corners(()=>{sprig(48,151,112,.5);sprig(151,48,112,-1.9);paw(48,48,28);});ends(()=>scallop(180,23,w-180,23,80));break;
-      case 11: ends(()=>{stroke(A,2,q=>{q.moveTo(72,31);q.bezierCurveTo(w*.28,65,w*.35,4,w*.45,31);q.bezierCurveTo(w*.65,65,w*.73,4,w-72,31);});med(w/2,36,27);});sides(()=>{for(let y=100;y<h-70;y+=105)flower(32,y,20);});break;
-      case 12: corners(()=>{stroke(A,1.9,q=>{q.moveTo(28,145);q.bezierCurveTo(7,26,24,10,145,28);});stroke(D,1,q=>{q.moveTo(40,118);q.bezierCurveTo(25,40,38,25,118,40);});paw(46,46,23);});break;
-      case 13: border(19,1,D);border(58,1,A);ends(()=>{for(let x=75;x<w-65;x+=70)flower(x,38,15);});sides(()=>{for(let y=75;y<h-65;y+=70)flower(38,y,15);});break;
-      case 14: corners(()=>{rosette(65,65,48,8,A);rosette(65,65,36,8,D);paw(65,65,22);});ends(()=>{line(A,130,30,w-130,30,1.5);for(const x of [w*.35,w*.65])diamond(x,30,8);});break;
-      case 15: sides(()=>{stroke(A,2,q=>{q.moveTo(25,0);q.bezierCurveTo(90,h*.35,0,h*.65,25,h);});for(let y=70,i=0;y<h-45;y+=63,i++){let x=25+19*Math.sin(y/h*T);leaf(x+17,y,15,i%2?.75:-.75);if(i%3===0)flower(x+27,y+15,12);}});ends(()=>{for(let x=115;x<w-110;x+=120)sprig(x,52,39,-.25);});break;
-      case 16: corners(()=>{for(let i=0;i<3;i++)for(let j=0;j<3-i;j++){let x=35+i*41,y=35+j*41;flower(x,y,18);if((i+j)%2===0)paw(x,y,10);}});ends(()=>{ribbon(170,18,w-340);});break;
-      case 17: sides(()=>{for(let y=50,i=0;y<h-45;y+=90,i++){let x=i%2?54:27;stroke(A,2.2,q=>{q.ellipse(x,y,22,32,0,0,T);});paw(x,y,15);}});ends(()=>scallop(105,30,w-105,30,67));break;
-      case 18: corners(()=>{for(let i=0;i<3;i++)stroke(A,1.5,q=>q.arc(22,22,37+i*24,0,Math.PI/2));sprig(32,95,74,.35);paw(42,42,20);});ends(()=>{flower(w/2,28,18);line(D,135,28,w*.45,28,1);line(D,w*.55,28,w-135,28,1);});break;
-      case 19: sides(()=>{stroke(A,2.2,q=>{q.moveTo(39,0);for(let i=0;i<7;i++){let y=i*h/7;q.bezierCurveTo(5,y+h/21,80,y+2*h/21,39,y+h/7);}});for(let y=80,i=0;y<h-45;y+=h/9,i++)paw(39+18*Math.cos(i),y,17);});break;
-      case 20: ends(()=>{line(D,45,20,w-45,20,2);for(let x=70;x<w-60;x+=85){flower(x,40,13);leaf(x+23,40,11,.6);}});sides(()=>{for(let y=105;y<h-80;y+=115){med(39,y,24);}});break;
-      case 21: ends(()=>{ribbon(0,15,w*.36);ribbon(w*.64,15,w*.36);med(w/2,32,24);});sides(()=>{for(let y=100;y<h-75;y+=120)sprig(39,y+32,67,.25);});break;
-      case 22: corners(()=>{shape(A,q=>{q.moveTo(20,20);q.lineTo(105,20);q.bezierCurveTo(113,80,69,114,20,105);q.closePath();},.16);stroke(A,2,q=>{q.moveTo(20,20);q.lineTo(105,20);q.bezierCurveTo(113,80,69,114,20,105);q.closePath();});paw(55,55,24);});ends(()=>line(D,145,24,w-145,24,1.5));break;
-      case 23: ends(()=>{for(let j=0;j<4;j++)stroke(j%2?D:A,1.6,q=>{q.moveTo(0,12+j*9);q.bezierCurveTo(w*.30,45+j*5,w*.68,-7+j*5,w,12+j*9);});});sides(()=>{for(let y=110;y<h-75;y+=110)flower(36,y,23);});break;
-      case 24: ends(()=>{shape(A,q=>{q.moveTo(0,0);q.lineTo(w,0);q.bezierCurveTo(w*.73,45,w*.31,4,0,42);q.closePath();},.24);for(let x=115;x<w-100;x+=100)paw(x,28,16);});sides(()=>scallop(28,88,28,h-88,77));break;
-      case 25: sides(()=>{for(let y=40;y<h-30;y+=80){stroke(A,2,q=>{q.roundRect(14,y,59,59,24);});paw(44,y+30,22);}});ends(()=>{line(A,110,27,w-110,27,1);for(let x=150;x<w-130;x+=84)flower(x,27,11);});break;
-      case 26: border(22,1,D);corners(()=>{for(let i=0;i<3;i++)rosette(59,59,19+i*13,7+i,A);paw(59,59,17);});sides(()=>{for(let y=145;y<h-110;y+=90){flower(35,y,17);sprig(35,y+37,34,.45);}});break;
-      case 27: ends(()=>{for(let x=60;x<w-55;x+=55){leaf(x,28,17,.65);leaf(x+15,40,14,-.65);}});sides(()=>{for(let y=60;y<h-50;y+=65){leaf(31,y,16,.75);leaf(45,y+18,15,-.75);if(y%4===0)paw(34,y+33,10);}});break;
-      case 28: corners(()=>{shape(D,q=>{q.moveTo(0,0);q.lineTo(145,0);q.quadraticCurveTo(35,35,0,145);q.closePath();},.78);stroke(A,3,q=>{q.moveTo(8,131);q.quadraticCurveTo(42,42,131,8);});paw(32,32,24,paper);sprig(85,46,48,-1.3,paper);});break;
-      case 29: border(18,1,A);sides(()=>{for(let y=95,i=0;y<h-80;y+=74,i++){sprig(43,y+26,58,i%2?.4:-.4);if(i%2===0)paw(43,y-7,15);}});ends(()=>{for(let x=100;x<w-95;x+=76){flower(x,35,17);leaf(x+27,34,14,.65);}med(w/2,35,27);});break;
-      }
-    }
-
-    const fine=dog?1.4:2.2, heavy=dog?6:10;
-    try{
-      if(hr){drawForensic();return;}
-      if(dt){drawDetection();return;}
-      if(dog){drawCare();return;}
-      switch(n){
-      case 0: // chamfered corner plates
-        corners(()=>{poly(D,[[0,0],[190,0],[134,42],[56,42],[56,132],[0,188]],dog?.28:1);poly(A,[[0,0],[190,0],[165,12],[45,12],[12,46],[12,165],[0,188]]);emblem(31,32,18,dog?D:paper);line(A,67,61,140,61,2);});sides(()=>{line(A,26,204,26,h-204,3);edgePattern(47,220,47,h-220,70);});break;
-      case 1: // parallel rails, narrow technical longitudinal panels
-        sides(()=>{rect(D,14,0,36,h,dog?.2:1);line(A,57,20,57,h-20,3);line(A,70,20,70,h-20,1);edgePattern(32,85,32,h-85,63,dog?D:paper);});ends(()=>{line(D,95,32,w-95,32,2);line(A,95,43,w-95,43,1);});break;
-      case 2: // engraved arch corners
-        border(27,1,D);corners(()=>{for(let j=0;j<5;j++)stroke(A,1.6,q=>q.arc(30,30,36+j*15,0,Math.PI/2),.9-j*.1);emblem(57,57,18);});ends(()=>{line(A,160,37,w-160,37,2);edgePattern(w*.28,55,w*.72,55,55);});break;
-      case 3: // faceted relief panels, opposite orientation
-        for(const [x,y,sx,sy] of [[0,0,1,1],[w,h,-1,-1]])at(x,y,sx,sy,()=>{poly(D,[[0,0],[w*.37,0],[w*.27,45],[90,45],[0,175]],dog?.28:.92);poly(A,[[0,0],[w*.30,0],[w*.21,26],[70,26],[0,133]],.85);for(let k=0;k<5;k++)line(paper,20+k*10,48,78+k*10,3,1,.7);emblem(36,35,15,paper);});for(const [x,y,sx,sy] of [[w,0,-1,1],[0,h,1,-1]])at(x,y,sx,sy,()=>{outline(A,[[25,25],[180,25],[25,180]],2);emblem(58,58,25);});break;
-      case 4: // diamond cartouches, open frame
-        sides(()=>{line(A,36,150,36,h*.36,2);line(A,36,h*.64,36,h-150,2);plaque(44,h/2,39,1);edgePattern(64,180,64,h*.36,60);edgePattern(64,h*.64,64,h-180,60);});ends(()=>{line(D,115,26,w*.45,26,2);line(D,w*.55,26,w-115,26,2);plaque(w/2,38,28,1);});corners(()=>diamond(35,35,17));break;
-      case 5: // side medals and understated border
-        border(23,1,D);border(34,1,A);sides(()=>{for(const y of [h*.21,h*.5,h*.79]){plaque(48,y,31);line(A,48,y-48,48,y-35,2);line(A,48,y+35,48,y+48,2);}});ends(()=>edgePattern(w*.32,24,w*.68,24,58));break;
-      case 6: // angled strip ribbons
-        corners(()=>{for(let j=0;j<3;j++)poly(j===1?D:A,[[0,30+j*19],[118+j*31,0],[143+j*31,0],[0,54+j*19]],dog?.45:.92);emblem(33,104,18);});sides(()=>{line(D,19,195,19,h-195,3);edgePattern(42,200,42,h-200,70);});break;
-      case 7: // atlas grid at four corners
-        corners(()=>{for(let i=0;i<6;i++){line(A,24+i*24,24,24+i*24,148,1,.8);line(A,24,24+i*24,148,24+i*24,1,.8);}rect(D,24,24,49,49,dog?.18:.85);emblem(48,48,20,dog?D:paper);line(D,24,149,149,149,2);line(D,149,24,149,149,2);});ends(()=>{line(A,175,24,w-175,24,1.7);});break;
-      case 8: // asymmetric corridor
-        rect(D,0,0,71,h,dog?.22:.94);rect(A,72,0,6,h);for(let y=65;y<h-35;y+=89){emblem(35,y,22,dog?D:paper);line(A,11,y+36,60,y+36,1.3);}line(A,w-35,90,w-35,h-90,2);ends(()=>{line(D,112,33,w-60,33,2);for(let i=0;i<5;i++)line(A,w-63-i*12,33,w-63-i*12,45,2);});break;
-      case 9: // segmented grooves, two horizontal bars
-        ends(()=>{rect(D,0,0,w,20,dog?.24:.95);rect(A,0,20,w,5);for(let x=85;x<w-85;x+=68){line(A,x,37,x+33,37,3);line(D,x,45,x+24,45,1);}});sides(()=>{for(let y=95;y<h-95;y+=76){line(D,24,y,24,y+45,heavy);emblem(48,y+22,16);}});break;
-      case 10: // stepped angular frame
-        corners(()=>{stroke(D,heavy,q=>{q.moveTo(25,184);q.lineTo(25,87);q.lineTo(58,87);q.lineTo(58,25);q.lineTo(185,25);});stroke(A,2.5,q=>{q.moveTo(42,185);q.lineTo(42,104);q.lineTo(75,104);q.lineTo(75,42);q.lineTo(185,42);});emblem(44,44,19);});sides(()=>edgePattern(28,215,28,h-215,62));ends(()=>line(A,210,24,w-210,24,1));break;
-      case 11: // central medals, twin vertical flourish
-        ends(()=>{line(A,100,32,w*.44,32,2);line(A,w*.56,32,w-100,32,2);plaque(w/2,40,34);rosette(w/2,40,30,8);});sides(()=>{line(D,33,135,33,h-135,2);for(let i=0;i<4;i++){let y=h*(i+1)/5;leaf(48,y,13,i%2?.9:-.9);emblem(35,y+20,12);}});break;
-      case 12: // editorial brackets, no full frame
-        corners(()=>{stroke(D,4,q=>{q.moveTo(35,140);q.lineTo(35,35);q.lineTo(140,35);});stroke(A,1.5,q=>{q.moveTo(48,118);q.lineTo(48,48);q.lineTo(118,48);});emblem(63,63,19);});sides(()=>{line(A,27,h*.37,27,h*.63,2);for(let j=0;j<3;j++)dot(D,27,h*.43+j*h*.07,3);});break;
-      case 13: // classic frieze
-        border(18,2,D);border(68,1,A);ends(()=>{rect(A,19,19,w-38,34,.10);edgePattern(83,36,w-83,36,47);});sides(()=>{edgePattern(41,83,41,h-83,48);});corners(()=>plaque(42,42,20,1));break;
-      case 14: // four embossed seals
-        border(25,1,D);corners(()=>{plaque(64,64,42,2);rosette(64,64,47,12);line(A,64,113,64,158,2);line(A,113,64,158,64,2);});ends(()=>{line(D,180,25,w-180,25,1);line(A,180,32,w-180,32,1);});break;
-      case 15: // organic sweeping bands
-        sides(()=>{shape(D,q=>{q.moveTo(0,0);q.lineTo(54,0);for(let i=0;i<=120;i++){let y=h*i/120;q.lineTo(34+23*Math.cos(y/h*T*2),y);}q.lineTo(0,h);q.closePath();},dog?.22:.82);for(let k=0;k<4;k++)stroke(A,1.8,q=>{for(let i=0;i<=120;i++){let y=h*i/120,x=63+k*8+13*Math.cos(y/h*T*2+k*.4);i?q.lineTo(x,y):q.moveTo(x,y);}});for(let y=110;y<h-70;y+=120)emblem(23,y,16,dog?D:paper);});break;
-      case 16: // mosaic corners with distinct tiles
-        corners(()=>{for(let i=0;i<5;i++)for(let j=0;j<5-i;j++){let X=17+i*28,Y=17+j*28;poly((i+j)%2?A:D,[[X,Y-13],[X+13,Y],[X,Y+13],[X-13,Y]],dog?.45:.88);}emblem(87,87,19);});ends(()=>{line(A,175,27,w-175,27,1);edgePattern(w*.30,45,w*.70,45,52);});break;
-      case 17: // alternating interrupted bars
-        sides(()=>{for(let y=45,i=0;y<h-40;y+=91,i++){let a=i%2;rect(a?A:D,18,y,a?20:43,56,dog?.4:.94);emblem(a?65:40,y+27,14,a?A:paper);}});ends(()=>{line(D,100,20,w-100,20,3);line(A,w*.25,35,w*.75,35,2);});break;
-      case 18: // radial instruments / rosettes
-        corners(()=>{for(let k=0;k<4;k++)stroke(A,1.4,q=>q.arc(0,0,40+k*26,0,Math.PI/2));for(let k=0;k<9;k++){let a=k*Math.PI/16;line(D,Math.cos(a)*35,Math.sin(a)*35,Math.cos(a)*115,Math.sin(a)*115,1,.7);}emblem(34,34,20);});ends(()=>{line(A,145,28,w-145,28,2);for(const x of [w*.25,w*.5,w*.75])diamond(x,28,6);});break;
-      case 19: // linked route or specimen / scent / care nodes
-        sides(()=>{stroke(D,3,q=>{q.moveTo(25,0);for(let i=1;i<=12;i++)q.lineTo(i%2?75:25,h*i/12);});for(let i=1;i<12;i++){let x=i%2?75:25,y=h*i/12;dot(paper,x,y,13);circle(A,x,y,12,2);emblem(x,y,8);}});ends(()=>line(A,95,35,w-95,35,1.7));break;
-      case 20: // engraved field register
-        sides(()=>{line(D,27,0,27,h,3);for(let y=40,i=0;y<h-35;y+=23,i++){let l=i%5===0?40:i%2===0?23:12;line(A,27,y,27+l,y,i%5===0?2.4:1);if(i%5===0)emblem(78,y,12);}});ends(()=>{line(D,110,24,w-110,24,1);for(let x=135;x<w-135;x+=35)line(A,x,24,x,34,1);});break;
-      case 21: // folded ribbon ends
-        ends(()=>{for(const [x,sx] of [[0,1],[w,-1]])at(x,0,sx,1,()=>{poly(D,[[0,0],[w*.22,0],[w*.17,45],[36,45],[36,95],[0,130]],dog?.35:.94);poly(A,[[0,0],[36,45],[36,95],[0,130]],.9);poly(A,[[36,45],[w*.17,45],[w*.14,61],[36,61]],.65);emblem(18,44,12,paper);});line(A,w*.23,26,w*.77,26,2);});break;
-      case 22: // shield cartouches and long narrow spine
-        sides(()=>{line(D,42,0,42,h,2);for(const y of [h*.13,h*.43,h*.73,h*.91]){rect(paper,4,y-35,76,70);plaque(42,y,32,2);}});ends(()=>{line(A,105,28,w-105,28,1);});break;
-      case 23: // layered wave engravings, upper/lower and side
-        ends(()=>{for(let j=0;j<6;j++)stroke(j%2?A:D,j===0?3:1.2,q=>{for(let i=0;i<=120;i++){let x=w*i/120,y=10+j*6+6*Math.sin(x/w*T*3+j*.5);i?q.lineTo(x,y):q.moveTo(x,y);}},.85);});sides(()=>{for(let y=110;y<h-85;y+=93)emblem(31,y,19);});break;
-      case 24: // stratified horizon, interrupted left/right
-        ends(()=>{for(let j=0;j<4;j++){poly(j%2?A:D,[[0,j*12],[w*.31,j*12],[w*.25,j*12+8],[0,j*12+8]],.8);poly(j%2?D:A,[[w,j*12],[w*.69,j*12],[w*.75,j*12+8],[w,j*12+8]],.8);}plaque(w/2,28,22,1);});sides(()=>{line(A,19,75,19,h-75,2);for(let y=100;y<h-80;y+=75)emblem(42,y,16);});break;
-      case 25: // modular capsules
-        sides(()=>{for(let y=25,i=0;y<h-55;y+=87,i++){stroke(i%2?A:D,2.2,q=>{q.roundRect(13,y,66,62,16);});rect(i%2?A:D,13,y+23,6,16);emblem(46,y+31,20);}});ends(()=>{line(A,112,26,w-112,26,2);for(let x=145;x<w-145;x+=70)dot(D,x,26,3);});break;
-      case 26: // fine guilloche medallions
-        border(21,1,D);corners(()=>{for(let i=0;i<3;i++)rosette(55,55,22+i*12,8+i*2);emblem(55,55,17);});sides(()=>{for(let y=155;y<h-145;y+=84){rosette(32,y,17,6);emblem(32,y,10);}});ends(()=>edgePattern(170,28,w-170,28,55));break;
-      case 27: // woven lattice side bands
-        sides(()=>{for(let y=-25;y<h;y+=39){line(D,13,y,75,y+45,2,.8);line(A,75,y,13,y+45,2,.8);}line(A,12,0,12,h,2);line(A,77,0,77,h,2);for(let y=105;y<h-65;y+=156){dot(paper,45,y,23);circle(A,45,y,23,2);emblem(45,y,15);}});ends(()=>line(D,100,27,w-100,27,1.4));break;
-      case 28: // cusp corners, linked angular arches
-        corners(()=>{stroke(D,heavy,q=>{q.moveTo(0,178);q.quadraticCurveTo(49,128,49,49);q.quadraticCurveTo(128,49,178,0);});stroke(A,3,q=>{q.moveTo(8,151);q.quadraticCurveTo(64,116,64,64);q.quadraticCurveTo(116,64,151,8);});emblem(28,28,20);});sides(()=>{for(let y=215;y<h-195;y+=85)diamond(25,y,10);});break;
-      case 29: // honor garland, open center
-        border(20,1,A);sides(()=>{stroke(D,1.6,q=>{q.moveTo(34,80);q.bezierCurveTo(61,h*.3,7,h*.7,34,h-80);});for(let y=105,i=0;y<h-90;y+=34,i++){let x=34+12*Math.sin(y/h*T);leaf(x-7,y,13,-.9);leaf(x+7,y+10,13,.9);if(i%4===0)emblem(62,y,13);}});ends(()=>{for(let x=110;x<w-110;x+=34){leaf(x,34,13,-.6);leaf(x+8,44,11,.6);}plaque(w/2,40,29);});break;
-    }}finally{ctx.restore();}
-  }
-
-  function drawSignatureCollection(kind,accent,ink){
-    const A=accent,D=ink, tau=Math.PI*2, e=Math.min(W,H), u=e/1190;
-    ctx.save();
-    ctx.lineCap='round';ctx.lineJoin='round';
-    const fill=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};
-    const p=(c,w,fn,opacity=1)=>{ctx.save();ctx.globalAlpha=opacity;ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();fn(ctx);ctx.stroke();ctx.restore();};
-    const shape=(c,fn,opacity=1)=>{ctx.save();ctx.globalAlpha=opacity;ctx.fillStyle=c;ctx.beginPath();fn(ctx);ctx.fill();ctx.restore();};
-    const poly=(c,pts,opacity=1)=>shape(c,q=>{pts.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();},opacity);
-    const line=(c,x,y,X,Y,w=1,opacity=1)=>p(c,w,q=>{q.moveTo(x,y);q.lineTo(X,Y);},opacity);
-    const rect=(c,m,w=1)=>p(c,w,q=>q.rect(m,m,W-m*2,H-m*2));
-    const circ=(c,x,y,r,w=1,opacity=1)=>p(c,w,q=>q.arc(x,y,r,0,tau),opacity);
-    const dot=(c,x,y,r,opacity=1)=>shape(c,q=>q.arc(x,y,r,0,tau),opacity);
-    const local=(x,y,sx,sy,fn)=>{ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);try{fn();}finally{ctx.restore();}};
-    const corners=[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]];
-    const goldLine=(x,y,X,Y,w=2)=>line(A,x,y,X,Y,w);
-    const curve=(c,x,y,r,n,opacity=1)=>p(c,1.4,q=>{for(let j=0;j<=240;j++){let a=tau*j/240,rr=r*(.82+.18*Math.cos(n*a));let xx=x+rr*Math.cos(a),yy=y+rr*Math.sin(a);j?q.lineTo(xx,yy):q.moveTo(xx,yy);}q.closePath();},opacity);
-    const leaf=(x,y,rx,ry,angle,c=A)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);shape(c,q=>{q.moveTo(-rx,0);q.quadraticCurveTo(0,-ry*2,rx,0);q.quadraticCurveTo(0,ry*2,-rx,0);},.85);line('#ffffff',-rx*.7,0,rx*.75,0,.7,.7);ctx.restore();};
-    const jewel=(x,y,r)=>{poly(A,[[x-r,y],[x,y-r],[x+r,y],[x,y+r]]);poly(D,[[x-r*.55,y],[x,y-r*.55],[x+r*.55,y],[x,y+r*.55]]);};
-    const edgeWash=(c,side,size)=>{let g=ctx.createLinearGradient(side?W:0,0,side?W-size:size,0);g.addColorStop(0,c);g.addColorStop(1,'rgba(255,255,255,0)');fill(g,side?W-size:0,0,size,H);};
-    const metal=(x,y,X,Y)=>{const g=ctx.createLinearGradient(x,y,X,Y);g.addColorStop(0,D);g.addColorStop(.23,A);g.addColorStop(.49,'#f2e4c4');g.addColorStop(.66,A);g.addColorStop(1,D);return g;};
-    try{switch(kind){
-      case 'sigApex': {
-        // Machined chamfered plates, inset rivets and engraved parallel grooves.
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{
-          poly(D,[[0,0],[W*.24,0],[W*.19,47],[119,47],[67,103],[67,217],[0,276]]);
-          poly(A,[[0,0],[W*.24,0],[W*.225,14],[104,14],[15,108],[15,263],[0,276]]);
-          poly('#ffffff',[[25,107],[111,23],[W*.187,23],[W*.175,34],[119,34],[56,105],[56,210],[25,238]],.13);
-          for(let j=0;j<7;j++)line(A,30,121+j*15,52,100+j*15,2,.8);
-          for(const [X,Y] of [[88,30],[28,72],[34,224]]){circ(A,X,Y,7,2);dot(A,X,Y,2);}
-        });
-        for(const [x,s] of [[25,1],[W-25,-1]]){line(D,x,290,x,H-290,3);for(let y=310;y<H-300;y+=38)line(A,x,y,x+s*(y%3?12:20),y,2);}
-        for(const y of [25,H-25]){goldLine(W*.29,y,W*.45,y,2);goldLine(W*.55,y,W*.71,y,2);jewel(W/2,y,12);}break;
-      }
-      case 'sigTrail': {
-        // Tracking ribbon: organically meandering paths and directional paw silhouettes.
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
-          edgeWash(D,0,1); // thin edge only; mirrored by the local transform
-          shape(D,q=>{q.moveTo(0,0);q.lineTo(81,0);for(let j=0;j<=100;j++){let t=j/100;q.lineTo(62+16*Math.sin(t*tau*2.2),t*H);}q.lineTo(0,H);q.closePath();});
-          for(let j=0;j<4;j++)p(A,1.7,q=>{for(let i=0;i<=200;i++){let t=i/200,X=89+j*10+12*Math.sin(t*tau*2.2+j*.3);i?q.lineTo(X,t*H):q.moveTo(X,t*H);}},.8-j*.13);
-          for(let y=105,i=0;y<H-60;y+=150,i++){ctx.save();ctx.translate(33+(i%2)*9,y);ctx.rotate((i%2?.25:-.25));shape(A,q=>{q.ellipse(0,5,11,9,0,0,tau);});for(let a=0;a<4;a++){let angle=Math.PI+(a+.5)*Math.PI/4;shape(A,q=>q.ellipse(14*Math.cos(angle),14*Math.sin(angle),3.3,5,angle+Math.PI/2,0,tau));}ctx.restore();}
-        });
-        for(const y of [38,H-38]){p(A,2,q=>{q.moveTo(155,y);q.bezierCurveTo(W*.29,y+14,W*.37,y-14,W/2,y);q.bezierCurveTo(W*.63,y+14,W*.71,y-14,W-155,y);});for(const x of [W*.25,W*.5,W*.75]){circ(D,x,y,7,2);dot(A,x,y,3);}}break;
-      }
-      case 'sigRescue': {
-        // Rescue beacon: asymmetric signal tower, radial sweeps and reflective chevrons.
-        fill(D,0,0,51,H);fill(A,51,0,8,H);
-        for(let y=25;y<H-22;y+=57)poly(A,[[0,y],[51,y+17],[51,y+32],[0,y+15]],.9);
-        for(const [x,y,sx,sy] of [corners[1],corners[3]])local(x,y,sx,sy,()=>{
-          shape(D,q=>{q.moveTo(0,0);q.lineTo(W*.27,0);q.quadraticCurveTo(60,65,0,230);q.closePath();});
-          for(let j=0;j<8;j++)p(A,2.2,q=>q.arc(0,0,42+j*23,0,Math.PI/2),.95-j*.07);
-          for(let j=0;j<8;j++){let a=j*Math.PI/14;line(A,Math.cos(a)*33,Math.sin(a)*33,Math.cos(a)*222,Math.sin(a)*222,1,.4);}
-          dot(A,23,23,8);circ('#fff',23,23,16,2);
-        });
-        for(const y of [26,H-26]){line(D,82,y,W*.67,y,2);line(A,82,y+6,W*.45,y+6,4);for(let i=0;i<3;i++)poly(D,[[W*.69+i*22,y-7],[W*.69+i*22+12,y],[W*.69+i*22,y+7]]);}break;
-      }
-      case 'sigForensic': {
-        // Stratigraphic cutaway panels, numbered-free specimen markers and fine hatching.
-        for(const [x,s] of [[0,1],[W,-1]])local(x,0,s,1,()=>{
-          fill(D,0,0,22,H);for(let j=0;j<7;j++){
-            shape(j%2?A:D,q=>{q.moveTo(22,j*H/7);q.lineTo(112,j*H/7+27);q.lineTo(88,(j+1)*H/7-26);q.lineTo(22,(j+1)*H/7);q.closePath();},.82);
-            for(let i=0;i<9;i++)line('#fff',31,j*H/7+13+i*12,71,j*H/7+28+i*12,1,.36);
-            circ(A,133,(j+.5)*H/7,11,1.8);line(D,126,(j+.5)*H/7,140,(j+.5)*H/7,1.5);line(D,133,(j+.5)*H/7-7,133,(j+.5)*H/7+7,1.5);
-          }
-        });for(const y of [30,H-30]){line(D,170,y,W-170,y,2);for(let i=0;i<21;i++)line(A,W*.21+i*W*.029,y,W*.21+i*W*.029,y+(i%5===0?15:6)*(y< H/2?1:-1),1.5);}break;
-      }
-      case 'sigNight': {
-        // Wide telemetry apertures, staggered micro-grid and electronic waveform.
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{
-          poly(D,[[0,0],[W*.44,0],[W*.37,38],[156,38],[86,103],[86,228],[0,305]]);
-          for(let i=0;i<7;i++)for(let j=0;j<8;j++)if(10+i*11<82)dot(A,12+i*11,53+j*14,2.1,.4+(i+j)%3*.24);
-          p(A,3,q=>{q.moveTo(7,284);q.lineTo(69,228);q.lineTo(69,103);q.lineTo(147,26);q.lineTo(W*.37,26);});
-          for(let j=0;j<6;j++)line('#fff',175+j*19,10,183+j*19,21,1.4,.65);
-        });
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,H/2,sx,1,()=>{fill(D,0,-H*.22,17,H*.44);p(A,3,q=>{q.moveTo(35,-H*.22);for(let j=0;j<24;j++)q.lineTo(35+([0,11,2,24,8,14][j%6]),-H*.22+(j+1)*H*.44/24);});});
-        for(const y of [43,H-43]){for(let i=0;i<13;i++)dot(A,W*.36+i*W*.024,y,i%3?2.2:4);line(D,W*.28,y,W*.34,y,3);line(D,W*.67,y,W*.73,y,3);}break;
-      }
-      case 'sigAurum': {
-        // Detailed intaglio engraving: braided border, rosettes and fine-cut acanthus corners.
-        rect(D,17,1.5);rect(A,24,3);rect(A,73,1.4);
-        for(const y of [48,H-48])for(let i=0;i<3;i++)p(A,1.1,q=>{for(let j=0;j<=700;j++){let t=j/700,X=80+t*(W-160),Y=y+15*Math.sin(t*tau*19+i*tau/3);j?q.lineTo(X,Y):q.moveTo(X,Y);}},.85);
-        for(const x of [47,W-47])for(let i=0;i<3;i++)p(A,1.1,q=>{for(let j=0;j<=500;j++){let t=j/500,X=x+13*Math.sin(t*tau*13+i*tau/3),Y=80+t*(H-160);j?q.lineTo(X,Y):q.moveTo(X,Y);}},.85);
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{
-          shape(D,q=>{q.moveTo(15,15);q.lineTo(190,15);q.bezierCurveTo(96,36,38,96,15,190);q.closePath();});
-          for(let j=0;j<13;j++)p(metal(15,15,145,145),1.4,q=>{q.moveTo(20+j*10,20);q.quadraticCurveTo(35+j*4,35+j*4,20,20+j*10);});
-          for(let j=0;j<7;j++){let a=.16+j*.2;leaf(27+105*Math.cos(a),27+105*Math.sin(a),15,5,a+1.1);}
-          curve(A,47,47,23,12);circ(A,47,47,14,1);dot(A,47,47,4);
-        });break;
-      }
-      case 'sigChateau': {
-        // Architectural pilasters and sculpted Baroque flourishes.
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
-          fill(D,0,0,26,H);for(let j=0;j<5;j++)fill(metal(28,0,70,0),29+j*9,0,5,H);
-          for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
-            poly(D,[[0,0],[W*.23,0],[W*.18,24],[115,24],[96,63],[0,63]]);
-            for(let j=0;j<5;j++)p(A,2,q=>{q.moveTo(35+j*11,74);q.bezierCurveTo(43,134+j*13,170+j*12,66,129+j*8,35);});
-            for(let j=0;j<6;j++)leaf(95+j*20,63+13*Math.sin(j),17,6,-.6);
-            for(let j=0;j<3;j++)circ(A,72,90,20+j*7,1.2);
-          });
-        });
-        for(const y of [28,H-28]){p(A,2,q=>{q.moveTo(W*.25,y);q.bezierCurveTo(W*.40,y+27,W*.42,y-19,W/2,y);q.bezierCurveTo(W*.58,y-19,W*.60,y+27,W*.75,y);});curve(A,W/2,y,19,6);}
-        break;
-      }
-      case 'sigLumiere': {
-        // Fan-shaped art-deco sunbursts contained in long horizontal capstones.
-        for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
-          shape(D,q=>{q.moveTo(0,0);q.lineTo(W,0);q.lineTo(W,35);q.lineTo(W*.64,35);q.lineTo(W*.60,65);q.lineTo(W*.40,65);q.lineTo(W*.36,35);q.lineTo(0,35);q.closePath();});
-          for(let j=0;j<=24;j++){let a=-Math.PI+j*Math.PI/24;const X=W/2+Math.cos(a)*W*.097,Y=61+Math.sin(a)*54;line(A,W/2,61,X,Y,2.3);}
-          for(let j=0;j<3;j++)p(A,1.5,q=>{q.moveTo(W*.40+j*12,61);q.quadraticCurveTo(W/2,5+j*12,W*.60-j*12,61);});
-          for(let j=0;j<3;j++){line(A,0,10+j*8,W*.35,10+j*8,1.1);line(A,W*.65,10+j*8,W,10+j*8,1.1);}
-        });
-        for(const x of [30,W-30]){line(D,x,60,x,H-60,2);for(let y=100;y<H-90;y+=112){poly(A,[[x-8,y],[x,y-17],[x+8,y],[x,y+17]]);circ(D,x,y,4,1);}}break;
-      }
-      case 'sigPorcelain': {
-        // Cobalt porcelain vines with petal clusters, alternating hand-painted motifs.
-        rect(A,19,3);rect(A,29,1);
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
-          p(A,2.3,q=>{for(let j=0;j<=220;j++){let t=j/220;let X=62+23*Math.sin(t*tau*5),Y=46+(H-92)*t;j?q.lineTo(X,Y):q.moveTo(X,Y);}});
-          for(let y=90,i=0;y<H-60;y+=97,i++){let X=60+19*Math.sin((y-46)/(H-92)*tau*5);for(let j=0;j<5;j++){let a=j*tau/5;leaf(X+15*Math.cos(a),y+15*Math.sin(a),12,5,a,A);}dot(D,X,y,4);leaf(X+20,y+30,17,6,.7);leaf(X-18,y-25,17,6,-.6);}
-        });
-        for(const y of [42,H-42]){for(let x=140,i=0;x<W-120;x+=52,i++){curve(A,x,y,15,i%2?4:6,.8);dot(A,x,y,2);if(x+26<W-120)leaf(x+26,y,10,3,0,A);}}break;
-      }
-      case 'sigEclipse': {
-        // Crescent cutout with offset orbital tracks; dramatic but print-friendly.
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{
-          shape(D,q=>{q.moveTo(0,0);q.lineTo(W*.46,0);q.bezierCurveTo(W*.23,29,64,81,0,H*.34);q.closePath();});
-          for(let j=0;j<10;j++)p(A,1.7,q=>{q.moveTo(W*(.47+j*.012),0);q.bezierCurveTo(W*(.20+j*.012),36+j*7,55+j*9,95+j*8,0,H*(.35+j*.016));},.91-j*.055);
-          for(let j=0;j<6;j++)dot(A,W*.29-j*18,14+j*12,2.6+j*.5,.75);
-        });
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,H/2,sx,1,()=>{p(A,2.4,q=>{q.moveTo(23,-H*.22);q.bezierCurveTo(99,-H*.13,99,H*.13,23,H*.22);});p(D,1,q=>{q.moveTo(15,-H*.22);q.bezierCurveTo(71,-H*.13,71,H*.13,15,H*.22);});});break;
-      }
-      case 'sigDiplomat': {
-        // Woven ceremonial ribbon; central generic ornamental medallions, no official seals.
-        for(const y of [0,H-47]){fill(D,0,y,W,47);for(let i=0;i<W;i+=24){poly(A,[[i,y],[i+12,y],[i+36,y+47],[i+24,y+47]],.75);line('#fff',i+2,y,i+26,y+47,.8,.45);}}
-        rect(A,58,1.6);
-        for(const x of [37,W-37])for(let y=90;y<H-70;y+=30){poly(D,[[x-9,y],[x,y-11],[x+9,y],[x,y+11]]);dot(A,x,y,3);}
-        for(const [y,sy] of [[48,1],[H-48,-1]])local(W/2,y,1,sy,()=>{shape('#fff',q=>q.arc(0,0,37,0,tau));circ(A,0,0,34,3);circ(D,0,0,28,1.5);curve(A,0,0,23,10);jewel(0,0,11);});break;
-      }
-      case 'sigAlma': {
-        // Gothic tracery built from pointed arches, ribbed capitals and quatrefoils.
-        for(const [x,s] of [[0,1],[W,-1]])local(x,0,s,1,()=>{
-          fill(D,0,0,19,H);line(A,24,0,24,H,3);
-          for(let y=70;y<H-100;y+=150){p(D,2.4,q=>{q.moveTo(35,y+86);q.lineTo(35,y+37);q.quadraticCurveTo(35,y+16,64,y);q.quadraticCurveTo(93,y+16,93,y+37);q.lineTo(93,y+86);});p(A,1.5,q=>{q.moveTo(45,y+86);q.lineTo(45,y+40);q.quadraticCurveTo(45,y+23,64,y+12);q.quadraticCurveTo(83,y+23,83,y+40);q.lineTo(83,y+86);});curve(A,64,y+56,14,4);line(D,33,y+92,95,y+92,3);}
-        });
-        for(const [y,sy] of [[20,1],[H-20,-1]])local(0,y,1,sy,()=>{for(let i=0;i<7;i++){let x=135+i*(W-270)/7,d=(W-270)/7;p(A,1.8,q=>{q.moveTo(x,32);q.quadraticCurveTo(x+d*.25,32,x+d/2,0);q.quadraticCurveTo(x+d*.75,32,x+d,32);});curve(D,x+d/2,35,9,4);}line(D,125,0,W-125,0,2);});break;
-      }
-      case 'sigMonograph': {
-        // Editorial composition: book spine, cropped folio tabs and asymmetric red line.
-        fill(D,0,0,42,H);fill(A,42,0,11,H);for(let j=0;j<5;j++)line('#fff',8+j*7,30,8+j*7,H-30,.8,.4);
-        fill(D,W*.68,0,W*.32,58);fill(A,W*.79,58,W*.21,10);
-        fill(A,0,H-51,W*.31,51);fill(D,W*.31,H-17,W*.69,17);
-        for(let j=0;j<6;j++){fill(j%2?A:D,W-65,110+j*H*.12,65,9);line(D,W-95,124+j*H*.12,W-22,124+j*H*.12,1);}
-        line(A,80,45,W*.62,45,2);line(D,80,52,W*.52,52,1);line(A,W*.37,H-39,W-85,H-39,2);break;
-      }
-      case 'sigHelix': {
-        // Abstract double helix with connected rungs and alternating chromatic curves.
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{
-          fill(D,0,0,15,H);
-          for(let i=0;i<=57;i++){let y=25+i*(H-50)/57,a=(y/H)*tau*4;let X=70+31*Math.sin(a),Y=70-31*Math.sin(a);line(D,X,y,Y,y,1.8,.5);dot(A,X,y,3.3);dot(D,Y,y,3.3);}
-          for(const [c,sg] of [[A,1],[D,-1]])p(c,4,q=>{for(let j=0;j<=350;j++){let y=j*H/350,x=70+sg*31*Math.sin(y/H*tau*4);j?q.lineTo(x,y):q.moveTo(x,y);}});
-        });
-        for(const y of [35,H-35]){for(let i=0;i<15;i++){let x=W*.24+i*W*.037;line(D,x,y,x+W*.023,y,2);dot(A,x+W*.025,y,3);}}break;
-      }
-      case 'sigMarble': {
-        // Procedural mineral veining on broad diagonal corner panels; not a photo texture.
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{
-          ctx.save();ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*.42,0);ctx.lineTo(109,117);ctx.lineTo(0,295);ctx.closePath();ctx.clip();
-          fill('#e9e8e6',0,0,W*.43,300);for(let j=0;j<30;j++)p(j%4===0?A:D,j%4===0?2.5:.9,q=>{for(let i=0;i<=170;i++){let t=i/170,X=t*W*.46,Y=j*12-50+35*Math.sin(t*13+j*.53)+13*Math.sin(t*33+j*.11)+t*50;i?q.lineTo(X,Y):q.moveTo(X,Y);}},j%4===0?.8:.25);
-          ctx.restore();p(metal(0,280,W*.42,0),7,q=>{q.moveTo(0,295);q.lineTo(109,117);q.lineTo(W*.42,0);});
-        });
-        rect(A,21,1.2);for(const [y,sy] of [[55,1],[H-55,-1]]){line(D,W*.44,y,W*.72,y,1);jewel(W*.76,y,7);}break;
-      }
-      case 'sigHorizon': {
-        // Deep relief engraved waves, edge-to-edge micro-linework in bottom/top bands.
-        for(const [y,sy] of [[0,1],[H,-1]])local(0,y,1,sy,()=>{
-          shape(D,q=>{q.moveTo(0,0);q.lineTo(W,0);q.lineTo(W,45);q.bezierCurveTo(W*.75,9,W*.62,86,W*.40,48);q.bezierCurveTo(W*.20,15,W*.12,77,0,48);q.closePath();});
-          for(let j=0;j<12;j++)p(j%3?A:'#ffffff',1.4,q=>{for(let i=0;i<=400;i++){let t=i/400,X=t*W,Y=7+j*4+11*Math.sin(t*tau*2+j*.17)+5*Math.sin(t*tau*4-j*.07);i?q.lineTo(X,Y):q.moveTo(X,Y);}},j%3?.8:.46);
-          p(A,2.5,q=>{q.moveTo(0,48);q.bezierCurveTo(W*.12,77,W*.20,15,W*.40,48);q.bezierCurveTo(W*.62,86,W*.75,9,W,45);});
-        });
-        for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{for(let j=0;j<3;j++)p(A,1.3,q=>{for(let i=0;i<=240;i++){let t=i/240, X=22+j*7+6*Math.sin(t*tau*4+j*.6),Y=93+t*(H-186);i?q.lineTo(X,Y):q.moveTo(X,Y);}},.8-j*.17);});break;
-      }
-    }}finally{ctx.restore();}
-  }
-
-  function drawProfessionalOrnament(kind, accent, ink) {
-    const m=38, e=Math.min(W,H), gold=accent, dark=ink;
-    ctx.save();
-    const fill=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};
-    const poly=(c,pts)=>{ctx.fillStyle=c;ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
-    const line=(c,x,y,X,Y,w=2)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(X,Y);ctx.stroke();};
-    const rect=(c,n,w=2)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.strokeRect(n,n,W-2*n,H-2*n);};
-    const circle=(c,x,y,r,w=2)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();};
-    const corners=[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]];
-    const cornerPoly=(c,x,y,sx,sy,pts)=>poly(c,pts.map(([a,b])=>[x+sx*a,y+sy*b]));
-    const diamond=(x,y,r)=>poly(gold,[[x-r,y],[x,y-r],[x+r,y],[x,y+r]]);
-
-    const path=(c,w,fn)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();fn(ctx);ctx.stroke();};
-    const local=(x,y,sx,sy,fn)=>{ctx.save();ctx.translate(x,y);ctx.scale(sx,sy);try{fn();}finally{ctx.restore();}};
-    const dot=(x,y,r)=>{ctx.fillStyle=accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();};
-    const wave=(x,y,len,amp,count,phase,c,opacity,width)=>{ctx.save();ctx.globalAlpha=opacity;path(c,width,p=>{for(let j=0;j<=320;j++){const t=j/320,yy=y+amp*Math.sin(t*Math.PI*2*count+phase);j?p.lineTo(x+t*len,yy):p.moveTo(x,yy);}});ctx.restore();};
-    const rosette=(x,y,r,n)=>{path(accent,1.5,p=>{for(let j=0;j<=200;j++){let a=j*Math.PI*2/200,rr=r*(.73+.27*Math.cos(n*a));let X=x+rr*Math.cos(a),Y=y+rr*Math.sin(a);j?p.lineTo(X,Y):p.moveTo(X,Y);}p.closePath();});circle(accent,x,y,r*.38,1.2);};
-    const leaf=(x,y,rx,ry,a)=>{ctx.save();ctx.translate(x,y);ctx.rotate(a);path(accent,1.3,p=>{p.moveTo(-rx,0);p.quadraticCurveTo(0,-ry*2,rx,0);p.quadraticCurveTo(0,ry*2,-rx,0);});ctx.restore();};
-    const hex=(x,y,r)=>{path(accent,1.4,p=>{for(let j=0;j<=6;j++){let a=j*Math.PI/3;j?p.lineTo(x+r*Math.cos(a),y+r*Math.sin(a)):p.moveTo(x+r*Math.cos(a),y+r*Math.sin(a));}p.closePath();});};
-    switch(kind) {
-
-      case "ducalPro": { rect(dark,25,2);rect(gold,65,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(gold,3,p=>{p.moveTo(24,220);p.lineTo(24,116);p.quadraticCurveTo(24,24,116,24);p.lineTo(220,24);});for(let i=0;i<8;i++){leaf(43+i*19,43,15,5,-.6);leaf(43,43+i*19,15,5,2.17);}rosette(43,43,17,7);}); break; }
-      case "silhouettePro": { fill(dark,0,0,W,12);fill(dark,0,H-12,W,12);for(const x of [0,W]){const sx=x===0?1:-1;local(x,H/2,sx,1,()=>{poly(dark,[[0,-H*.35],[53,-H*.21],[53,H*.21],[0,H*.35]]);path(gold,3,p=>{p.moveTo(8,-H*.32);p.lineTo(39,-H*.20);p.lineTo(39,H*.20);p.lineTo(8,H*.32);});});}for(const y of [49,H-49]){line(gold,W*.15,y,W*.85,y,1);diamond(W/2,y,11);} break; }
-      case "arcTriomphePro": { for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{fill(dark,0,0,16,H);for(const n of [31,46])path(gold,2,p=>{p.moveTo(n,H-50);p.lineTo(n,156);p.quadraticCurveTo(n,50,154,50);p.lineTo(W*.28,50);});});for(const y of [50,H-50]){line(gold,W*.33,y,W*.67,y,2);for(let j=-2;j<=2;j++)diamond(W/2+j*23,y,7);} break; }
-      case "mosaicPro": { for(const y of [20,H-53])for(let x=20,i=0;x<W-20;x+=36,i++){poly(i%2?gold:dark,[[x,y+16],[x+17,y],[x+34,y+16],[x+17,y+32]]);poly('#fff',[[x+10,y+16],[x+17,y+9],[x+24,y+16],[x+17,y+23]]);}for(const x of [36,W-36])line(gold,x,65,x,H-65,2);rect(dark,70,1); break; }
-      case "engravedVinePro": { for(const [x,sx] of [[35,1],[W-35,-1]]){path(gold,2,p=>{for(let i=0;i<=160;i++){let y=65+(H-130)*i/160,xx=x+sx*12*Math.sin(i/8);i?p.lineTo(xx,y):p.moveTo(xx,y);}});for(let y=85,i=0;y<H-75;y+=45,i++)leaf(x+sx*(i%2?10:23),y,19,8,sx*(i%2?.8:-.8));}for(const y of [39,H-39]){line(dark,67,y,W-67,y,2);rosette(W/2,y,24,9);} break; }
-      case "fleurPro": { rect(gold,42,2);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(42,42);ctx.bezierCurveTo(150,12,12,150,42,42);ctx.fill();for(const a of [0,Math.PI/2])local(42,42,1,1,()=>{ctx.rotate(a);path(gold,2,p=>{p.moveTo(18,0);p.bezierCurveTo(38,-32,70,-26,86,0);p.bezierCurveTo(70,26,38,32,18,0);});});});for(const y of [42,H-42]){for(let j=-3;j<=3;j++)leaf(W/2+j*25,y,14,5,Math.PI/2);diamond(W/2,y,8);} break; }
-      case "crownRibbonPro": { fill(dark,0,0,W,18);fill(dark,0,H-18,W,18);rect(gold,60,1);for(const [x,y,sx,sy] of [corners[0],corners[1]])local(x,y,sx,sy,()=>{poly(gold,[[0,0],[165,0],[165,38],[80,38],[80,118],[40,83],[0,118]]);poly(dark,[[12,0],[68,0],[68,91],[40,68],[12,91]]);});for(const y of [40,H-40]){line(gold,W*.24,y,W*.44,y,2);line(gold,W*.56,y,W*.76,y,2);poly(gold,[[W/2-37,y-13],[W/2-18,y+4],[W/2,y-19],[W/2+18,y+4],[W/2+37,y-13],[W/2+28,y+14],[W/2-28,y+14]]);} break; }
-      case "quillPro": { fill('#f1ece3',0,0,55,H);line(gold,60,20,60,H-20,2);for(const y of [46,H-46]){line(dark,90,y,W-54,y,1);for(let j=0;j<3;j++)line(gold,W-122+j*15,y-10,W-105+j*15,y+10,1.2);}for(let y=105;y<H-100;y+=100){path(gold,1.5,p=>{p.moveTo(18,y+22);p.quadraticCurveTo(20,y-19,42,y-25);});for(let j=0;j<4;j++)line(gold,23+j*4,y+10-j*8,39,y+5-j*8,1);} break; }
-      case "laureatePro": { rect(dark,26,1);for(const y of [47,H-47]){for(const sx of [-1,1])local(W/2,y,sx,1,()=>{path(gold,1.7,p=>{p.moveTo(0,15);p.quadraticCurveTo(110,30,218,-12);});for(let j=0;j<8;j++)leaf(25+j*25,15+Math.sin(j*.5)*8,18,5,-.6-j*.08);});circle(gold,W/2,y,17,2);diamond(W/2,y,7);}for(const x of [46,W-46])line(gold,x,92,x,H-92,2); break; }
-      case "crestPro": { for(const y of [0,H-28])fill(dark,0,y,W,28);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(gold,2,p=>{p.moveTo(0,33);p.lineTo(130,33);p.lineTo(130,67);p.quadraticCurveTo(65,80,65,142);p.lineTo(33,142);p.lineTo(33,0);});});for(const y of [48,H-48]){path(gold,2,p=>{p.moveTo(W/2-22,y-14);p.lineTo(W/2+22,y-14);p.lineTo(W/2+19,y+8);p.quadraticCurveTo(W/2,y+26,W/2-19,y+8);p.closePath();});line(gold,W*.25,y,W/2-34,y,1);line(gold,W/2+34,y,W*.75,y,1);} break; }
-      case "terracesPro": { for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{for(let j=0;j<4;j++){const len=W*(.48-j*.09);fill(j%2?gold:dark,0,j*15,len,12);poly(j%2?gold:dark,[[0,j*15],[17,j*15],[17,100-j*12],[0,130-j*12]]);}});for(const y of [57,H-57])line(gold,70,y,W-70,y,1); break; }
-      case "vectorCutPro": { for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[W*.53,0],[W*.31,22],[94,45],[0,210]]);poly(gold,[[0,210],[94,45],[112,39],[0,252]]);poly(gold,[[0,0],[92,0],[0,92]]);});for(const y of [48,H-48])line(dark,W*.39,y,W*.61,y,4); break; }
-      case "foldedPagePro": { fill(dark,0,0,22,H);poly(gold,[[W-215,0],[W,0],[W,215]]);poly(dark,[[W-215,0],[W-35,35],[W,215],[W,0]]);poly('#e6dfd2',[[W-215,0],[W-35,35],[W,215],[W-164,51]]);for(const y of [65,H-65])line(gold,55,y,W*.7,y,2);fill(gold,W-20,H*.55,20,H*.45); break; }
-      case "crescentPro": { for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(240,0);ctx.quadraticCurveTo(16,32,0,240);ctx.closePath();ctx.fill();for(let i=0;i<6;i++)path(gold,2,p=>{p.moveTo(245+i*13,0);p.quadraticCurveTo(32+i*6,32+i*6,0,245+i*13);});});for(const y of [40,H-40])circle(gold,W/2,y,12,1.5); break; }
-      case "modularPro": { for(const y of [0,H-40]){fill(dark,W*.18,y,W*.64,40);for(const x of [0,W*.82]){fill(gold,x,y,W*.18,40);fill(dark,x+W*.035,y+11,W*.11,18);}}for(const x of [38,W-38]){for(let j=0;j<5;j++){let y=H*(.18+.16*j);fill(j%2?gold:dark,x-10,y-15,20,30);}} break; }
-      case "contourFieldPro": { for(const [x,y,sx,sy] of [corners[0],corners[1],corners[2],corners[3]])local(x,y,sx,sy,()=>{for(let j=0;j<7;j++){path(gold,1.6,p=>{p.moveTo(0,35+j*19);p.bezierCurveTo(42+j*15,40+j*9,35+j*8,0,145+j*21,0);});}fill(dark,0,0,26,26);});for(const x of [34,W-34])line(dark,x,H*.25,x,H*.75,2); break; }
-      case "rescueBandPro": { for(const x of [0,W-30]){fill(dark,x,0,30,H);for(let y=60;y<H-40;y+=73)poly(gold,[[x,y],[x+30,y+16],[x+30,y+30],[x,y+14]]);}for(const y of [30,H-30]){fill(gold,W*.33,y-9,W*.34,18);line(dark,65,y,W*.33,y,4);line(dark,W*.67,y,W-65,y,4);fill(dark,W/2-17,y-6,34,12);} break; }
-      case "trackRoutePro": { rect(dark,24,2);for(const [y,sy] of [[42,1],[H-42,-1]]){const pts=[[55,y],[W*.18,y+sy*10],[W*.33,y-sy*9],[W*.51,y+sy*8],[W*.72,y-sy*8],[W-55,y]];path(gold,3,p=>pts.forEach(([x,Y],j)=>j?p.lineTo(x,Y):p.moveTo(x,Y)));for(const [x,Y] of pts){circle(dark,x,Y,8,2);dot(x,Y,3);}}for(const x of [42,W-42])for(let y=110;y<H-100;y+=80)circle(gold,x,y,3,1); break; }
-      case "sensorPro": { for(const [x,sx] of [[0,1],[W,-1]])local(x,H/2,sx,1,()=>{poly(dark,[[0,-190],[60,-115],[60,115],[0,190]]);for(let j=0;j<6;j++)path(gold,2,p=>{p.arc(0,0,20+j*10,-Math.PI/2,Math.PI/2);});});for(const y of [46,H-46]){line(dark,65,y,W-65,y,2);for(let j=0;j<9;j++)dot(W/2+(j-4)*22,y,3+j%3);} break; }
-      case "coordinateLPro": { for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{fill(dark,0,0,136,13);fill(dark,0,0,13,136);for(let j=1;j<=8;j++){line(gold,j*15,13,j*15,j%2?25:37,2);line(gold,13,j*15,j%2?25:37,j*15,2);}circle(dark,47,47,12,2);});for(const y of [44,H-44]){line(gold,W*.25,y,W*.75,y,1.5);for(let j=-3;j<=3;j++)line(dark,W/2+j*31,y-7,W/2+j*31,y+7,2);} break; }
-      case "cedarPro": { for(const [x,y,sx,sy] of [corners[0],corners[1],corners[2],corners[3]])local(x,y,sx,sy,()=>{path(dark,2,p=>{p.moveTo(30,168);p.quadraticCurveTo(64,72,168,30);});for(let j=0;j<7;j++){let X=35+j*17,Y=146-j*16;leaf(X,Y,16,5,-.3);leaf(X-9,Y-6,14,4,1.1);}});for(const y of [35,H-35])line(gold,184,y,W-184,y,1.5); break; }
-      case "tesseraPro": { for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{for(let j=0;j<6;j++){let X=12+j*37;poly(j%2?gold:dark,[[X,0],[X+32,0],[X+13,31],[X-15,31]]);}for(let j=0;j<4;j++)poly(j%2?dark:gold,[[0,45+j*33],[30,30+j*33],[30,61+j*33],[0,76+j*33]]);});for(const y of [40,H-40])line(gold,W*.31,y,W*.69,y,3); break; }
-      case "lacquerPro": { fill(dark,0,0,W,10);fill(dark,0,H-10,W,10);for(const [x,sx] of [[0,1],[W,-1]])local(x,0,sx,1,()=>{ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(73,0);ctx.bezierCurveTo(25,H*.30,25,H*.70,73,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();path(gold,3,p=>{p.moveTo(77,0);p.bezierCurveTo(29,H*.30,29,H*.70,77,H);});});for(const y of [55,H-55]){line(gold,W*.25,y,W*.75,y,2);circle(dark,W/2,y,12,2);} break; }
-      case "halftonePro": { for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{for(let i=0;i<12;i++)for(let j=0;j<6;j++){const r=6*(1-(i+j)/18);if(r>1){ctx.fillStyle=(i+j)%3?gold:dark;ctx.beginPath();ctx.arc(13+i*19,13+j*19,r,0,Math.PI*2);ctx.fill();}}});rect(dark,28,1);line(gold,35,46,W*.35,46,6);line(gold,W*.65,H-46,W-35,H-46,6); break; }
-
-      // Edizione Ultra HD: 21 composizioni originali; nessuna semplice variante cromatica.
-      case "magistraleUHD": {
-        rect(dark,28,7);rect(gold,43,2);rect(gold,64,1.5);
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<5;j++){let z=52+j*11;path(gold,1.6,p=>{p.moveTo(z,154-j*10);p.bezierCurveTo(z,65,z+25,z,154-j*10,z);});}rosette(61,61,20,8);});
-        for(const y of [31,H-31]){fill(dark,W*.35,y-9,W*.30,18);for(let j=-3;j<=3;j++)diamond(W/2+j*23,y,5);}break;}
-      case "senatoUHD": {
-        fill(dark,0,0,W,42);fill(dark,0,H-30,W,30);line(gold,0,43,W,43,4);line(gold,0,H-31,W,H-31,3);
-        for(const x of [36,W-36]){fill(gold,x-3,66,6,H-125);for(let y=96;y<H-92;y+=54){leaf(x,y,21,7,Math.PI/2);}}
-        for(const [x,y,sx,sy] of [corners[0],corners[1]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[210,0],[147,46],[49,46],[49,156],[0,205]]);path(gold,3,p=>{p.moveTo(44,166);p.lineTo(44,51);p.lineTo(169,51);});});break;}
-      case "noirUHD": {
-        fill(dark,0,0,35,H);fill(dark,W-35,0,35,H);fill(dark,0,0,W,35);fill(dark,0,H-35,W,35);
-        rect(gold,16,2.5);rect(gold,47,2);rect(dark,57,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<6;j++)line(gold,6,18+j*7,18+j*7,6,1.6);poly(gold,[[36,36],[100,36],[36,100]]);poly(dark,[[43,43],[83,43],[43,83]]);});break;}
-      case "atlasUHD": {
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[W*.46,0],[W*.27,24],[75,24],[24,90],[0,190]]);poly(gold,[[0,190],[24,90],[24,120],[0,230]]);});
-        for(const y of [62,H-62]){line(dark,80,y,W-80,y,1.6);fill(gold,W*.40,y-5,W*.20,10);}for(const x of [49,W-49])for(let j=0;j<4;j++)line(gold,x-8,160+j*25,x+8,160+j*25,2);break;}
-      case "dogeUHD": {
-        rect(gold,35,4);rect(dark,59,1.5);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(gold,2.5,p=>{p.moveTo(39,170);p.bezierCurveTo(92,115,8,95,68,68);p.bezierCurveTo(95,8,115,92,170,39);});for(let j=0;j<4;j++){leaf(71+j*23,48,16,6,-.32);leaf(48,71+j*23,16,6,1.89);}rosette(45,45,14,6);});
-        for(const y of [46,H-46]){path(gold,2,p=>{p.moveTo(W/2-96,y);p.bezierCurveTo(W/2-38,y-24,W/2+38,y+24,W/2+96,y);});rosette(W/2,y,22,10);}break;}
-      case "vellumUHD": {
-        ctx.save();ctx.globalAlpha=.10;fill('#c5a57b',0,0,W,70);fill('#c5a57b',0,H-70,W,70);ctx.restore();
-        for(const y of [34,H-34]){line(gold,34,y,W-34,y,1);for(let x=55;x<W-46;x+=34){line(gold,x,y-6,x+11,y+6,1.4);line(gold,x+11,y+6,x+22,y-6,1.4);}}
-        for(const x of [34,W-34]){line(dark,x,58,x,H-58,1.5);for(let y=86;y<H-70;y+=60){path(gold,1.5,p=>{p.moveTo(x,y-14);p.quadraticCurveTo(x+12,y,x,y+14);p.quadraticCurveTo(x-12,y,x,y-14);});}}break;}
-      case "orbitaleUHD": {
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[245,0],[0,245]]);for(let j=0;j<5;j++){path(gold,2,p=>{p.arc(0,0,44+j*29,0,Math.PI/2);});}dot(112,61,7);dot(63,143,5);});
-        line(gold,57,44,W-270,44,3);line(dark,270,H-44,W-57,H-44,3);break;}
-      case "sentinelUHD": {
-        fill(dark,0,0,25,H);fill(dark,W-25,0,25,H);for(const x of [39,W-39]){line(gold,x,44,x,H-44,4);for(let y=95;y<H-80;y+=115)poly(gold,[[x-10,y],[x,y-14],[x+10,y],[x,y+14]]);}
-        for(const y of [37,H-37]){poly(dark,[[W*.38,y-16],[W*.62,y-16],[W*.59,y+16],[W*.41,y+16]]);line(gold,W*.43,y,W*.57,y,3);}break;}
-      case "triageUHD": {
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[142,0],[142,25],[55,25],[25,55],[25,142],[0,142]]);poly(gold,[[25,25],[71,25],[25,71]]);for(let j=0;j<3;j++)line(gold,10,65+j*19,20,76+j*19,3);});
-        for(const y of [42,H-42]){line(gold,174,y,W*.45,y,2);line(gold,W*.55,y,W-174,y,2);fill(dark,W/2-27,y-5,54,10);fill(gold,W/2-5,y-15,10,30);}break;}
-      case "forenseUHD": {
-        rect(dark,27,2);for(const y of [44,H-44]){for(let i=0;i<36;i++){let x=55+i*(W-110)/36;fill(i%6===0?dark:gold,x,y-5,i%3===0?4:1.5,i%6===0?20:10);}}
-        for(const x of [46,W-46])for(let y=94;y<H-75;y+=72){line(gold,x-9,y,x+9,y,1);line(dark,x,y-9,x,y+9,1.4);}for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(dark,2,p=>{p.moveTo(24,85);p.lineTo(24,24);p.lineTo(85,24);});});break;}
-      case "heliosUHD": {
-        rect(gold,40,1.5);for(const y of [45,H-45]){for(let j=-8;j<=8;j++){let x=W/2+j*24;let h=7+17*(1-Math.abs(j)/9);line(gold,x,y-h/2,x,y+h/2,j===0?3:1.5);}circle(dark,W/2,y,21,1.5);circle(gold,W/2,y,15,1.5);}
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<4;j++)path(gold,1.7,p=>{p.arc(35,35,18+j*15,0,Math.PI/2);});});break;}
-      case "mintUHD": {
-        rect(gold,47,1.4);for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[W*.36,0],[W*.29,26],[88,26],[26,88],[26,150],[0,150]]);poly(gold,[[0,150],[26,150],[26,167],[0,191]]);});
-        for(const y of [36,H-36]){line(gold,W*.38,y,W*.62,y,1);for(let j=-2;j<=2;j++){path(dark,1.4,p=>{p.ellipse(W/2+j*17,y,16,6,0,0,Math.PI*2);});}}break;}
-      case "spectrumUHD": {
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[W*.50,0],[W*.37,22],[0,105]]);for(let j=0;j<5;j++){ctx.save();ctx.globalAlpha=.32+j*.13;poly(gold,[[0,105+j*8],[W*.37-j*35,22+j*10],[W*.42-j*35,22+j*10],[0,111+j*8]]);ctx.restore();}});
-        line(dark,45,H-46,W*.38,H-46,3);line(gold,W*.62,46,W-45,46,3);break;}
-      case "vettaUHD": {
-        for(const y of [0,H-43]){fill(dark,0,y,W,43);const pts=[];for(let j=0;j<=12;j++)pts.push([W*j/12,y+6+((j*13)%29)]);pts.push([W,y+43],[0,y+43]);poly(gold,pts);}
-        for(const x of [37,W-37]){line(dark,x,65,x,H-65,2);for(let y=104;y<H-95;y+=85){poly(gold,[[x-8,y+6],[x,y-10],[x+8,y+6]]);}}break;}
-      case "mareaUHD": {
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*.43,0);ctx.bezierCurveTo(W*.24,55,88,16,0,182);ctx.closePath();ctx.fill();for(let j=0;j<5;j++)path(gold,2.5,p=>{p.moveTo(W*.43+j*13,0);p.bezierCurveTo(W*.25,67+j*8,98+j*6,32+j*10,0,187+j*9);});});
-        for(const y of [49,H-49]){line(gold,W*.32,y,W*.68,y,1.6);}break;}
-      case "opaleUHD": {
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[116,0],[78,28],[25,25],[28,78],[0,116]]);poly(gold,[[25,25],[78,28],[48,51],[28,78]]);path(gold,2,p=>{p.moveTo(25,125);p.lineTo(48,51);p.lineTo(125,25);});});
-        for(const y of [42,H-42]){line(dark,130,y,W*.38,y,1);line(dark,W*.62,y,W-130,y,1);for(let j=-2;j<=2;j++)diamond(W/2+j*20,y,8);}break;}
-      case "florealeUHD": {
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(dark,2,p=>{p.moveTo(32,220);p.bezierCurveTo(18,96,91,31,220,32);});for(let j=0;j<7;j++){let t=j/6;let X=39+148*t*t,Y=184-142*t;leaf(X,Y,23,7,-.65);leaf(X+13,Y-14,17,6,.42);}rosette(49,49,19,7);});
-        for(const y of [40,H-40])line(gold,228,y,W-228,y,1.2);break;}
-      case "palinsestoUHD": {
-        for(const x of [0,W-24]){fill(dark,x,0,24,H);fill(gold,x===0?24:W-29,0,5,H);}for(const y of [35,H-35]){line(gold,51,y,W-51,y,1.5);for(let i=0;i<9;i++){let x=W*.32+i*W*.045;path(dark,1.6,p=>{p.moveTo(x-9,y-6);p.lineTo(x,y+6);p.lineTo(x+9,y-6);});}}
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{fill(gold,32,32,57,6);fill(gold,32,32,6,57);});break;}
-      case "incisioneUHD": {
-        rect(dark,28,2);rect(gold,67,1);for(const y of [47,H-47]){for(let j=0;j<5;j++)wave(38,y,W-76,8+j*2,Math.round(W/97),j*.7,gold,.55,1.1);}
-        for(const x of [47,W-47])for(let y=87;y<H-70;y+=42){path(gold,1.1,p=>{p.ellipse(x,y,10,18,0,0,Math.PI*2);});diamond(x,y,3);}break;}
-      case "prismaUHD": {
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[245,0],[136,48],[48,136],[0,245]]);poly(gold,[[0,245],[48,136],[136,48],[245,0],[266,0],[156,64],[64,156],[0,266]]);});
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{path(gold,2,p=>{p.moveTo(30,142);p.lineTo(30,30);p.lineTo(142,30);});poly(dark,[[30,30],[75,30],[30,75]]);});break;}
-      case "notarileUHD": {
-        rect(dark,34,2);rect(gold,49,2);for(const y of [49,H-49]){fill('#ffffff',W/2-85,y-29,170,58);line(dark,W/2-84,y,W/2-36,y,1.5);line(dark,W/2+36,y,W/2+84,y,1.5);rosette(W/2,y,31,12);circle(dark,W/2,y,24,1.3);diamond(W/2,y,8);}
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(gold,2,p=>{p.moveTo(49,116);p.quadraticCurveTo(49,49,116,49);});for(let j=0;j<3;j++)circle(dark,49+j*12,49+j*12,3,1.2);});break;}
-
-      case "aureole":
-        fill(dark,0,0,W,20);fill(dark,0,H-20,W,20);
-        for(const [x,y,sx,sy] of [corners[0],corners[1]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[248,0],[192,25],[55,25],[25,55],[25,192],[0,248]]);path(accent,3,p=>{p.moveTo(0,181);p.quadraticCurveTo(25,37,181,0);});for(let j=0;j<7;j++){const a=(j+1)*Math.PI/18;line(accent,23+46*Math.cos(a),23+46*Math.sin(a),23+76*Math.cos(a),23+76*Math.sin(a),2);}});
-        for(const y of [40,H-40]){line(accent,70,y,W*.41,y,2);line(accent,W*.59,y,W-70,y,2);path(accent,2,p=>{p.ellipse(W/2,y,W*.072,12,0,0,2*Math.PI);});diamond(W/2,y,7);}break;
-      case "signet":
-        rect(dark,32,1.5);rect(accent,49,3);for(const y of [48,H-48]){for(let k=-2;k<=2;k++)circle(accent,W/2+k*25,y,16,1.4);diamond(W/2,y,12);}for(const x of [49,W-49])for(let y=110;y<H-100;y+=74)diamond(x,y,6);break;
-      case "silk":
-        for(const y of [22,H-22]){for(let j=0;j<4;j++)wave(0,y,W,12+j*3,3,j*.7,accent,.8-j*.12,2.2);}for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(dark,4,p=>{p.moveTo(0,122);p.bezierCurveTo(32,38,98,75,188,0);});});break;
-      case "archivist":
-        fill('#f3eee3',0,0,55,H);fill('#f3eee3',W-55,0,55,H);rect(accent,32,1);for(let x=75;x<W-65;x+=18){line(accent,x,35,x,45,1);line(accent,x,H-35,x,H-45,1);}for(let y=90;y<H-90;y+=65){line(dark,29,y,44,y,2);line(dark,W-44,y,W-29,y,2);}break;
-      case "rational":
-        fill(dark,0,0,W*.32,24);fill(accent,W*.32,0,W*.68,24);fill(accent,0,H-24,W*.68,24);fill(dark,W*.68,H-24,W*.32,24);line(dark,36,63,36,H-63,7);line(accent,W-36,63,W-36,H-63,7);break;
-      case "brocade":
-        rect(accent,31,2);rect(accent,70,1);for(const y of [49,H-49])for(let x=64;x<W-42;x+=51){leaf(x,y,24,8,Math.PI/4);leaf(x,y,24,8,-Math.PI/4);}for(const x of [50,W-50])for(let y=90;y<H-70;y+=45){leaf(x,y,20,7,Math.PI/4);leaf(x,y,20,7,-Math.PI/4);}break;
-      case "sundial":
-        rect(accent,46,1.7);for(const [x,y,sx,sy] of [corners[0],corners[1]])local(x,y,sx,sy,()=>{for(let i=0;i<=12;i++){let a=i*Math.PI/24;line(accent,24+35*Math.cos(a),24+35*Math.sin(a),24+86*Math.cos(a),24+86*Math.sin(a),i%3===0?3:1.2);}circle(dark,24,24,32,2);});for(const x of [45,W-45])for(let y=150;y<H-100;y+=100)dot(x,y,3);break;
-      case "inlay":
-        rect(dark,35,2);for(let x=46;x<W-55;x+=58){poly(accent,[[x,36],[x+23,25],[x+46,36],[x+23,47]]);poly(dark,[[x,H-36],[x+23,H-25],[x+46,H-36],[x+23,H-47]]);}for(const x of [36,W-36])line(accent,x,64,x,H-64,3);break;
-      case "emboss":
-        for(let n=28;n<=48;n+=5)rect(n%10===3?dark:accent,n,1.2);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let i=0;i<5;i++)circle(accent,56,56,12+i*7,1);});break;
-      case "botanical":
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(dark,1.8,p=>{p.moveTo(38,200);p.quadraticCurveTo(27,70,160,42);});for(let j=0;j<5;j++){leaf(42+j*20,150-j*23,21,8,-.65);leaf(33+j*20,135-j*19,18,7,.6);}});line(accent,176,42,W-176,42,1);line(accent,176,H-42,W-176,H-42,1);break;
-      case "bookplate":
-        rect(accent,43,2);for(const y of [44,H-44]){fill(dark,W*.4,y-11,W*.2,22);line(accent,W*.4,y,W*.6,y,2);diamond(W/2,y,9);}for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(accent,2,p=>{p.moveTo(26,108);p.lineTo(26,26);p.lineTo(108,26);p.moveTo(56,100);p.lineTo(56,56);p.lineTo(100,56);});});break;
-      case "rivet":
-        fill(dark,0,0,34,H);fill(dark,W-34,0,34,H);for(const x of [17,W-17])for(let y=36;y<H-12;y+=76){circle(accent,x,y,8,2);line(accent,x-4,y,x+4,y,1);}line(accent,57,45,W-57,45,3);line(accent,57,H-45,W-57,H-45,3);break;
-      case "parallels":
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{for(let i=0;i<5;i++){let n=i*18;poly(i%2?accent:dark,[[0,n],[200+n,0],[230+n,0],[0,n+13]]);}});line(dark,46,65,W-46,65,1);line(dark,46,H-65,W-46,H-65,1);break;
-      case "marquetry":
-        rect(accent,54,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let i=0;i<3;i++)for(let j=0;j<3;j++){let X=18+18*i,Y=18+18*j;poly((i+j)%2?dark:accent,[[X,Y],[X+17,Y],[X,Y+17]]);poly((i+j)%2?accent:dark,[[X+17,Y],[X+17,Y+17],[X,Y+17]]);}});break;
-      case "palazzo":
-        for(const x of [37,W-37]){line(accent,x-9,78,x-9,H-78,2);line(dark,x,78,x,H-78,5);line(accent,x+9,78,x+9,H-78,2);}for(const y of [42,H-42]){line(dark,28,y,W-28,y,6);for(let x=65;x<W-60;x+=55){path(accent,2,p=>{p.moveTo(x-20,y);p.quadraticCurveTo(x,y-18,x+20,y);p.quadraticCurveTo(x,y+18,x-20,y);});}}break;
-      case "cadenza":
-        for(let x=70,i=0;x<W-65;x+=24,i++){const h=5+14*(1+Math.sin(i*.52));line(i%4===0?dark:accent,x,40-h/2,x,40+h/2,2);line(i%4===0?dark:accent,x,H-40-h/2,x,H-40+h/2,2);}for(const x of [36,W-36])line(dark,x,76,x,H-76,1);break;
-      case "keystone":
-        rect(accent,50,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[145,0],[145,22],[60,22],[22,60],[22,145],[0,145]]);poly(accent,[[22,22],[80,22],[22,80]]);});for(const y of [36,H-36])poly(accent,[[W/2-36,y-9],[W/2+36,y-9],[W/2+22,y+9],[W/2-22,y+9]]);break;
-      case "ribbonFold":
-        for(const [x,y,sx,sy] of [corners[0],corners[1]])local(x,y,sx,sy,()=>{poly(dark,[[0,18],[156,18],[124,45],[156,72],[0,72]]);poly(accent,[[0,72],[32,72],[0,97]]);line(accent,12,26,113,26,1.5);});line(accent,48,H-45,W-48,H-45,3);break;
-      case "folioTab":
-        fill(dark,0,0,25,H);for(let j=0;j<5;j++){let y=110+j*(H-220)/4;fill(j%2?accent:dark,0,y,48,47);}line(accent,64,45,W-44,45,2);line(dark,W-44,45,W-44,H-45,2);line(accent,64,H-45,W-44,H-45,2);break;
-      case "chevronRail":
-        for(const y of [0,H-35]){fill(dark,0,y,W,35);for(let x=16;x<W-40;x+=62)poly(accent,[[x,y+7],[x+16,y+7],[x+31,y+17],[x+16,y+28],[x,y+28],[x+15,y+17]]);}line(accent,42,54,42,H-54,3);line(accent,W-42,54,W-42,H-54,3);break;
-      case "relay":
-        rect(dark,36,2);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{fill(dark,0,0,100,26);fill(accent,0,26,66,8);fill(dark,0,0,26,100);fill(accent,26,0,8,66);});for(const y of [48,H-48]){for(let j=0;j<7;j++){let x=W/2+(j-3)*26;fill(j===3?accent:dark,x-6,y-5,12,10);}}break;
-      case "scanline":
-        rect(dark,31,1);for(const x of [34,W-34])for(let y=70;y<H-60;y+=22){line(accent,x-12,y,x+12,y,1.4);}for(const y of [44,H-44]){for(let i=0;i<31;i++){let x=56+(W-112)*i/30;line(i%5===0?dark:accent,x,y-5,x,y+5+(i%5)*2,1.5);}}break;
-      case "ledger":
-        fill(dark,0,0,19,H);fill(accent,19,0,5,H);for(let y=82;y<H-65;y+=48){circle(accent,40,y,6,1.5);line(dark,48,y,65,y,1.5);}line(accent,80,46,W-45,46,2);line(accent,80,H-46,W-45,H-46,2);break;
-      case "starChart":
-        rect(accent,43,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{const pts=[[38,42],[80,26],[118,49],[159,30],[46,88],[25,126]];for(const [a,b] of [[0,1],[1,2],[2,3],[0,4],[4,5]])line(dark,...pts[a],...pts[b],1);for(const [a,b] of pts){diamond(a,b,4);circle(accent,a,b,8,1);}});break;
-      case "quartz":
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[122,0],[70,27],[27,70],[0,122]]);poly(accent,[[0,0],[49,0],[27,27],[0,49]]);path(accent,2,p=>{p.moveTo(26,108);p.lineTo(53,53);p.lineTo(108,26);});});rect(accent,57,1);break;
-      case "weave":
-        for(const y of [40,H-40])for(let x=44;x<W-40;x+=32){line(accent,x-14,y-10,x+14,y+10,3);line(dark,x-14,y+10,x+14,y-10,1.6);}for(const x of [40,W-40])for(let y=76;y<H-65;y+=32){line(accent,x-10,y-14,x+10,y+14,3);line(dark,x+10,y-14,x-10,y+14,1.6);}break;
-      case "wreathMedal":
-        rect(accent,40,2);for(const y of [48,H-48]){circle(dark,W/2,y,31,2);circle(accent,W/2,y,25,2);for(let j=0;j<8;j++){const a=j*Math.PI/4;leaf(W/2+38*Math.cos(a),y+24*Math.sin(a),11,4,a+Math.PI/2);}diamond(W/2,y,14);}break;
-      case "folioRail":
-        fill(accent,0,0,12,H);fill(dark,12,0,12,H);for(const y of [37,H-37]){line(dark,45,y,W-36,y,1.4);line(accent,45,y+7,W*.38,y+7,4);}for(let y=90;y<H-75;y+=100)line(accent,W-30,y,W-30,y+30,4);break;
-
-      // Nuove composizioni originali: la grafica resta nello spazio periferico A4.
-      case "regalia":
-        fill(dark,0,0,W,35);fill(dark,0,H-35,W,35);fill(dark,0,0,35,H);fill(dark,W-35,0,35,H);
-        rect(accent,19,2);rect(accent,47,3);rect(accent,60,1);for(const [x,y,sx,sy] of corners){local(x,y,sx,sy,()=>{for(let j=0;j<3;j++){const t=48+j*13;path(accent,2,p=>{p.moveTo(t,155);p.lineTo(t,t);p.lineTo(155,t);});}rosette(51,51,23,8);});}break;
-      case "guilloche":
-        rect(dark,31,1);rect(accent,66,2);for(const y of [48,H-48])for(let j=0;j<5;j++){wave(34,y,W-68,10,34,j*Math.PI/5,accent,.62,1.1);}for(const x of [48,W-48]){ctx.save();ctx.translate(x,34);ctx.rotate(Math.PI/2);for(let j=0;j<5;j++)wave(0,0,H-68,10,25,j*Math.PI/5,accent,.62,1.1);ctx.restore();}break;
-      case "rosette":
-        rect(accent,40,2.4);rect(accent,58,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{rosette(60,60,32,12);path(accent,2,p=>{p.moveTo(91,60);p.quadraticCurveTo(140,12,215,40);p.moveTo(60,91);p.quadraticCurveTo(12,140,40,215);});});break;
-      case "venetian":
-        rect(accent,34,4);rect(accent,72,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<6;j++){path(accent,2,p=>{p.moveTo(45,45);p.bezierCurveTo(72,15+j*8,103+j*15,108-j*9,180+j*12,48);});path(accent,2,p=>{p.moveTo(45,45);p.bezierCurveTo(15+j*8,72,108-j*9,103+j*15,48,180+j*12);});}});break;
-      case "renaissance":
-        rect(accent,36,2);rect(accent,58,2);for(const y of [47,H-47])for(let x=90;x<W-65;x+=52){diamond(x,y,6);path(accent,1.2,p=>{p.moveTo(x-24,y);p.quadraticCurveTo(x,y-13,x+24,y);p.quadraticCurveTo(x,y+13,x-24,y);});}for(const x of [47,W-47])for(let y=90;y<H-65;y+=52){diamond(x,y,6);}break;
-      case "laurelSeal":
-        rect(accent,43,2);rect(accent,56,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(accent,2,p=>{p.moveTo(44,175);p.quadraticCurveTo(57,65,178,44);});for(let j=0;j<7;j++){let t=j/6;leaf(45+130*t,175-130*t,13,5,-.7);leaf(45+130*t,175-130*t,13,5,2.2);}});break;
-      case "engraved":
-        rect(dark,30,4);rect(accent,73,1.5);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<8;j++){path(accent,1.4,p=>{p.moveTo(38+j*4,125);p.arcTo(38+j*4,38+j*4,125,38+j*4,37+j*2);p.lineTo(125,38+j*4);});}});for(let x=130;x<W-120;x+=18){line(accent,x,44,x+8,57,1);line(accent,x,H-44,x+8,H-57,1);}break;
-      case "cameo":
-        rect(accent,47,1.5);for(const y of [48,H-48]){ctx.save();ctx.translate(W/2,y);ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,46,23,0,0,Math.PI*2);ctx.stroke();ctx.restore();rosette(W/2,y,17,8);line(accent,85,y,W/2-58,y,1.2);line(accent,W/2+58,y,W-85,y,1.2);}break;
-      case "lattice":
-        rect(accent,27,2);rect(dark,72,2);for(const y of [49,H-49])for(let x=48;x<W-35;x+=38){path(accent,1.3,p=>{p.moveTo(x-19,y);p.lineTo(x,y-15);p.lineTo(x+19,y);p.lineTo(x,y+15);p.closePath();});}for(const x of [49,W-49])for(let y=82;y<H-60;y+=38){path(accent,1.3,p=>{p.moveTo(x-15,y);p.lineTo(x,y-19);p.lineTo(x+15,y);p.lineTo(x,y+19);p.closePath();});}break;
-      case "fanDeco":
-        rect(dark,30,3);rect(accent,68,1.5);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[160,0],[0,160]]);for(let j=0;j<13;j++){let a=j*Math.PI/24;line(accent,28,28,28+120*Math.cos(a),28+120*Math.sin(a),1.6);}for(let r of [39,67,98]){path(accent,2,p=>{p.arc(28,28,r,0,Math.PI/2);});}});break;
-      case "pearl":
-        rect(accent,37,1);rect(accent,64,1);for(let x=45;x<W-35;x+=19){dot(x,50,2.5);dot(x,H-50,2.5);}for(let y=68;y<H-58;y+=19){dot(50,y,2.5);dot(W-50,y,2.5);}for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{circle(accent,50,50,13,1.5);circle(accent,50,50,7,1);});break;
-      case "ribbonSeal":
-        rect(accent,45,2);for(const y of [0,H-33])fill(dark,0,y,W,33);for(const y of [48,H-48]){line(accent,75,y,W-75,y,2);poly(accent,[[W/2-42,y-12],[W/2+42,y-12],[W/2+30,y+12],[W/2-30,y+12]]);circle(dark,W/2,y,13,2);}break;
-      case "aurora":
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{for(let j=0;j<5;j++){ctx.globalAlpha=.95-j*.13;poly(j%2?accent:dark,[[0,j*9],[e*(.48-j*.045),0],[0,82+j*12]]);}ctx.globalAlpha=1;});line(accent,78,64,W-78,64,1);line(accent,78,H-64,W-78,H-64,1);break;
-      case "prism":
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(dark,[[0,0],[180,0],[70,63],[0,118]]);poly(accent,[[180,0],[245,0],[70,63]]);ctx.globalAlpha=.38;poly(accent,[[0,118],[70,63],[0,180]]);ctx.globalAlpha=1;});break;
-      case "horizon":
-        fill(dark,0,0,W,30);fill(accent,0,30,W,8);fill(dark,0,H-30,W,30);fill(accent,0,H-38,W,8);for(const y of [55,H-55]){line(accent,0,y,W*.34,y,3);line(accent,W*.66,y,W,y,3);}break;
-      case "origami":
-        for(const [x,y,sx,sy] of [corners[1],corners[2]])local(x,y,sx,sy,()=>{poly(dark,[[0,0],[260,0],[90,82],[0,110]]);poly(accent,[[0,0],[115,0],[60,130],[0,110]]);poly(dark,[[60,130],[0,110],[0,155]]);});rect(accent,56,1.3);break;
-      case "monolith":
-        fill(dark,0,0,46,H);fill(dark,W-46,0,46,H);fill(accent,46,0,8,H);fill(accent,W-54,0,8,H);for(const y of [55,H-55]){line(accent,85,y,W-85,y,1.6);fill(dark,W/2-85,y-9,170,18);fill(accent,W/2-35,y-2,70,4);}break;
-      case "ascent":
-        for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<3;j++){let z=j*29;poly(j===1?accent:dark,[[z,0],[z+65,0],[0,z+65],[0,z]]);}});rect(accent,72,1.4);break;
-      case "folioModern":
-        fill(accent,0,0,19,H);fill(dark,W-19,0,19,H);line(dark,66,56,W-66,56,3);line(accent,66,H-56,W-66,H-56,3);for(const x of [66,W-66]){line(accent,x,56,x,144,1);line(dark,x,H-144,x,H-56,1);}break;
-      case "spectrum":
-        for(const y of [0,H-46]){fill(dark,0,y,W,46);for(let j=0;j<7;j++){ctx.globalAlpha=.25+j*.095;poly(accent,[[W*j/7,y],[W*(j+1)/7,y],[W*(j+1)/7-50,y+46],[W*j/7-50,y+46]]);}ctx.globalAlpha=1;}rect(accent,64,1.2);break;
-      case "arcadia":
-        rect(accent,50,1.2);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(accent,2,p=>{p.moveTo(37,150);p.bezierCurveTo(67,115,103,64,172,37);});for(let j=0;j<6;j++){let t=j/5;leaf(37+135*t,150-113*t,18,7,-.9);}});break;
-      case "bridge":
-        fill(dark,0,0,W,29);fill(dark,0,H-29,W,29);for(const y of [49,H-49]){line(accent,0,y,W,y,2);for(let j=0;j<5;j++){let x=75+j*(W-150)/4;path(accent,1.5,p=>{p.moveTo(x-34,y);p.quadraticCurveTo(x,y+(y<100?24:-24),x+34,y);});}}break;
-      case "ripple":
-        for(const y of [43,H-43])for(let j=0;j<4;j++)wave(0,y,W,8+j*3,3,j*.7, j%2?accent:dark,.6,2.5);break;
-      case "minimalLux":
-        rect(dark,36,2.5);for(const y of [60,H-60]){line(accent,88,y,W*.42,y,1.8);line(accent,W*.58,y,W-88,y,1.8);diamond(W/2,y,9);circle(accent,W/2,y,15,1);}break;
-      case "command":
-        fill(dark,0,0,W,44);fill(dark,0,H-44,W,44);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{poly(accent,[[0,0],[155,0],[100,44],[44,44],[44,119],[0,150]]);for(let j=0;j<4;j++)line(dark,45+j*16,9,58+j*16,30,4);});rect(accent,65,2);break;
-      case "fieldMap":
-        rect(dark,35,2);rect(accent,74,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<7;j++){let r=20+j*13;path(accent,1.5,p=>{p.moveTo(15,40+r);p.bezierCurveTo(40+r,48+r,25+r,20+r,80+r,30);});}});break;
-      case "radar":
-        rect(dark,33,3);rect(accent,63,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let r of [32,49,66,83])path(accent,1.6,p=>{p.arc(35,35,r,0,Math.PI/2);});for(let a of [0,Math.PI/6,Math.PI/3,Math.PI/2])line(accent,35,35,35+83*Math.cos(a),35+83*Math.sin(a),1.2);dot(79,66,4);});break;
-      case "signal":
-        fill(dark,0,0,W,35);fill(dark,0,H-35,W,35);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<5;j++){let z=12+j*31;poly(accent,[[z,0],[z+16,0],[z+43,35],[z+27,35]]);}});line(accent,52,61,W-52,61,2);line(accent,52,H-61,W-52,H-61,2);break;
-      case "compass":
-        rect(dark,39,2);rect(accent,58,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{circle(accent,60,60,30,1.3);for(let j=0;j<8;j++){let a=j*Math.PI/4;line(accent,60+21*Math.cos(a),60+21*Math.sin(a),60+30*Math.cos(a),60+30*Math.sin(a),2);}poly(dark,[[60,31],[65,60],[60,89],[55,60]]);poly(accent,[[31,60],[60,55],[89,60],[60,65]]);});break;
-      case "trace":
-        rect(accent,47,1.5);for(const y of [46,H-46]){ctx.save();ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.setLineDash([3,8]);ctx.beginPath();ctx.moveTo(80,y);ctx.bezierCurveTo(W*.25,y-17,W*.38,y+17,W*.5,y);ctx.bezierCurveTo(W*.62,y-17,W*.75,y+17,W-80,y);ctx.stroke();ctx.restore();for(let x of [80,W/2,W-80])circle(accent,x,y,8,2);}break;
-      case "hexTech":
-        rect(dark,36,2.5);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{for(let j=0;j<5;j++){let X=49+j*34,Y=49;hex(X,Y,19);if(j<3)hex(49,Y+j*34+34,19);}});break;
-      case "shieldPro":
-        rect(accent,38,2);rect(dark,58,1);for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{path(accent,2.3,p=>{p.moveTo(32,30);p.lineTo(90,30);p.lineTo(90,62);p.quadraticCurveTo(88,83,61,97);p.quadraticCurveTo(34,83,32,62);p.closePath();});line(dark,61,39,61,77,2);line(accent,43,53,79,53,2);});break;
-      case "pulse":
-        rect(dark,34,3);for(const y of [52,H-52]){line(accent,65,y,W*.36,y,2.5);path(accent,2.5,p=>{p.moveTo(W*.36,y);p.lineTo(W*.44,y);p.lineTo(W*.47,y-16);p.lineTo(W*.50,y+16);p.lineTo(W*.53,y-10);p.lineTo(W*.56,y);p.lineTo(W-65,y);});}break;
-      case "gridPro":
-        rect(dark,39,2);rect(accent,68,1);for(let x=76;x<W-65;x+=34){line(accent,x,39,x,49,1.4);line(accent,x,H-39,x,H-49,1.4);}for(let y=76;y<H-65;y+=34){line(accent,39,y,49,y,1.4);line(accent,W-39,y,W-49,y,1.4);}for(const [x,y,sx,sy] of corners)local(x,y,sx,sy,()=>{circle(accent,52,52,9,1.5);line(dark,52,34,52,70,1);line(dark,34,52,70,52,1);});break;
-      case "mountain":
-        for(const y of [0,H-38]){fill(dark,0,y,W,38);for(let j=0;j<5;j++){let x=j*W/5;ctx.globalAlpha=.8;poly(accent,[[x,y+38],[x+W/10,y+4],[x+W/5,y+38]]);ctx.globalAlpha=1;}}rect(accent,65,1);break;
-      case "current":
-        for(const [x,y,sx,sy] of [corners[0],corners[3]])local(x,y,sx,sy,()=>{ctx.fillStyle=dark;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(e*.47,0);ctx.bezierCurveTo(e*.22,18,55,100,0,128);ctx.closePath();ctx.fill();path(accent,8,p=>{p.moveTo(e*.50,0);p.bezierCurveTo(e*.22,28,68,111,0,141);});});line(accent,75,61,W-75,61,1.5);line(accent,75,H-61,W-75,H-61,1.5);break;
-      case "imperial":
-        fill(dark,0,0,W,44);fill(dark,0,H-44,W,44);fill(dark,0,0,44,H);fill(dark,W-44,0,44,H);
-        rect(gold,19,3);rect(gold,57,4);rect(gold,70,1);
-        for(const [x,y,sx,sy] of corners){cornerPoly(gold,x,y,sx,sy,[[44,44],[112,44],[44,112]]);cornerPoly(dark,x,y,sx,sy,[[46,46],[82,46],[46,82]]);}
-        break;
-      case "baroque":
-        rect(gold,34,5);rect(gold,53,1.5);rect(gold,65,1);
-        for(const [x,y,sx,sy] of corners){ctx.save();ctx.translate(x+sx*64,y+sy*64);ctx.scale(sx,sy);ctx.strokeStyle=gold;ctx.lineWidth=3;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(18+i*17,-12,65+i*9,30+i*6,95+i*12,0);ctx.stroke();ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-12,18+i*17,30+i*6,65+i*9,0,95+i*12);ctx.stroke();}ctx.restore();}diamond(W/2,47,13);diamond(W/2,H-47,13);break;
-      case "deco":
-        rect(dark,32,4);rect(gold,49,2);rect(gold,60,1);
-        for(const [x,y,sx,sy] of corners){for(let i=0;i<5;i++){const a=36+i*13;line(gold,x+sx*a,y+sy*135,x+sx*a,y+sy*a,2);line(gold,x+sx*a,y+sy*a,x+sx*155,y+sy*a,2);}cornerPoly(dark,x,y,sx,sy,[[0,0],[105,0],[0,105]]);}
-        diamond(W/2,48,12);diamond(W/2,H-48,12);break;
-      case "academy":
-        fill(dark,0,0,W,48);fill(accent,0,48,W,9);fill(dark,0,H-33,W,33);fill(accent,0,H-41,W,8);
-        rect(accent,72,2);for(const [x,y,sx,sy] of corners)cornerPoly(accent,x,y,sx,sy,[[0,0],[e*.18,0],[0,112]]);break;
-      case "sash":
-        for(const [x,y,sx,sy] of [corners[0],corners[3]]){cornerPoly(dark,x,y,sx,sy,[[0,0],[e*.43,0],[0,e*(sy<0?.075:.19)]]);cornerPoly(accent,x,y,sx,sy,[[0,e*(sy<0?.075:.19)],[e*.43,0],[e*.48,0],[0,e*(sy<0?.085:.22)]]);}
-        line(accent,68,65,W-68,65,2);line(accent,68,H-65,W-68,H-65,2);break;
-      case "facet":
-        for(const [x,y,sx,sy] of [corners[0],corners[3]]){cornerPoly(dark,x,y,sx,sy,[[0,0],[e*.32,0],[0,e*(sy<0?.07:.24)]]);cornerPoly(accent,x,y,sx,sy,[[0,e*(sy<0?.07:.24)],[e*.32,0],[e*.40,0],[0,e*(sy<0?.085:.30)]]);ctx.globalAlpha=.22;cornerPoly(accent,x,y,sx,sy,[[0,e*(sy<0?.085:.30)],[e*.40,0],[e*.46,0],[0,e*(sy<0?.095:.35)]]);ctx.globalAlpha=1;}
-        line(accent,58,58,W-58,58,3);line(accent,58,H-58,W-58,H-58,3);break;
-      case "tactical":
-        fill(dark,0,0,W,40);fill(dark,0,H-40,W,40);fill(dark,0,0,43,H);fill(dark,W-43,0,43,H);rect(accent,57,4);
-        for(const [x,y,sx,sy] of corners){cornerPoly(accent,x,y,sx,sy,[[0,0],[230,0],[155,40],[43,40],[43,145],[0,185]]);for(let i=0;i<4;i++)line(accent,x+sx*(85+i*18),y+sy*60,x+sx*(103+i*18),y+sy*78,3);}break;
-      case "rescue":
-        fill(dark,0,0,W,32);fill(dark,0,H-32,W,32);fill(accent,0,32,W,8);fill(accent,0,H-40,W,8);
-        for(const [x,y,sx,sy] of corners){cornerPoly(dark,x,y,sx,sy,[[0,0],[190,0],[0,125]]);cornerPoly(accent,x,y,sx,sy,[[0,125],[190,0],[230,0],[0,155]]);}rect(accent,66,1.5);break;
-      case "techpro":
-        rect(dark,35,3);rect(accent,53,1.5);
-        for(const [x,y,sx,sy] of corners){for(let i=0;i<5;i++){const a=43+i*12;line(accent,x+sx*a,y+sy*30,x+sx*a,y+sy*74,2);line(accent,x+sx*30,y+sy*a,x+sx*74,y+sy*a,2);}cornerPoly(dark,x,y,sx,sy,[[0,0],[160,0],[110,38],[0,38]]);}
-        for(const y of [46,H-46]){line(accent,W*.33,y,W*.67,y,5);diamond(W/2,y,8);}break;
-      case "editorial":
-        fill(dark,0,0,26,H);fill(accent,26,0,9,H);fill(accent,W-35,0,9,H);fill(dark,W-26,0,26,H);line(accent,72,74,W-72,74,1.5);line(accent,72,H-74,W-72,H-74,1.5);break;
-      case "medallion":
-        rect(accent,35,4);rect(accent,53,1.5);rect(dark,68,1);
-        for(const [x,y,sx,sy] of corners){cornerPoly(dark,x,y,sx,sy,[[0,0],[95,0],[0,95]]);for(let i=0;i<3;i++)line(accent,x+sx*(38+i*8),y+sy*105,x+sx*105,y+sy*(38+i*8),2);}
-        for(const y of [43,H-43]){circle(accent,W/2,y,23,3);circle(accent,W/2,y,17,1);diamond(W/2,y,9);}break;
-      case "folio":
-        rect(accent,47,2);rect(accent,59,1);line(dark,90,84,W-90,84,3);line(dark,90,H-84,W-90,H-84,3);
-        for(const [x,y,sx,sy] of corners){line(accent,x+sx*40,y+sy*140,x+sx*40,y+sy*40,5);line(accent,x+sx*40,y+sy*40,x+sx*140,y+sy*40,5);}break;
-    }
-    ctx.restore();
-  }
   function drawThemeThumbnail(preview,theme) {
     const prior={ctx,W,H};
     const portrait=currentOrientation()==="portrait";
@@ -2703,7 +1676,7 @@
   const MAX_PROJECT_PIXELS = 100_000_000;
   const imagePixels = image => image ? image.naturalWidth * image.naturalHeight : 0;
   async function checkImageHeader(blob){
-    const b=new Uint8Array(await blob.arrayBuffer()),v=new DataView(b.buffer);let w=0,h=0;
+    const b=new Uint8Array(await (blob.type==="image/jpeg"?blob:blob.slice(0,32)).arrayBuffer()),v=new DataView(b.buffer);let w=0,h=0;
     if(b.length>=24&&v.getUint32(0)===0x89504e47){w=v.getUint32(16);h=v.getUint32(20);}
     else if(b.length>=25&&v.getUint32(0)===0x52494646&&v.getUint32(8)===0x57454250){
       const kind=String.fromCharCode(...b.subarray(12,16));
@@ -2748,6 +1721,15 @@
     const rect=personalFrameRect(image,W,H);
     return (rect[0]>W*.015||rect[1]>H*.015) ? "Cornice adattata senza deformazioni; restano margini. Per riempire il foglio usa un PNG dello stesso orientamento A4." : "Cornice personale adattata al foglio A4";
   }
+  function validatePersonalFrame(image){
+    const sample=document.createElement("canvas");sample.width=sample.height=128;
+    try{
+      const sc=sample.getContext("2d",{willReadFrequently:true});sc.drawImage(image,0,0,128,128);
+      const pixels=sc.getImageData(24,24,80,80).data;let transparent=0;
+      for(let i=3;i<pixels.length;i+=4)if(pixels[i]<=5)transparent++;
+      if(transparent<.90*80*80)throw new Error("Centro troppo opaco: serve un PNG o WebP con almeno il 90% della zona centrale trasparente.");
+    }finally{sample.width=sample.height=1;}
+  }
   async function importPersonalFrame(file){
     if(!file||state.frameLocked)return;
     // Android can omit a MIME type when the source is a file manager.
@@ -2757,13 +1739,9 @@
     if(!/^image\/(png|webp)$/.test(blob.type))throw new Error("Seleziona una cornice PNG o WebP con trasparenza");
     const image=await imageFromBlob(blob);
     checkImageBudget(image,state.personalFrameImage);
-    // Inspect the centre only; never erase or recolour the source pixels.
-    const sample=document.createElement("canvas");sample.width=sample.height=32;
-    const sc=sample.getContext("2d",{willReadFrequently:true});
-    sc.drawImage(image,0,0,32,32);
-    const pixels=sc.getImageData(8,8,16,16).data;
-    let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]<250)transparent++;
-    if(!transparent)throw new Error("Il centro non risulta trasparente: scegli il PNG originale con apertura trasparente");
+    // Verifica campione centrale: almeno 90% realmente trasparente (alfa <= 5).
+    // Non altera i pixel; i progetti precedenti restano leggibili.
+    validatePersonalFrame(image);
     if(state.frameLocked)return;
     state.personalFrameImage=image;state.personalFrameBlob=blob;
     state.personalFrameName=String(file.name||"Cornice personale").slice(0,150);
@@ -2846,6 +1824,7 @@
       ctx = previous;
       const blob = await new Promise((resolve,reject)=>high.toBlob(b=>b&&b.size?resolve(b):reject(new Error("Impossibile creare la grafica a 600 DPI. Chiudi le altre app e riprova.")),"image/jpeg",.98));
       if(blob.type !== "image/jpeg") throw new Error("Formato grafico PDF non disponibile");
+      high.width=high.height=1; // rilascia ~133 MiB prima di leggere il JPEG
       return new Uint8Array(await blob.arrayBuffer());
     } finally {
       ctx = previous;
@@ -3012,6 +1991,7 @@
     const automatic = $("autoCertificateCode").checked;
     if (!beginExport()) return;
     const pages = [];
+    let uniqueRasterBytes=0;const seenRasters=new Set();
     try {
       await ensureActivePhoto();
       const repeated = duplicateNames(names);
@@ -3034,7 +2014,10 @@
         $("recipientName").value = names[i];
         $("certificateCode").value = codes[i];
         setStatus(`Pagina ${i + 1}/${names.length}`);
-        pages.push(await recordPage(sharedGraphics,allOps[i]));
+        const page=await recordPage(sharedGraphics,allOps[i]);
+        if(!seenRasters.has(page.image)){seenRasters.add(page.image);uniqueRasterBytes+=page.image.byteLength;}
+        if(uniqueRasterBytes>96*1024*1024)throw new Error("PDF multipagina troppo pesante per un’unica esportazione: dividi l’elenco in gruppi più piccoli. La qualità resta 600 DPI.");
+        pages.push(page);
         // Cede il controllo all'interfaccia (soprattutto su smartphone).
         await new Promise(resolve => setTimeout(resolve, 0));
       }
@@ -3067,7 +2050,7 @@
     }
   }
 
-  $("backgroundFile").addEventListener("change", guardAsync(e => loadImage(e.target.files[0], setBackground)));
+  $("backgroundFile").addEventListener("change", guardAsync(e => {if(!state.backgroundLocked)return loadImage(e.target.files[0], setBackground);}));
   $("logoFile").addEventListener("change", guardAsync(e => loadImage(e.target.files[0], setLogo)));
 
   $("backgroundOpacity").addEventListener("input", e => {
@@ -3103,6 +2086,7 @@
     queuePreviewRender();
   });
   $("fitBackground").addEventListener("click", () => {
+    if(state.backgroundLocked)return;
     state.backgroundScale = 100;
     state.backgroundX = W / 2;
     state.backgroundY = H / 2;
@@ -3122,6 +2106,7 @@
   });
 
   $("removeBackground").addEventListener("click", () => {
+    if(state.backgroundLocked)return;
     state.backgroundImage = null;
     state.backgroundBlob = null;
     state.backgroundLocked = false;
@@ -3208,7 +2193,7 @@
   });
 
   $("downloadPdf").addEventListener("click", downloadPdf);
-  $("downloadPdfBottom").addEventListener("click", downloadPdf);
+
   $("downloadPng").addEventListener("click", downloadPng);
   // Il formato è una proprietà dello STESSO progetto, non un nuovo progetto.
   // Il salvataggio automatico aggiorna l'ID esistente; "Duplica come nuovo"
@@ -3511,6 +2496,7 @@
       populateFrameOptions();
       for(const id of formIds){
         const field=$(id), value=typeof migrated[id]==="string"?migrated[id]:String(fallback[id]??"");
+        if(id==="frameStyle"){selectFrameValue(value);continue;}
         field.value=["themeBackgroundOpacity","frameOpacity"].includes(id)?normalizeThemeOpacity(value):value;
         if(field.tagName==="SELECT" && field.selectedIndex<0)field.value=String(fallback[id]??"");
       }
@@ -4124,16 +3110,8 @@
   });
   $("themeBackgroundOpacity").addEventListener("input",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();deferSettingsSave();queuePreviewRender();});
   $("themeBackgroundOpacity").addEventListener("change",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();saveSettings();queuePreviewRender();});
-  $("resetThemeBackgroundOpacity").addEventListener("click",()=>{
-    if(state.themeBackgroundLocked)return;
-    $("themeBackgroundOpacity").value="100";syncThemeOpacity();saveSettings();queuePreviewRender();
-  });
   $("frameOpacity").addEventListener("input",()=>{if(state.frameLocked)return;syncFrameOpacity();deferSettingsSave();queuePreviewRender();});
   $("frameOpacity").addEventListener("change",()=>{if(state.frameLocked)return;syncFrameOpacity();saveSettings();queuePreviewRender();});
-  $("resetFrameOpacity").addEventListener("click",()=>{
-    if(state.frameLocked)return;
-    $("frameOpacity").value="100";syncFrameOpacity();saveSettings();queuePreviewRender();
-  });
   $("removeThemeBackground").addEventListener("click",()=>{
     if(state.themeBackgroundLocked)return;
     $("themeBackgroundId").value="none";syncDesignUI();saveSettings();render();
@@ -4145,7 +3123,7 @@
   });
   $("loadPersonalFrame").addEventListener("click",()=>{if(!state.frameLocked)$("personalFrameFile").click();});
   $("personalFrameFile").addEventListener("change",guardAsync(async e=>{const file=e.target.files[0];e.target.value="";await importPersonalFrame(file);}));
-  $("fitPersonalFrame").addEventListener("click",()=>{if(state.frameLocked||$("frameStyle").value!==PERSONAL_FRAME||!state.personalFrameImage)return;render();setStatus(personalFrameMessage(state.personalFrameImage));});
+
     $("lockThemeBackground").addEventListener("click",()=>{
     state.themeBackgroundLocked = !state.themeBackgroundLocked;
     applyThemeBackgroundLockUI();
@@ -4160,6 +3138,7 @@
     scheduleAutosave();
     setStatus(state.frameLocked ? "Cornice bloccata" : "Cornice sbloccata");
   });
+  for(const id of ["frameDiscipline","frameCollection"]) $(id).addEventListener("change",()=>{if(state.frameLocked)return;populateFrameOptions();updateFrameNavigatorUI();});
   $("prevFrame").addEventListener("click",()=>moveFrameSelection(-1));
   $("nextFrame").addEventListener("click",()=>moveFrameSelection(1));
   for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "courseOutcome"]) {
@@ -4375,7 +3354,7 @@
     syncAutomaticCode(); saveSettings();render();
     setStatus("Codice automatico attivato");
   });
-  $("quickDownloadPdf").addEventListener("click", downloadPdf);
+
   $("quickOpenBatch").addEventListener("click", () => {$("quickBatchPanel").open = true;$("quickBatchNames").focus();});
   $("quickBatchNames").addEventListener("input", e => {
     $("batchNames").value = e.target.value;
