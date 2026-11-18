@@ -1,5 +1,5 @@
 // Cache privata per questa applicazione e per il suo percorso di pubblicazione.
-const VERSION = "4.9.19-precision-controls";
+const VERSION = "4.9.20-precision-performance";
 const FRAME_VERSION = "4.9.17-a4-personal";
 const SCOPE = self.registration.scope;
 const PREFIX = `k9-template-studio|${SCOPE}|`;
@@ -21,6 +21,10 @@ self.addEventListener("install", event=>event.waitUntil((async()=>{
     }
     const app=await (await cache.match(urlFor(versioned("./js/app.js")))).text();
     if (!app.includes(`const STUDIO_VERSION = "${VERSION}";`)) throw new Error("JavaScript non aggiornato");
+    for(const file of ["./css/style.css","./js/pdf-vector.js"]){
+      const content=await (await cache.match(urlFor(versioned(file)))).text();
+      if(!content.includes(VERSION))throw new Error(`Risorsa non aggiornata: ${file}`);
+    }
     const frames=await (await cache.match(urlFor(`./js/premium-frames.js?v=${FRAME_VERSION}`))).text();
     if(!frames.includes(`K9_FRAME_VERSION = "${FRAME_VERSION}"`) || (frames.match(/"src":"data:image\//g)||[]).length!==260)throw new Error("Archivio cornici Ultra incompleto");
     if ((frames.match(/"a4Block":/g)||[]).length!==43) throw new Error("Archivio cornici A4 incompleto");

@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.19-precision-controls">
+  <link rel="stylesheet" href="css/style.css?v=4.9.20-precision-performance">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.19-precision-controls</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.20-precision-performance</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -19,6 +19,7 @@
         </div>
       </div>
       <div id="status" class="status preview-feedback is-idle" role="status" aria-live="polite">Pronto</div>
+      <div id="layoutNotice" class="layout-notice hidden" role="status" aria-live="polite"></div>
       <div class="preview-mini-tools">
         <button id="downloadPdf" class="button primary pdf-button" type="button">Scarica PDF</button>
         <button id="togglePreviewGrid" class="button ghost small" type="button" aria-pressed="false" aria-label="Griglia di riferimento" title="Mostra la griglia senza spostare gli elementi">Griglia</button>
@@ -26,6 +27,8 @@
     </section>
 
     <section class="controls" aria-label="Modifica certificato">
+      <div class="edit-tools"><label>Qualità di esportazione<select id="exportQuality"><option value="150">150 DPI · digitale</option><option value="300">300 DPI · stampa</option><option value="600" selected>600 DPI · massima</option></select></label><div class="edit-history"><button id="undoEdit" class="button secondary small" type="button" disabled>Annulla</button><button id="redoEdit" class="button secondary small" type="button" disabled>Ripristina</button></div></div>
+      <label class="drag-toggle"><input type="checkbox" id="dragLogos"> Sposta i loghi trascinandoli nell’anteprima</label>
       <span id="previewHeading" class="visually-hidden">Anteprima A4 297 × 210 mm · sempre visibile</span>
       <div class="mode-switch" role="group" aria-label="Modalità di lavoro">
         <div class="mode-switch-title"><strong>Come vuoi lavorare?</strong><small>Le funzioni e i dati restano gli stessi</small></div>
@@ -83,7 +86,7 @@
           <div class="quick-batch-inner">
             <label>Un nominativo per riga (massimo 30)<textarea id="quickBatchNames" rows="4" placeholder="Mario Rossi&#10;Anna Bianchi"></textarea></label>
             <button id="quickDownloadBatch" type="button" class="button primary">Prepara PDF multipagina</button>
-            <a id="quickReadyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
+            <button id="quickDownloadIndividual" type="button" class="button secondary">Prepara ZIP con PDF individuali</button><a id="quickReadyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
             <p class="quick-batch-help">Dopo la preparazione apparirà qui il collegamento per scaricare il documento.</p>
           </div>
         </details>
@@ -153,7 +156,7 @@
             <strong>Registro locale delle esportazioni</strong>
             <p id="exportsSummary" class="help-text" aria-live="polite">Caricamento registro…</p>
             <ul id="exportsList" class="registry-list"></ul>
-            <button id="exportRegistry" class="button secondary" type="button">Esporta registro CSV</button>
+            <label>Ricerca registro<input id="registrySearch" type="search" placeholder="Nome, codice, corso o data"></label><p class="help-text">Il registro indica una richiesta di download, non conferma il salvataggio effettivo sul dispositivo.</p><button id="exportRegistry" class="button secondary" type="button">Esporta registro CSV</button>
             <button id="clearRegistry" class="button danger-soft" type="button">Azzera registro esportazioni</button>
             <small>Registro solo su questo dispositivo, non sincronizzato. Un codice già utilizzato attiva una richiesta di conferma, non un blocco permanente.</small>
           </div>
@@ -250,7 +253,7 @@
             </label>
             <label class="range-row">
               <span>Dimensione <output id="backgroundScaleValue" for="backgroundScale">100%</output></span>
-              <input id="backgroundScale" type="range" min="50" max="180" value="100">
+              <input id="backgroundScale" type="range" min="25" max="300" value="100">
             </label>
             <div class="position-controls" aria-label="Posizione sfondo">
               <label class="range-row position-row">
@@ -338,12 +341,12 @@
             </label>
             <label class="range-row position-row">
               <span>Spostamento orizzontale <output id="signatureBlockXValue" for="signatureBlockX">0%</output></span>
-              <input id="signatureBlockX" type="range" min="-100" max="100" value="0" step="1">
+              <input id="signatureBlockX" type="range" min="-100" max="100" value="0" step="0.1">
               <small>Sinistra ↔ Destra</small>
             </label>
             <label class="range-row position-row">
               <span>Spostamento verticale <output id="signatureBlockYValue" for="signatureBlockY">0%</output></span>
-              <input id="signatureBlockY" type="range" min="-100" max="100" value="0" step="1">
+              <input id="signatureBlockY" type="range" min="-100" max="100" value="0" step="0.1">
               <small>Alto ↕ Basso</small>
             </label>
             <div class="two-buttons">
@@ -353,6 +356,7 @@
             <small>I cursori spostano e ridimensionano insieme le firme, i ruoli, i nomi e le righe. Lo 0% indica la posizione iniziale; lo spostamento è proporzionale allo spazio disponibile. La dimensione effettiva può essere limitata dai margini e dai testi.</small>
           </div>
 
+          <div class="signature-fields wide"><div class="signature-fields-title">Carattere firma automatica</div><p id="signatureFontStatus" class="help-text">Font locale assente: Great Vibes se installato, altrimenti corsivo alternativo.</p><label>Carica un font con licenza d’uso (es. Great Vibes)<input id="signatureFontFile" type="file" accept=".ttf,.otf,.woff,.woff2"></label><button id="removeSignatureFont" class="button secondary" type="button">Ripristina corsivo di sistema</button><small>Il font personale resta sul dispositivo, non viene incluso nei backup dei progetti. Per una firma identica su più dispositivi carica lo stesso font su ciascuno.</small></div>
           <div class="signature-fields wide">
             <div class="signature-fields-title">Firma sinistra</div>
             <label>Ruolo / qualifica
@@ -479,7 +483,7 @@
           <div id="batchValidation" class="batch-validation hidden" role="status" aria-live="polite"></div>
           <p class="help-text">Codici automatici per corsista, ad esempio <strong>K9_DETECTION_06112006_M.R.</strong> e <strong>K9_DETECTION_06112006_A.B.</strong>. Nessuna numerazione 001/002. Se due corsisti hanno le stesse iniziali, compare un avviso.</p>
           <button id="downloadBatch" class="button primary" type="button">Prepara PDF multipagina</button>
-          <a id="readyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
+          <button id="downloadIndividual" type="button" class="button secondary">Prepara ZIP con PDF individuali</button><a id="readyBatchLink" class="button primary ready-download hidden" download>Scarica PDF multipagina pronto</a>
           <p class="help-text">Il nome in ogni pagina sostituisce il nominativo del modello. Ogni pagina riceve il codice relativo alle iniziali del proprio corsista (se il codice automatico è attivo). Corso, data, firme, loghi e grafica restano invariati. I file CSV possono contenere colonne “Nome” e “Cognome”. Tutto rimane sul dispositivo.</p>
         </div>
       </details>
@@ -489,7 +493,7 @@
           <strong>Fatto</strong>
           <p>Scarica il PDF dal pulsante fisso sopra, oppure esporta il PNG qui.</p>
         </div>
-        <div class="finish-actions"><button id="downloadPng" class="button secondary" type="button">Esporta PNG 600 DPI</button></div>
+        <div class="finish-actions"><button id="downloadPng" class="button secondary" type="button">Esporta PNG</button></div>
       </section>
     </section>
   </main>
@@ -511,9 +515,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.19-precision-controls"></script>
+  <script src="js/pdf-vector.js?v=4.9.20-precision-performance"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
   <script src="js/premium-frames.js?v=4.9.17-a4-personal"></script>
-  <script src="js/app.js?v=4.9.19-precision-controls"></script>
+  <script src="js/app.js?v=4.9.20-precision-performance"></script>
 </body>
 </html>

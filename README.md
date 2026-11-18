@@ -1,46 +1,39 @@
-# K9 Template Studio 4.9.19 — Precision Controls
+# K9 Template Studio 4.9.20 — Precision & Performance
 
-Aggiornamento cumulativo rispetto alla 4.9.17/4.9.18.
-- Tutti i 13 cursori condividono la stessa gestione di input e change.
-- Coordinate sfondo personale e loghi: passo 0,1%; nessun aggancio automatico alla griglia.
-- La griglia resta un riferimento esclusivamente visivo, non esportato.
-- Opacità, scala, posizione, blocchi e salvataggio restano indipendenti.
-- Le firme indicano la scala effettiva quando limitata dai margini.
-- Aggiornamento dell’anteprima per frame e salvataggio differito durante i movimenti.
-- Migliore area di contatto su dispositivi touch.
-- Nessun cambiamento agli asset e ai dati dei progetti.
-
-# K9 Template Studio — 4.9.18 Clean Studio
-
-Aggiornamento dalla repository 4.9.17 A4 Personal. Applicazione statica per GitHub Pages; nessun Supabase. L'archivio locale, i progetti, i modelli, la cronologia e il formato dei backup non cambiano.
+Aggiornamento della versione 4.9.19. Applicazione statica per GitHub Pages, nessun Supabase. Il database IndexedDB, il suo schema, i dati dei progetti e il formato dei backup V2 restano compatibili. Cataloghi grafici e identificativi invariati.
 
 ## Installazione
 
-1. Esporta un backup dell'archivio dall'app e conserva lo ZIP originale della repository.
-2. Sostituisci insieme `index.html`, `css/style.css`, `js/app.js`, `sw.js`, `README.md` con i file del pacchetto. Mantieni le cartelle di destinazione.
-3. Elimina soltanto i 29 file obsoleti elencati sotto. È possibile farlo anche dopo aver verificato l'app: non sono necessari alla nuova versione.
-4. Riapri l'app online dopo la pubblicazione. Controlla `v4.9.18-clean-studio`. Non cancellare i dati del sito, IndexedDB o localStorage.
+1. Prima dell'aggiornamento, dall'app originale esportare il backup completo dei progetti e, se necessario, il progetto corrente separatamente. Conservare la repository originale.
+2. Sostituire **insieme** i sei file di questo pacchetto, rispettando i percorsi:
+   - `index.html`
+   - `css/style.css`
+   - `js/app.js`
+   - `js/pdf-vector.js`
+   - `sw.js`
+   - `README.md`
+3. Non eliminare alcun file. Non toccare i nove `frames-*-a4-*.js`, i due cataloghi in `js/`, manifest e icone.
+4. Dopo la pubblicazione, chiudere e riaprire l'app online. Controllare la versione `4.9.20-precision-performance`. Non cancellare i dati del sito, IndexedDB o localStorage.
 
-## Eliminazioni (solo file nella radice)
+## Correzioni
 
-- `app.js`, `style.css`, `premium-frames.js`
-- `frames-mantrailing-01.js` ... `frames-mantrailing-08.js`
-- `frames-hrdd-01.js` ... `frames-hrdd-08.js`
-- `frames-detection-01.js` ... `frames-detection-08.js`
-- `frames-dogsitter-01.js`, `frames-dogsitter-02.js`
+- Rimozione di un logo bloccato impedita sia nell'interfaccia sia nella funzione JavaScript.
+- Tutti i 13 cursori dispongono di valore numerico, incremento/decremento e ripristino del valore iniziale; i controlli aggiuntivi rispettano i blocchi. Coordinate firme con passo 0,1%. Scala sfondo personale 25–300%, preservata al riavvio.
+- Adattamento dei nomi e titoli lunghi: la dimensione iniziale per l'impaginazione su due righe segue il cursore. Scala firme richiesta ed effettiva distinte; il limite effettivo dipende dai margini e non modifica la preferenza salvata.
+- Annulla/Ripristina: cronologia temporanea della sessione (fino a 15 modifiche, raggruppate dopo 350 ms di inattività, con limite di memoria indicativo di 64 MiB per i Blob storici). Si azzera cambiando progetto o riaprendo un modello. Non sostituisce lo storico persistente dei progetti. Se l'archivio è in recupero protetto non esegue ripristini automatici.
+- Trascinamento dei loghi opzionale, con puntatore o touch; il logo bloccato non può essere spostato. Avvisi per loghi fuori foglio e possibili sovrapposizioni con altri loghi o testi; gli avvisi sui loghi non bloccano l'esportazione.
+- PDF e PNG con scelta 150, 300 o 600 DPI, default storico 600. La scelta si conserva sul dispositivo. Il PDF resta A4 e conserva il testo vettoriale supportato dal motore originale. La risoluzione delle fotografie e cornici originali non aumenta: 600 DPI indica la risoluzione della grafica nel documento.
+- Esportazione multipagina invariata; nuova alternativa ZIP con un PDF per corsista (massimo 30, limite di memoria e dimensione). I codici con iniziali duplicate possono essere corretti manualmente nel gruppo; la correzione è applicata al PDF e al nome del file, senza cambiare il codice del modello. Nomi di file ripetuti resi univoci solo se necessario, senza aggiungere progressivi al codice stampato.
+- Registro: ricerca per nome, codice, corso o data; CSV include DPI e indicazione che il download è stato richiesto. Il browser non certifica il salvataggio effettivo del file.
+- Font firma locale: si può caricare un proprio file TTF/OTF/WOFF/WOFF2 (fino a 1 MB) con licenza d'uso. Se lo spazio lo permette resta disponibile offline sullo stesso dispositivo. In assenza viene mostrato l'avviso di fallback. Il font non è distribuito nel pacchetto e non entra nei backup: per la stessa resa su dispositivi diversi usare lo stesso font locale, oppure firma grafica autorizzata.
+- Ridotte le cache di immagini/miniature, retry delle risorse alla riconnessione, eliminazione di due funzioni non usate e rafforzato il controllo delle versioni del Service Worker. Nessuna modifica al formato dei cataloghi.
 
-**Non eliminare** i file `frames-*-a4-*.js`, `js/premium-frames.js`, `js/realistic-backgrounds.js`, `js/pdf-vector.js`, `css/style.css`, `js/app.js`, il manifest e le icone. Il catalogo e i blocchi A4 restano alla versione asset 4.9.17 per evitare di ricaricare decine di MB. La versione dell'editor e della cache è 4.9.18.
+## Collaudo
 
-## Novità
+Controlli eseguiti: sintassi JS, riferimenti HTML, motore in Chromium con asset iniettati, 13 controlli di precisione, blocco/rimozione logo, annulla/ripristina di un cursore in sessione, formato A4, codice con tutte le iniziali, PDF a 150 e 600 DPI, ZIP con due PDF individuali e codice duplicato corretto, verifica CRC e testo/MediaBox dei PDF.
 
-- 303 cornici conservate: 260 storiche e 43 A4 Duo, con identificativi invariati. Filtri disciplina e collezione; precedente/successiva seguono il filtro. Il cambio filtro non modifica la cornice attiva. I filtri si riallineano al ripristino di un progetto.
-- 266 stili di sfondo, di cui 120 fotografici. Nessuna modifica alle sorgenti grafiche o alla qualità di esportazione. Le sorgenti non sono native Ultra HD.
-- Un solo pulsante PDF singolo, fisso in anteprima; mantenuti PNG e PDF multipagina. Adattamento A4 delle cornici personali automatico, senza deformazioni. Per ripristinare l'opacità, porta il relativo cursore al 100%.
-- Nuove cornici personali PNG/WebP: almeno il 90% dei pixel campionati nella zona centrale (dal 18,75% all'81,25% di larghezza e altezza) deve avere alfa <=5/255. La verifica non altera i file e non si applica retroattivamente ai progetti salvati. Limiti precedenti: 15 MiB e 40 MP per immagine, 100 MP per progetto.
-- Blocco sfondo personale esteso a sostituzione/rimozione e adattamento.
-- Eliminato il motore decorativo non richiamato (1.007 righe). Cache grafiche non attive liberate prima dell'esportazione; rilascio anticipato del canvas 600 DPI dopo JPEG. Il PDF multipagina riusa la grafica quando possibile; soglia di 96 MiB per i raster distinti, con messaggio per suddividere l'elenco se necessario. Non viene ridotta la risoluzione di esportazione.
-- Backup, registro, firme, loghi, griglia, colori coordinati, codice automatico e modalità rapida/full conservati. Nessuna libreria personale aggiuntiva: le cornici personali restano nei progetti e nei backup; l'archivio galleria resta esterno.
+Limite: in questo ambiente la navigazione normale e lo storage di Chromium sono bloccati. L'undo è stato verificato in un ambiente di test in memoria, non con persistenza reale. Dopo pubblicazione verificare sul dispositivo il salvataggio/ripristino dei progetti e backup, la cache offline, l'installazione PWA e il font locale.
 
-## Verifiche
+## Cataloghi
 
-Controlli sintattici, riferimenti HTML, catalogo preservato, navigazione e filtri, blocco, A4, indipendenza sfondo, verifica trasparenza, ripristino snapshot e creazione PDF a 7016×4961 pixel in Chromium. Il test usa asset iniettati localmente; la persistenza reale IndexedDB e la pubblicazione GitHub Pages richiedono prova sul dispositivo.
+Restano disponibili tutte le 303 cornici (260 storiche, 43 A4 Duo) e i fondali esistenti. La sostituzione delle sorgenti grafiche con immagini native ad alta definizione, il completamento delle collezioni e la migrazione delle immagini in file separati non fanno parte di questa patch: richiedono risorse grafiche nuove o una migrazione specifica per evitare regressioni nei progetti.
