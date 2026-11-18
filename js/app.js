@@ -1,8 +1,8 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.12-ultra-personal";
-  const FRAME_LIBRARY_VERSION = "4.9.12-ultra";
+  const STUDIO_VERSION = "4.9.17-a4-personal";
+  const FRAME_LIBRARY_VERSION = STUDIO_VERSION;
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
   const canvas = $("certificateCanvas");
@@ -932,7 +932,7 @@
       const items=premiumFrameCatalog.filter(item=>item.group===group);
       if(!items.length) continue;
       const optgroup=document.createElement("optgroup");
-      optgroup.label=`${group} · ${items.length} cornici Ultra`;
+      optgroup.label=`${group} · ${items.length} cornici`;
       for(const item of items) optgroup.appendChild(new Option(item.label,item.id));
       select.appendChild(optgroup);
     }
