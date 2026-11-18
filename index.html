@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.12-ultra-personal">
+  <link rel="stylesheet" href="css/style.css?v=4.9.17-a4-personal">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.12-ultra-personal</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.17-a4-personal</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -165,7 +165,7 @@
         <div class="panel-body design-area">
           <p class="mini-heading">Archivio sfondi grafici · pronti da caricare<span id="studioVersion"></span></p>
           <div class="layer-controls">
-            <label for="frameStyle"><strong>1. Cornice Ultra indipendente</strong></label>
+            <label for="frameStyle"><strong>1. Cornice indipendente</strong></label>
             <select id="frameStyle"><option value="none">Senza cornice</option></select>
             <button id="loadPersonalFrame" class="button secondary" type="button">Carica cornice personale dalla galleria</button>
             <input id="personalFrameFile" type="file" accept="image/png,image/webp,.png,.webp" hidden>
@@ -176,6 +176,7 @@
               <button id="prevFrame" class="button secondary small" type="button" aria-label="Cornice precedente della disciplina">← Precedente</button>
               <button id="nextFrame" class="button secondary small" type="button" aria-label="Cornice successiva della disciplina">Successiva →</button>
             </div>
+            <small class="help-text">Le cornici A4 Duo seguono automaticamente il formato verticale o orizzontale.</small>
             <small id="frameNavStatus">Seleziona una cornice per scorrere la disciplina corrente</small>
             <div class="two-buttons">
               <button id="removeFrame" class="button ghost small" type="button">Elimina solo cornice</button>
@@ -506,9 +507,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.12-ultra-personal"></script>
+  <script src="js/pdf-vector.js?v=4.9.17-a4-personal"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
-  <script src="js/premium-frames.js?v=4.9.12-ultra"></script>
-  <script src="js/app.js?v=4.9.12-ultra-personal"></script>
+  <script src="js/premium-frames.js?v=4.9.17-a4-personal"></script>
+  <script src="js/app.js?v=4.9.17-a4-personal"></script>
 </body>
 </html>
