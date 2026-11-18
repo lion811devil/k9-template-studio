@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.19-precision-controls";
+  const STUDIO_VERSION = "4.9.20-precision-performance";
   const FRAME_LIBRARY_VERSION = "4.9.17-a4-personal"; // asset invariati, versione indipendente
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
@@ -11,9 +11,12 @@
   let rasterUnsupportedOnly = false;
   let layoutWarnings = [];
   let textBounds = [];
+  const precisionControls = new Map();
   let W = canvas.width;
   let H = canvas.height;
-  const EXPORT_DPI = 600;
+  const EXPORT_DPI = 600; // qualità storica predefinita
+  const exportDpi = () => [150,300,600].includes(Number($("exportQuality").value)) ? Number($("exportQuality").value) : EXPORT_DPI;
+  function exportSize(){const {outputW,outputH}=pageSize(),ratio=exportDpi()/600;return {outputW:Math.round(outputW*ratio),outputH:Math.round(outputH*ratio)};}
   const A4_STAGE = Object.freeze({
     landscape: {w:1683,h:1190,outputW:7016,outputH:4961},
     portrait: {w:1190,h:1683,outputW:4961,outputH:7016}
@@ -424,7 +427,7 @@
       pendingEditorOperations++;
       setEditorBusy(true);
       try {return await handler(...args);} catch(error) {console.error(error);setStatus(error.message || "Operazione non riuscita","warning");}
-      finally {pendingEditorOperations--;setEditorBusy(false);if(dirty) scheduleAutosave();}
+      finally {pendingEditorOperations--;setEditorBusy(false);syncPrecisionControls();if(dirty) scheduleAutosave();}
     };
   }
   function trimExportCaches(){
@@ -436,10 +439,10 @@
   }
   function beginExport() {
     if (state.exporting || pendingEditorOperations || !state.initialized) { if (!state.exporting) setStatus("Completa prima l'operazione in corso"); return false; }
-    clearTimeout(autosaveTimer);clearTimeout(settingsSaveTimer);saveSettings();
+    captureUndo();clearTimeout(autosaveTimer);clearTimeout(settingsSaveTimer);saveSettings();
     if(dirty||pendingPreviewFrame)void persistCurrentSnapshot();
     trimExportCaches();
-    state.exporting=true;exportLock=true;
+    state.exporting=true;exportLock=true;updateUndoButtons();
     document.activeElement?.blur();
     document.body.setAttribute("aria-busy","true");
     document.body.classList.add("export-locked");
@@ -447,9 +450,10 @@
     return true;
   }
   function endExport() {
-    state.exporting=false;exportLock=false;
+    state.exporting=false;exportLock=false;updateUndoButtons();
     document.body.removeAttribute("aria-busy");document.body.classList.remove("export-locked");
     for(const el of document.querySelectorAll(".controls,.preview-toolbar,.header-actions,.pdf-button,#togglePreviewGrid"))el.inert=false;
+    syncPrecisionControls();
   }
   for(const event of ["click","input","change","keydown","pointerdown","drop","paste","beforeinput"]){
     document.addEventListener(event,e=>{if(exportLock && e.isTrusted){e.preventDefault();e.stopImmediatePropagation();}},true);
@@ -559,7 +563,8 @@
       btn.classList.toggle("is-locked", locked);
     }
     const removeBtn = $("removeLogo");
-    if (removeBtn) removeBtn.disabled = !logo;
+    if (removeBtn) removeBtn.disabled = !logo || locked;
+    syncPrecisionControls();
   }
 
   function escapeStored(value, fallback = "") {
@@ -796,12 +801,13 @@
   function automaticCode(name) {
     return `K9_${disciplineCode()}_${certificateDateCode()}_${participantInitials(name)}`;
   }
+  let batchCodeOverride=null;
   function syncAutomaticCode() {
     const automatic = $("autoCertificateCode").checked;
     $("certificateCode").readOnly = automatic;
     $("certificateCode").setAttribute("aria-readonly", String(automatic));
     if (automatic) {
-      try { $("certificateCode").value = automaticCode($("recipientName").value); }
+      try { $("certificateCode").value = batchCodeOverride??automaticCode($("recipientName").value); }
       catch { $("certificateCode").value = ""; }
     }
     $("certificateCodeHelp").textContent = automatic
@@ -966,7 +972,7 @@
       const image=new Image();image.onload=()=>{
         if(!image.naturalWidth||!image.naturalHeight){reject(new Error('Fondale non valido'));return;}
         photoDecoded.set(id,image);
-        while(photoDecoded.size>18){const current=photoKeyFor(activeBackgroundId());const key=[...photoDecoded.keys()].find(k=>k!==current&&k!==id);if(!key)break;photoDecoded.delete(key);}
+        while(photoDecoded.size>8){const current=photoKeyFor(activeBackgroundId());const key=[...photoDecoded.keys()].find(k=>k!==current&&k!==id);if(!key)break;photoDecoded.delete(key);}
         resolve(image);
       };image.onerror=()=>reject(new Error('Impossibile caricare il fondale del tema'));image.src=photoAssets[id];
     }).finally(()=>photoPending.delete(id));
@@ -994,6 +1000,7 @@
     }).catch(error=>{frameFailures.add(id);if($("frameStyle").value===id)setStatus(error.message,"warning");})
       .finally(()=>frameRefreshPending.delete(id));
   }
+  window.addEventListener("online",()=>{photoFailures.clear();frameFailures.clear();if(state.initialized&&!state.exporting)render({visualOnly:true});});
   async function ensureActivePhoto(){
     const id=photoKeyFor(activeBackgroundId()),frame=$("frameStyle").value;
     const tasks=[];
@@ -1035,7 +1042,7 @@
     if(!portrait&&!wide){const dw=h*iw/ih,lo=(w-dw)/2/w,hi=1-lo;const edge=g.createLinearGradient(0,0,w,0);for(const [at,a] of [[0,0],[lo,0],[lo+(hi-lo)*.15,1],[hi-(hi-lo)*.15,1],[hi,0],[1,0]])edge.addColorStop(at,`rgba(0,0,0,${a})`);g.fillStyle=edge;g.fillRect(0,0,w,h);}
     g.globalCompositeOperation='source-over';
     photoLayers.set(key,layer);
-    while(photoLayers.size>12){
+    while(photoLayers.size>5){
       const active=(currentOrientation()==="portrait"?'P|':'L|')+activeBackgroundId();
       const oldest=[...photoLayers.keys()].find(k=>k!==active&&k!==key);
       if(!oldest)break;
@@ -1065,7 +1072,7 @@
     drawThemeThumbnail(canvas,theme);
     const copy=document.createElement("canvas");copy.width=canvas.width;copy.height=canvas.height;copy.getContext("2d").drawImage(canvas,0,0);
     thumbnailCache.set(key,copy);
-    if(thumbnailCache.size>32){const oldest=thumbnailCache.keys().next().value;const old=thumbnailCache.get(oldest);old.width=1;old.height=1;thumbnailCache.delete(oldest);}
+    if(thumbnailCache.size>20){const oldest=thumbnailCache.keys().next().value;const old=thumbnailCache.get(oldest);old.width=1;old.height=1;thumbnailCache.delete(oldest);}
   }
   let thumbnailObserver=null;
   // La navigazione normale e la ricerca hanno stati separati. Il cambio A4 non chiude i menu.
@@ -1330,33 +1337,24 @@
     return { lines:lines.slice(0,capacity), size: 18, spacing: 24, top, bottom, fits: false };
   }
 
-  function fitItalicFont(text, maxWidth, startSize, minSize, weight = "600") {
-    const family = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
-    let size = startSize;
-    do {
-      ctx.font = `italic ${weight} ${size}px ${family}`;
-      if (ctx.measureText(text).width <= maxWidth) return size;
-      size -= 2;
-    } while (size > minSize);
-    return minSize;
+  let localSignatureFace=null;
+  const SIGNATURE_FONT_KEY="k9-signature-font-local-v1";
+  async function installSignatureFont(buffer){
+    const face=new FontFace("K9LocalSignature",buffer,{style:"normal",weight:"400"});await face.load();if(localSignatureFace)document.fonts.delete(localSignatureFace);document.fonts.add(face);localSignatureFace=face;$("signatureFontStatus").textContent="Font locale attivo · disponibile anche offline su questo dispositivo";
   }
-
-  function drawCenteredItalic(text, y, size, color, weight = "600", maxWidth = 1320) {
-    if (!text) return;
-    const family = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
-    size = fitItalicFont(text, maxWidth, size, Math.max(24, Math.round(size * .55)), weight);
-    ctx.font = `italic ${weight} ${size}px ${family}`;
-    ctx.fillStyle = color;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, W / 2, y);
-  }
-
+  async function restoreSignatureFont(){try{const saved=localStorage.getItem(SIGNATURE_FONT_KEY);if(saved){const bytes=Uint8Array.from(atob(saved),ch=>ch.charCodeAt(0));await installSignatureFont(bytes.buffer);}}catch(error){console.warn("Font locale non disponibile",error);$("signatureFontStatus").textContent="Font locale non recuperato: viene utilizzato un corsivo alternativo.";}}
+  $("signatureFontFile").addEventListener("change",guardAsync(async e=>{
+    const file=e.target.files[0];e.target.value="";if(!file)return;if(!/\.(?:ttf|otf|woff2?)$/i.test(file.name)||file.size>1024*1024)throw new Error("Usa un font TTF, OTF, WOFF o WOFF2 fino a 1 MB");
+    const buffer=await file.arrayBuffer();await installSignatureFont(buffer);try{const bytes=new Uint8Array(buffer);let raw="";for(let i=0;i<bytes.length;i+=8192)raw+=String.fromCharCode(...bytes.subarray(i,i+8192));localStorage.setItem(SIGNATURE_FONT_KEY,btoa(raw));}catch{$("signatureFontStatus").textContent="Font attivo solo per questa sessione: memoria locale non disponibile.";}
+    invalidateReadyBatch();render({visualOnly:true});
+  }));
+  $("removeSignatureFont").addEventListener("click",()=>{if(localSignatureFace)document.fonts.delete(localSignatureFace);localSignatureFace=null;try{localStorage.removeItem(SIGNATURE_FONT_KEY);}catch{}$("signatureFontStatus").textContent="Font locale assente: Great Vibes se installato, altrimenti corsivo alternativo.";invalidateReadyBatch();render({visualOnly:true});});
+  const signatureFamily=()=>localSignatureFace?'"K9LocalSignature", cursive':'"Great Vibes", "Snell Roundhand", "Segoe Script", "Brush Script MT", "URW Chancery L", "Apple Chancery", cursive';
+  const signatureFont=(size)=>`${localSignatureFace?'normal 400':'italic 500'} ${size}px ${signatureFamily()}`;
   function fitSignatureFont(text, maxWidth, startSize, minSize) {
-    const family = '"Great Vibes", "Snell Roundhand", "Segoe Script", "Brush Script MT", "URW Chancery L", "Apple Chancery", cursive';
     let size = startSize;
     do {
-      ctx.font = `italic 500 ${size}px ${family}`;
+      ctx.font = signatureFont(size);
       if (ctx.measureText(text).width <= maxWidth) return size;
       size -= 2;
     } while (size > minSize);
@@ -1380,6 +1378,7 @@
       if(id==="signatureBlockScale"){
         const effective=Math.round(signatureGeometry().scale*1000)/10;
         const label=effective+0.05<value?`${percentLabel(effective)} eff. (rich. ${value}%)`:percentLabel(value);
+        input.title=`Limite geometrico attuale: ${percentLabel(Math.round(signatureGeometry(1.15).scale*1000)/10)}. Il valore richiesto resta salvato.`;
         $(`${id}Value`).value=label;
         input.setAttribute("aria-valuetext",label);
       }else{
@@ -1398,6 +1397,7 @@
     button.setAttribute("aria-pressed", String(locked));
     button.textContent = locked ? "Sblocca firme" : "Blocca firme";
     button.classList.toggle("is-locked", locked);
+    syncPrecisionControls();
   }
 
   function signatureSlots() {
@@ -1416,9 +1416,9 @@
   // Same reserved print margins for all new frames (including none).
   function themeSafeArea(){return {left:92,right:92,top:85,bottom:H-85};}
   function themeContentWidth(y, height=70){const safe=themeSafeArea(Math.max(0,(y-height/2)/H),Math.min(1,(y+height/2)/H));return Math.max(W*.54,W-2*Math.max(safe.left,safe.right));}
-  function signatureGeometry() {
+  function signatureGeometry(requestedOverride) {
     const portrait = currentOrientation() === "portrait";
-    const requested=Number($("signatureBlockScale").value)/100,slots=signatureSlots(),baseLine=portrait?1530:980;
+    const requested=requestedOverride??Number($("signatureBlockScale").value)/100,slots=signatureSlots(),baseLine=portrait?1530:980;
     const metadataCount=Number($("autoCertificateCode").checked || !!$("certificateCode").value.trim())+Number(!!$("courseHours").value.trim())+Number(!!$("courseOutcome").value);
     const textBottom=portrait?(metadataCount?1270+Math.max(0,metadataCount-1)*31+15:1219):(metadataCount?869:831);
     const safe=themeSafeArea(textBottom/H,.97),baseHalf=signatureWidth(portrait?350:430)/2;
@@ -1444,9 +1444,8 @@
       const h = w / ratio;
       ctx.drawImage(image, centerX - w / 2, lineY - h - 3*scale, w, h);
     } else if (mode === "auto" && name) {
-      const signatureFamily = '"Great Vibes", "Snell Roundhand", "Segoe Script", "Brush Script MT", "URW Chancery L", "Apple Chancery", cursive';
       const sigSize = fitSignatureFont(name, baseWidth, 46, 20) * scale;
-      ctx.font = `italic 500 ${sigSize}px ${signatureFamily}`;
+      ctx.font = signatureFont(sigSize);
       ctx.fillStyle = "#25221d";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -1515,7 +1514,7 @@
     ctx.font=`700 ${fitted}px ${profile.name}`;
     if (recipient && ctx.measureText(recipient).width>nameWidth) {
       let found=false;
-      for(let size=portrait?55:41;size>=20;size--){
+      for(let size=Math.min(nameSize,Math.round((portrait?55:41)*fontAdj));size>=20;size--){
         const lines=wrapLines(recipient,nameWidth,`700 ${size}px ${profile.name}`);
         if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=nameWidth)){
           lines.forEach((line,i)=>drawCentered(line,nameY+(i-(lines.length-1)/2)*(size+3),size,profile.name,mainTextColor,"700",nameWidth));found=true;break;
@@ -1539,7 +1538,7 @@
     ctx.font=`700 ${courseFit}px ${profile.course}`;
     if(course&&ctx.measureText(course).width>courseWidth){
       let found=false;
-      for(let size=portrait?38:30;size>=18;size--){
+      for(let size=Math.min(courseSize,Math.round((portrait?38:30)*fontAdj));size>=18;size--){
         const lines=wrapLines(course,courseWidth,`700 ${size}px ${profile.course}`);
         if(lines.length<=2 && lines.every(line=>ctx.measureText(line).width<=courseWidth)){lines.forEach((line,i)=>drawCentered(line,courseY+(i-(lines.length-1)/2)*(size+3),size,profile.course,mainTextColor,"700",courseWidth));found=true;break;}
       }
@@ -1570,6 +1569,29 @@
     // La posizione scelta dal docente non impedisce l’esportazione.
   }
 
+  function logoRect(logo){const w=180*logo.scale/100,h=w*logo.image.naturalHeight/logo.image.naturalWidth;return {x:logo.x-w/2,y:logo.y-h/2,w,h};}
+  function updateLayoutNotice(){
+    const notice=$("layoutNotice");if(!notice)return;
+    const intersects=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+    const problems=[...new Set(layoutWarnings)];
+    state.logos.forEach((logo,i)=>{if(!logo.image)return;const box=logoRect(logo);
+      if(box.x<0||box.y<0||box.x+box.w>W||box.y+box.h>H)problems.push(`Logo ${i+1}: oltre il bordo del foglio.`);
+      if(textBounds.some(t=>intersects(box,t)))problems.push(`Logo ${i+1}: possibile sovrapposizione con un testo.`);
+      if(state.logos.slice(0,i).some(l=>l.image&&intersects(box,logoRect(l))))problems.push(`Logo ${i+1}: sovrapposizione con un altro logo.`);
+    });
+    notice.textContent=problems.join(" • ");notice.classList.toggle("hidden",!problems.length);
+  }
+  let logoDrag=null;
+  function previewPoint(e){const rect=canvas.getBoundingClientRect(),scale=Math.min(rect.width/W,rect.height/H);return {x:(e.clientX-rect.left-(rect.width-W*scale)/2)/scale,y:(e.clientY-rect.top-(rect.height-H*scale)/2)/scale};}
+  canvas.addEventListener("pointerdown",e=>{
+    if(!$('dragLogos').checked||!state.initialized||state.exporting||pendingEditorOperations||e.button!==0||logoDrag)return;
+    const point=previewPoint(e);let i=-1;for(let j=state.logos.length-1;j>=0;j--){const l=state.logos[j];if(!l.image)continue;const b=logoRect(l);if(point.x>=b.x&&point.x<=b.x+b.w&&point.y>=b.y&&point.y<=b.y+b.h){i=j;break;}}
+    if(i<0)return;state.activeLogoIndex=i;syncLogoControls();const logo=state.logos[i];if(logo.locked){setStatus("Logo bloccato: sbloccalo per spostarlo");return;}
+    e.preventDefault();canvas.setPointerCapture(e.pointerId);logoDrag={id:e.pointerId,logo,dx:point.x-logo.x,dy:point.y-logo.y};
+  });
+  canvas.addEventListener("pointermove",e=>{if(!logoDrag||logoDrag.id!==e.pointerId||logoDrag.logo.locked||state.exporting||pendingEditorOperations)return;e.preventDefault();const p=previewPoint(e),l=logoDrag.logo;l.x=Math.max(0,Math.min(W,p.x-logoDrag.dx));l.y=Math.max(0,Math.min(H,p.y-logoDrag.dy));syncLogoControls();queueSliderRender(false);});
+  for(const event of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(event,e=>{if(logoDrag?.id===e.pointerId){logoDrag=null;queueSliderRender(true);}});
+  $("dragLogos").addEventListener("change",()=>canvas.classList.toggle("drag-enabled",$("dragLogos").checked));
   function drawLogos() {
     state.logos.forEach(logo => {
       if (!logo || !logo.image) return;
@@ -1686,6 +1708,24 @@
     };
     input.addEventListener("input",()=>apply(false));
     input.addEventListener("change",()=>apply(true));
+    const label=input.closest("label"), tools=document.createElement("div");
+    tools.className="precision-controls";label.insertAdjacentElement("afterend",tools);
+    const caption=label.querySelector("span")?.firstChild?.textContent?.trim()||id;
+    const number=document.createElement("input");number.type="number";number.min=input.min;number.max=input.max;number.step=input.step||"1";number.setAttribute("aria-label",`${caption} in percentuale`);number.inputMode="decimal";
+    const button=(text,title,fn)=>{const b=document.createElement("button");b.type="button";b.className="button secondary small";b.textContent=text;b.setAttribute("aria-label",`${title}: ${caption}`);b.addEventListener("click",fn);return b;};
+    const commit=value=>{if(!state.initialized||state.exporting||pendingEditorOperations||input.disabled||!allowed())return;if(!Number.isFinite(value))return;input.value=String(Math.round(value*1000)/1000);apply(true);syncPrecisionControls();};
+    const minus=button("−","Diminuisci",()=>commit(Number(input.value)-Number(number.step))),plus=button("+","Aumenta",()=>commit(Number(input.value)+Number(number.step)));
+    const reset=button("↺","Ripristina",()=>commit(Number(input.defaultValue)));
+    number.addEventListener("change",()=>{commit(number.valueAsNumber);syncPrecisionControls();});
+    number.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();number.blur();}});
+    tools.append(minus,number,plus,reset);precisionControls.set(id,{input,number,minus,plus,reset,allowed});
+  }
+  function syncPrecisionControls(){
+    for(const {input,number,minus,plus,reset,allowed} of precisionControls.values()){
+      const disabled=input.disabled||!allowed()||state.exporting||!!pendingEditorOperations;
+      if(document.activeElement!==number)number.value=input.value;
+      for(const el of [number,minus,plus,reset])el.disabled=disabled;
+    }
   }
   function render({visualOnly=false}={}) {
     if (pendingPreviewFrame) { cancelAnimationFrame(pendingPreviewFrame); pendingPreviewFrame = 0; visualOnly=false; }
@@ -1700,6 +1740,8 @@
     if (showGrid) drawPreviewGrid(); // Solo anteprima, mai nel PDF o nel PNG.
     if (showGuides) drawSafetyGuides(); // Solo anteprima, mai nel PDF o nel PNG.
     syncQuickFromEditor();
+    syncPrecisionControls();
+    updateLayoutNotice();
     if(state.initialized&&quickTemplateKey()!==lastTemplateLookupKey)void refreshQuickTemplateInfo();
     if (state.initialized && !state.exporting && !visualOnly) scheduleAutosave();
   }
@@ -1841,20 +1883,20 @@
 
   async function composePage(includeUnsupported=false) {
     await ensureActivePhoto();
-    // Disegno nativo a 600 DPI, senza ingrandire l'anteprima. Testi separati nel PDF.
-    const {outputW:outW, outputH:outH} = pageSize();
+    // Disegno nativo ai DPI scelti, senza ingrandire l'anteprima. Testi separati nel PDF.
+    const {outputW:outW, outputH:outH} = exportSize();
     const high = document.createElement("canvas");
     const previous = ctx;
     try {
       high.width = outW; high.height = outH;
       ctx = high.getContext("2d", { alpha: false });
-      if (!ctx) throw new Error("Memoria insufficiente per la grafica a 600 DPI");
+      if (!ctx) throw new Error("Memoria insufficiente per la grafica: seleziona una qualità inferiore");
       ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
       ctx.scale(outW / W, outH / H);
       drawGraphics();
       if(includeUnsupported){rasterUnsupportedOnly=true;try{drawTextLayout();}finally{rasterUnsupportedOnly=false;}}
       ctx = previous;
-      const blob = await new Promise((resolve,reject)=>high.toBlob(b=>b&&b.size?resolve(b):reject(new Error("Impossibile creare la grafica a 600 DPI. Chiudi le altre app e riprova.")),"image/jpeg",.98));
+      const blob = await new Promise((resolve,reject)=>high.toBlob(b=>b&&b.size?resolve(b):reject(new Error("Impossibile creare la grafica. Riduci i DPI o chiudi le altre app.")),"image/jpeg",.98));
       if(blob.type !== "image/jpeg") throw new Error("Formato grafico PDF non disponibile");
       high.width=high.height=1; // rilascia ~133 MiB prima di leggere il JPEG
       return new Uint8Array(await blob.arrayBuffer());
@@ -1875,14 +1917,16 @@
     const ops=collected||collectPageText();
     const unsupported=ops.some(op=>!window.K9PDF.canEncode(op.text));
     const jpg=unsupported?await composePage(true):sharedGraphics||await composePage();
-    const {outputW,outputH}=pageSize();
+    const {outputW,outputH}=exportSize();
     return {image:jpg,width:outputW,height:outputH,stageWidth:W,stageHeight:H,orientation:currentOrientation(),texts:ops.filter(op=>window.K9PDF.canEncode(op.text))};
   }
 
+  $("exportQuality").addEventListener("change",()=>{invalidateReadyBatch();try{localStorage.setItem("k9-export-dpi",String(exportDpi()));}catch{}});
   function invalidateReadyBatch() {
     if (lastBatchUrl) { URL.revokeObjectURL(lastBatchUrl); lastBatchUrl = null; }
     $("readyBatchLink").classList.add("hidden");
     $("readyBatchLink").removeAttribute("href");
+    $("readyBatchLink").onclick=null;
     const quickBatch = $("quickReadyBatchLink");
     if (quickBatch) {quickBatch.classList.add("hidden");quickBatch.removeAttribute("href");quickBatch.onclick = null;}
   }
@@ -1937,12 +1981,12 @@
       if (problems.length) throw new Error(problems[0]);
       const code=$("certificateCode").value.trim();
       if (!(await verifyCodes([code]))) {setStatus("Esportazione annullata");return;}
-      setStatus("Preparazione PNG 600 DPI…");
+      setStatus(`Preparazione PNG ${exportDpi()} DPI…`);
       high = document.createElement("canvas");
-      const {outputW, outputH} = pageSize();
+      const {outputW, outputH} = exportSize();
       high.width = outputW; high.height = outputH;
       ctx = high.getContext("2d", {alpha:false});
-      if (!ctx) throw new Error("Memoria insufficiente per il PNG a 600 DPI");
+      if (!ctx) throw new Error("Memoria insufficiente per il PNG: seleziona una qualità inferiore");
       ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
       ctx.scale(high.width/W,high.height/H);
       pdfTextOps = null;
@@ -1953,8 +1997,8 @@
       pdfTextOps = oldOps;
       const blob = await new Promise((resolve,reject) => high.toBlob(b=>b ? resolve(b) : reject(new Error("Esportazione PNG non disponibile")), "image/png"));
       high.width=1;high.height=1;
-      offerDownload(await insertPngDpi(blob), `${certificateFilename(code, safeFilename())}.png`);
-      setStatus("PNG 600 DPI pronto");
+      offerDownload(await insertPngDpi(blob,exportDpi()), `${certificateFilename(code, safeFilename())}.png`);
+      setStatus(`PNG ${exportDpi()} DPI pronto`);
       await registerExport([{name:$("recipientName").value.trim(),course:$("courseName").value.trim(),code,certificateDate:$("certificateDate").value,format:"PNG"}]);
     } catch (err) {console.error(err);setStatus(err.message || "Errore PNG");}
     finally {
@@ -1968,12 +2012,12 @@
     if (!beginExport()) return;
     try {
       await ensureActivePhoto();
-      setStatus("Creazione PDF Ultra HD…");
+      setStatus(`Creazione PDF ${exportDpi()} DPI…`);
       const ops=collectPageText(),code=$("certificateCode").value.trim();
       if (!(await verifyCodes([code]))) {setStatus("Esportazione annullata");return;}
       const page=await recordPage(null,ops);
       offerDownload(window.K9PDF.create([page]), `${certificateFilename(code, safeFilename())}.pdf`);
-      setStatus("PDF A4 Ultra HD creato");
+      setStatus(`PDF A4 ${exportDpi()} DPI creato`);
       await registerExport([{name:$("recipientName").value.trim(),course:$("courseName").value.trim(),code,certificateDate:$("certificateDate").value,format:"PDF"}]);
     } catch (err) { console.error(err); setStatus(err.message || "Errore PDF"); }
     finally { endExport(); render({visualOnly:true});if(dirty)scheduleAutosave(); }
@@ -2012,7 +2056,21 @@
     warnings.textContent = notes.join(" · ");
   }
 
-  async function downloadBatch() {
+  // ZIP non compresso: i PDF contengono già JPEG compressi. Nessuna libreria o rete.
+  async function buildZip(files){
+    const encoder=new TextEncoder(),table=Uint32Array.from({length:256},(_,n)=>{for(let i=0;i<8;i++)n=(n>>>1)^((n&1)?0xedb88320:0);return n>>>0;});
+    const parts=[],central=[];let offset=0,centralSize=0;
+    const header=(size)=>{const bytes=new Uint8Array(size);return {bytes,v:new DataView(bytes.buffer)};};
+    for(const file of files){const name=encoder.encode(file.name),data=new Uint8Array(await file.blob.arrayBuffer());let crc=0xffffffff;for(const b of data)crc=(crc>>>8)^table[(crc^b)&255];crc=(crc^0xffffffff)>>>0;
+      const l=header(30);l.v.setUint32(0,0x04034b50,true);l.v.setUint16(4,20,true);l.v.setUint16(6,0x800,true);l.v.setUint16(12,33,true);l.v.setUint32(14,crc,true);l.v.setUint32(18,data.length,true);l.v.setUint32(22,data.length,true);l.v.setUint16(26,name.length,true);
+      const c=header(46);c.v.setUint32(0,0x02014b50,true);c.v.setUint16(4,20,true);c.v.setUint16(6,20,true);c.v.setUint16(8,0x800,true);c.v.setUint16(14,33,true);c.v.setUint32(16,crc,true);c.v.setUint32(20,data.length,true);c.v.setUint32(24,data.length,true);c.v.setUint16(28,name.length,true);c.v.setUint32(42,offset,true);
+      parts.push(l.bytes,name,file.blob);central.push(c.bytes,name);offset+=30+name.length+data.length;centralSize+=46+name.length;
+      if(offset>128*1024*1024)throw new Error("ZIP troppo pesante: riduci i DPI o dividi i corsisti in gruppi.");
+    }
+    const end=header(22);end.v.setUint32(0,0x06054b50,true);end.v.setUint16(8,files.length,true);end.v.setUint16(10,files.length,true);end.v.setUint32(12,centralSize,true);end.v.setUint32(16,offset,true);
+    return new Blob([...parts,...central,end.bytes],{type:"application/zip"});
+  }
+  async function downloadBatch(individual=false) {
     if (state.exporting) return;
     const names = parseBatchNames($("batchNames").value);
     if (!names.length) { setStatus("Inserisci almeno un corsista"); return; }
@@ -2032,46 +2090,54 @@
       // La grafica delle pagine è identica: la preparo una volta sola.
       // Nominali e codici rimangono testo PDF indipendente per pagina.
       const codes=names.map(name=>automatic ? automaticCode(name) : oldCode.trim());
+      if(automatic){const used=new Set();for(let i=0;i<codes.length;i++){if(used.has(normalizedCode(codes[i]))){const replacement=prompt(`Stesse iniziali per ${names[i]}. Modifica il codice se necessario (nessun progressivo automatico).`,codes[i]);if(replacement===null)return;codes[i]=replacement.trim();}used.add(normalizedCode(codes[i]));}}
       const batchFilename=automatic?`K9_${disciplineCode()}_${certificateDateCode()}_corsisti.pdf`:`${certificateFilename(oldCode.trim(),"K9_certificati")}_corsisti.pdf`;
-      if(codes.some(code=>!code))throw new Error("Inserisci il codice identificativo manuale prima di esportare");
+      if(codes.some(code=>!code||code.length>160))throw new Error("Codice identificativo mancante o troppo lungo (massimo 160 caratteri)");
       const allOps=[];
       for(let i=0;i<names.length;i++){
-        $("recipientName").value=names[i];$("certificateCode").value=codes[i];
+        $("recipientName").value=names[i];batchCodeOverride=codes[i];$("certificateCode").value=codes[i];
         try{allOps.push(collectPageText());}catch(err){throw new Error(`Corsista ${i+1} (${names[i]}): ${err.message}`);}
       }
       if (!(await verifyCodes(codes))) {setStatus("Esportazione annullata");return;}
-      $("recipientName").value=names[0];$("certificateCode").value=codes[0];
+      $("recipientName").value=names[0];batchCodeOverride=codes[0];$("certificateCode").value=codes[0];
       const sharedGraphics=allOps.some(ops=>ops.every(op=>window.K9PDF.canEncode(op.text)))?await composePage():null;
       for (let i = 0; i < names.length; i++) {
         $("recipientName").value = names[i];
-        $("certificateCode").value = codes[i];
+        batchCodeOverride=codes[i];$("certificateCode").value = codes[i];
         setStatus(`Pagina ${i + 1}/${names.length}`);
         const page=await recordPage(sharedGraphics,allOps[i]);
         if(!seenRasters.has(page.image)){seenRasters.add(page.image);uniqueRasterBytes+=page.image.byteLength;}
-        if(uniqueRasterBytes>96*1024*1024)throw new Error("PDF multipagina troppo pesante per un’unica esportazione: dividi l’elenco in gruppi più piccoli. La qualità resta 600 DPI.");
+        if(uniqueRasterBytes>96*1024*1024)throw new Error("PDF multipagina troppo pesante per un’unica esportazione: dividi l’elenco in gruppi più piccoli. Oppure seleziona una qualità inferiore.");
         pages.push(page);
         // Cede il controllo all'interfaccia (soprattutto su smartphone).
         await new Promise(resolve => setTimeout(resolve, 0));
       }
-      const pdf = window.K9PDF.create(pages);
+      let pdf;
+      if(individual){const filenames=new Set(),files=[];let totalPdfBytes=0;for(let i=0;i<pages.length;i++){
+        let stem=certificateFilename(codes[i],`K9_${names[i]}`),name=`${stem}.pdf`;
+        if(filenames.has(name.toLowerCase())){stem+=`_${safeProjectName(names[i])}`;name=`${stem}.pdf`;}
+        let suffix=2;while(filenames.has(name.toLowerCase()))name=`${stem}_${suffix++}.pdf`;
+        filenames.add(name.toLowerCase());const blob=window.K9PDF.create([pages[i]]);totalPdfBytes+=blob.size;if(totalPdfBytes>120*1024*1024)throw new Error("ZIP troppo pesante: riduci i DPI o dividi i corsisti in gruppi.");files.push({name,blob});
+      }pdf=await buildZip(files);}else pdf=window.K9PDF.create(pages);
       invalidateReadyBatch();
       lastBatchUrl = URL.createObjectURL(pdf);
       const ready = $("readyBatchLink");
       ready.href = lastBatchUrl;
-      ready.download = batchFilename;
+      ready.download = individual?batchFilename.replace(/\.pdf$/i,".zip"):batchFilename;
+      ready.textContent=individual?"Scarica ZIP dei PDF individuali":"Scarica PDF multipagina pronto";
       ready.classList.remove("hidden");
       const quickReady = $("quickReadyBatchLink");
-      if (quickReady) {quickReady.href = ready.href;quickReady.download = ready.download;quickReady.classList.remove("hidden");}
-      const entries=names.map((name,i)=>({name,course:$("courseName").value.trim(),code:codes[i],certificateDate:$("certificateDate").value,format:"PDF multipagina"}));
+      if (quickReady) {quickReady.href = ready.href;quickReady.download = ready.download;quickReady.textContent=ready.textContent;quickReady.classList.remove("hidden");}
+      const entries=names.map((name,i)=>({name,course:$("courseName").value.trim(),code:codes[i],certificateDate:$("certificateDate").value,dpi:exportDpi(),format:individual?"PDF individuale (ZIP)":"PDF multipagina"}));
       let registered = false;
       const recordOnce = () => {if (!registered) {registered = true;void registerExport(entries).then(ok=>{if(!ok)registered=false;});}};
       ready.onclick = recordOnce;
       if (quickReady) quickReady.onclick = recordOnce;
-      setStatus(`PDF pronto: ${names.length} pagine. Tocca Scarica.`);
+      setStatus(`${individual?"ZIP pronto":"PDF pronto"}: ${names.length} certificati. Tocca Scarica.`);
     } catch (err) { console.error(err); setStatus(`PDF non creato: ${err.message}`); }
     finally {
       try {
-        $("recipientName").value = oldName;
+        batchCodeOverride=null;$("recipientName").value = oldName;
         $("certificateCode").value = oldCode;
         // Mantiene valido il link del PDF multipagina già generato.
         render();
@@ -2157,7 +2223,7 @@
   });
 
   $("removeLogo").addEventListener("click", () => {
-    if (!getActiveLogo()) return;
+    if (!getActiveLogo() || getActiveLogo().locked) return;
     const removedNumber = state.activeLogoIndex + 1;
     state.logos.splice(state.activeLogoIndex, 1);
     if (!state.logos.length) {
@@ -2311,7 +2377,7 @@
     // Impedisce l'azzeramento durante la registrazione di un PDF multipagina.
     pendingEditorOperations++;
     try {
-      await writeArchiveAtomically([],[],records.map(record=>({...record,id:`e_${newToken()}`,exportedAt:new Date().toISOString()})));
+      await writeArchiveAtomically([],[],records.map(record=>({...record,delivery:"download_requested",dpi:record.dpi||exportDpi(),id:`e_${newToken()}`,exportedAt:new Date().toISOString()})));
       await refreshExports();return true;
     } catch(error) {console.warn("Esportazione avvenuta, ma registrazione non riuscita",error);setStatus("Documento creato, ma registro non aggiornato");return false;}
     finally {pendingEditorOperations--;if(dirty&&!state.exporting)scheduleAutosave();}
@@ -2322,7 +2388,9 @@
       const items=(await allExports()).sort((a,b)=>String(b.exportedAt).localeCompare(String(a.exportedAt)));
       target.textContent=items.length ? `${items.length} esportazioni registrate su questo dispositivo` : "Nessuna esportazione registrata";
       const list=$("exportsList"); list.replaceChildren();
-      for (const item of items.slice(0,8)) {
+      const query=$("registrySearch").value.trim().toLocaleLowerCase("it-IT");
+      const filtered=items.filter(item=>!query||[item.name,item.code,item.course,item.certificateDate].some(v=>String(v||"").toLocaleLowerCase("it-IT").includes(query)));
+      for (const item of filtered.slice(0,query?100:8)) {
         const li=document.createElement("li");
         li.textContent=`${new Date(item.exportedAt).toLocaleDateString("it-IT")} · ${item.name || "Senza nome"} · ${item.code || "Senza codice"}`;
         list.appendChild(li);
@@ -2334,15 +2402,16 @@
       const items=await allExports();
       if (!items.length) {setStatus("Nessuna esportazione da registrare");return;}
       const esc=v=>{let t=String(v??"");if (/^[\s\uFEFF]*[=+@-]|^[\t\r\n]/.test(t)) t="'"+t;return `"${t.replace(/"/g,'""')}"`;};
-      const header=["Data esportazione","Corsista","Corso","Codice","Data attestato","Formato"];
+      const header=["Data esportazione","Corsista","Corso","Codice","Data attestato","Formato","DPI","Consegna"];
       const lines=[header.map(esc).join(";")];
       items.sort((a,b)=>String(a.exportedAt).localeCompare(String(b.exportedAt))).forEach(item=>{
-        lines.push([item.exportedAt,item.name,item.course,item.code,item.certificateDate,item.format].map(esc).join(";"));
+        lines.push([item.exportedAt,item.name,item.course,item.code,item.certificateDate,item.format,item.dpi||"",item.delivery==="download_requested"?"Download richiesto (salvataggio non verificabile)":"Storico"].map(esc).join(";"));
       });
       offerDownload(new Blob(["\uFEFF",lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),`K9_registro_esportazioni_${todayISO()}.csv`);
       setStatus("Registro CSV esportato: contiene dati personali");
     } catch(error) {console.error(error);setStatus("Impossibile esportare il registro");}
   }
+  $("registrySearch").addEventListener("input",()=>void refreshExports());
   $("exportRegistry").addEventListener("click",exportRegistryCSV);
   async function clearRegistry() {
     if (!state.initialized || state.exporting || pendingEditorOperations) {
@@ -2368,6 +2437,22 @@
   }
   $("clearRegistry").addEventListener("click",clearRegistry);
 
+  let undoStack=[],redoStack=[],undoTimer=0,undoRestoring=false,undoProject=null;
+  const undoBlobIds=new WeakMap();let undoBlobSeq=0;
+  function undoKey(item){return JSON.stringify({...item,updatedAt:null,name:null,activeLogoIndex:null,form:{...item.form,certificateCode:item.autoCertificateCode?null:item.form.certificateCode}},(_,v)=>{if(v instanceof Blob){if(!undoBlobIds.has(v))undoBlobIds.set(v,++undoBlobSeq);return `blob:${undoBlobIds.get(v)}`;}return v;});}
+  function updateUndoButtons(){if(!$("undoEdit"))return;$("undoEdit").disabled=undoStack.length<2||state.exporting||undoRestoring;$("redoEdit").disabled=!redoStack.length||state.exporting||undoRestoring;}
+  function resetUndo(){clearTimeout(undoTimer);undoProject=state.currentProjectId;undoStack=[snapshot("__workspace__",lastSavedProjectName)];redoStack=[];updateUndoButtons();}
+  function captureUndo(){clearTimeout(undoTimer);if(!state.initialized||undoRestoring||state.exporting)return;if(undoProject!==state.currentProjectId||!undoStack.length){resetUndo();return;}const item=snapshot("__workspace__",lastSavedProjectName);if(undoKey(item)===undoKey(undoStack.at(-1)))return;undoStack.push(item);redoStack=[];
+    const total=()=>{const seen=new Set();for(const x of undoStack)for(const b of [x.background?.blob,x.personalFrame?.blob,x.leftSignature,x.rightSignature,x.thirdSignature,...x.logos.map(l=>l.blob)])if(b)seen.add(b);return [...seen].reduce((n,b)=>n+b.size,0);};
+    while(undoStack.length>2&&(undoStack.length>16||total()>64*1024*1024))undoStack.shift();updateUndoButtons();}
+  function scheduleUndoCapture(){if(undoRestoring||!state.initialized)return;clearTimeout(undoTimer);undoTimer=setTimeout(captureUndo,350);}
+  async function undoEdit(redo=false){
+    if(state.exporting||pendingEditorOperations||recoveryBlocked)return;captureUndo();if(redo?!redoStack.length:undoStack.length<2)return;
+    const target=redo?redoStack.at(-1):undoStack.at(-2);undoRestoring=true;pendingEditorOperations++;setEditorBusy(true);updateUndoButtons();
+    try{await restoreSnapshot(target);invalidateReadyBatch();if(redo)undoStack.push(redoStack.pop());else redoStack.push(undoStack.pop());setStatus(redo?"Modifica ripristinata":"Ultima modifica annullata");}
+    catch(error){setStatus(error.message,"warning");}finally{undoRestoring=false;pendingEditorOperations--;setEditorBusy(false);updateUndoButtons();scheduleAutosave();}
+  }
+  $("undoEdit").addEventListener("click",()=>void undoEdit());$("redoEdit").addEventListener("click",()=>void undoEdit(true));
   function snapshot(id = "__workspace__", name = "") {
     const form = {};
     formIds.forEach(key => form[key] = $(key).value);
@@ -2436,6 +2521,8 @@
   }
   function scheduleAutosave(delay=250) {
     if (!state.initialized || state.exporting || recoveryBlocked) return;
+    syncPrecisionControls();
+    scheduleUndoCapture();
     dirty=true;
     ++savedRevision; // un nuovo input non può essere marcato salvato da una scrittura precedente
     setSaveIndicator(state.currentProjectId ? "Salvataggio progetto…" : "Salvataggio lavoro…", "saving");
@@ -2499,7 +2586,7 @@
       state.themeBackgroundLocked = data.form.themeBackgroundLocked === true;
       state.frameLocked = data.form.frameLocked === true;
       state.backgroundImage=assets.background;state.backgroundBlob=assets.background?data.background.blob:null;
-      state.backgroundScale=goodNumber(data.background?.scale,100,50,180);
+      state.backgroundScale=goodNumber(data.background?.scale,100,25,300);
       state.backgroundOpacity=goodNumber(data.background?.opacity,100,0,100);
       state.backgroundX=goodNumber(data.background?.x,W/2,0,W);state.backgroundY=goodNumber(data.background?.y,H/2,0,H);
       state.backgroundLocked=!!(assets.background && data.background.locked);
@@ -2518,6 +2605,7 @@
       $("autoCertificateCode").checked=data.autoCertificateCode!==false;
       syncAutomaticCode();updateBatchCount();syncAllControls();saveSettings();render({visualOnly:true});
     } finally {state.initialized=wasInitialized;}
+    if(!undoRestoring&&wasInitialized)resetUndo();
   }
 
   function syncAllControls() {
@@ -2570,8 +2658,9 @@
       if(duplicate)data.importSourceKey=null;
       await writeCurrentProjects([data,{...data,id:"__workspace__"}], duplicate || !state.currentProjectId ? new Set([id]) : new Set(),dirty);
       void refreshStorageInfo();
-      state.currentProjectId = id;
+      const changedProject=state.currentProjectId!==id;state.currentProjectId = id;
       state.importSourceKey=data.importSourceKey;
+      if(changedProject)resetUndo();
       lastSavedProjectName = name;
       await refreshProjectList();
       $("projectSelector").value = id;
@@ -3217,7 +3306,7 @@
 
   $("batchNames").addEventListener("input", ()=>{updateBatchCount();scheduleAutosave();});
   $("autoCertificateCode").addEventListener("change",()=>{syncAutomaticCode();saveSettings();render();});
-  $("downloadBatch").addEventListener("click", downloadBatch);
+  $("downloadBatch").addEventListener("click", () => downloadBatch(false));
   $("saveProject").addEventListener("click", guardAsync(() => saveProject(false)));
   $("duplicateProject").addEventListener("click", guardAsync(() => saveProject(true)));
   $("openProject").addEventListener("click", guardAsync(openProject));
@@ -3332,6 +3421,8 @@
     $("batchNames").value = e.target.value;
     updateBatchCount();scheduleAutosave();
   });
+  $("downloadIndividual").addEventListener("click",()=>downloadBatch(true));
+  $("quickDownloadIndividual").addEventListener("click",()=>{$("batchNames").value=$("quickBatchNames").value;downloadBatch(true);});
   $("quickDownloadBatch").addEventListener("click", () => {$("batchNames").value = $("quickBatchNames").value;downloadBatch();});
   $("batchNames").addEventListener("input", () => {$("quickBatchNames").value = $("batchNames").value;});
   function orientedTemplateKey(discipline, orientation=currentOrientation()) {
@@ -3405,6 +3496,7 @@
     $("togglePreviewGrid").setAttribute("aria-pressed", String(showGrid));
     $("togglePreviewGrid").textContent = showGrid ? "Griglia attiva" : "Griglia";
     loadSettings();
+    await restoreSignatureFont();
     $("leftSignatureMode").value = "auto";
     $("signatureMode").value = "auto";
     let archiveAvailable=false;
@@ -3419,7 +3511,9 @@
       await refreshProjectList();archiveAvailable=true;
     }catch(e){recoveryBlocked=true;console.warn("Archivio locale non disponibile",e);setStatus("Archivio non disponibile: usa backup JSON","warning");}
     state.initialized = true;
+    try{const dpi=localStorage.getItem("k9-export-dpi");if(["150","300","600"].includes(dpi))$("exportQuality").value=dpi;}catch{}
     syncAllControls();
+    resetUndo();
     $("quickBatchNames").value = $("batchNames").value;
     try {setEditorMode(localStorage.getItem("k9-certificati-editor-mode") || "quick", false);} catch {setEditorMode("quick", false);}
     render({visualOnly:true});
@@ -3428,7 +3522,7 @@
     await refreshExports();
     void refreshStorageInfo();
     setSaveIndicator(archiveAvailable&&!recoveryBlocked ? "Archivio locale pronto" : "Archivio protetto: recupero necessario", archiveAvailable&&!recoveryBlocked ? "" : "error");
-    setEditorBusy(false);
+    setEditorBusy(false);syncPrecisionControls();
   }
   initialize().catch(error=>{console.error(error);recoveryBlocked=true;state.initialized=true;setEditorBusy(false);setStatus("Avvio non riuscito: archivio protetto, esporta un backup se necessario","warning");});
 
