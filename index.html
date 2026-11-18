@@ -7,10 +7,10 @@
   <meta name="description" content="Generatore semplice di attestati e certificati K9">
   <title>K9 Certificati</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=4.9.17-a4-personal">
+  <link rel="stylesheet" href="css/style.css?v=4.9.18-clean-studio">
 </head>
 <body class="mode-quick">
-  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.17-a4-personal</h1>
+  <h1 class="visually-hidden">K9 Certificati · Studio 4.9.18-clean-studio</h1>
   <main class="layout">
     <section class="preview-panel preview-fixed" aria-label="Anteprima certificato sempre visibile">
       <div class="canvas-wrap">
@@ -75,7 +75,7 @@
           <small>Un modello conserva formato A4, grafica, loghi, firme e testi. Caricandolo mantieni il nominativo e la data attuali.</small>
         </div>
         <div class="quick-pdf-actions">
-          <button id="quickDownloadPdf" type="button" class="button primary">Crea PDF attestato</button>
+          
           <button id="quickOpenBatch" type="button" class="button secondary">Più corsisti</button>
         </div>
         <details class="quick-batch" id="quickBatchPanel">
@@ -166,35 +166,39 @@
           <p class="mini-heading">Archivio sfondi grafici · pronti da caricare<span id="studioVersion"></span></p>
           <div class="layer-controls">
             <label for="frameStyle"><strong>1. Cornice indipendente</strong></label>
-            <select id="frameStyle"><option value="none">Senza cornice</option></select>
+            <div class="frame-filters">
+              <label>Disciplina <select id="frameDiscipline"><option>Mantrailing</option><option>HRDD</option><option>Detection</option><option>Dogsitter</option></select></label>
+              <label>Collezione <select id="frameCollection"><option value="all">Tutte</option><option value="duo">A4 Duo</option><option value="legacy">Storiche</option></select></label>
+            </div>
+            <select id="frameStyle" aria-label="Modello cornice"><option value="none">Senza cornice</option></select>
             <button id="loadPersonalFrame" class="button secondary" type="button">Carica cornice personale dalla galleria</button>
             <input id="personalFrameFile" type="file" accept="image/png,image/webp,.png,.webp" hidden>
             <small id="personalFrameInfo" aria-live="polite">Nessuna cornice personale caricata</small>
-            <button id="fitPersonalFrame" class="button ghost small" type="button" disabled>Adatta a foglio A4</button>
-            <small>PNG o WebP con centro trasparente, massimo 15 MB. Adattamento proporzionale automatico, senza ritagli; per coprire tutti i margini scegli lo stesso orientamento del foglio.</small>
+            
+            <small>PNG o WebP con centro ampiamente trasparente, massimo 15 MB. Adattamento proporzionale automatico, senza ritagli; per coprire tutti i margini scegli lo stesso orientamento del foglio.</small>
             <div class="two-buttons" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
               <button id="prevFrame" class="button secondary small" type="button" aria-label="Cornice precedente della disciplina">← Precedente</button>
               <button id="nextFrame" class="button secondary small" type="button" aria-label="Cornice successiva della disciplina">Successiva →</button>
             </div>
-            <small class="help-text">Le cornici A4 Duo seguono automaticamente il formato verticale o orizzontale.</small>
-            <small id="frameNavStatus">Seleziona una cornice per scorrere la disciplina corrente</small>
+            <small class="help-text">A4 Duo: segue l’orientamento del foglio. I filtri non cambiano la cornice applicata.</small>
+            <small id="frameNavStatus">Scegli una cornice o usa Precedente / Successiva</small>
             <div class="two-buttons">
               <button id="removeFrame" class="button ghost small" type="button">Elimina solo cornice</button>
-              <button id="lockFrameLayer" class="button lock-button" type="button" aria-pressed="false" aria-controls="frameStyle frameOpacity resetFrameOpacity prevFrame nextFrame removeFrame loadPersonalFrame personalFrameFile fitPersonalFrame">Blocca cornice</button>
+              <button id="lockFrameLayer" class="button lock-button" type="button" aria-pressed="false" aria-controls="frameDiscipline frameCollection frameStyle frameOpacity prevFrame nextFrame removeFrame loadPersonalFrame personalFrameFile">Blocca cornice</button>
             </div>
             <label class="range-row">
               <span>Opacità cornice <output id="frameOpacityValue" for="frameOpacity">100%</output></span>
               <input id="frameOpacity" type="range" min="0" max="100" step="1" value="100" aria-describedby="frameOpacityHelp">
             </label>
-            <small id="frameOpacityHelp">0% invisibile · 100% originale. Il fondale, i testi, i loghi e le firme non cambiano.</small>
-            <button id="resetFrameOpacity" class="button ghost small" type="button" disabled>Ripristina opacità cornice</button>
+            <small id="frameOpacityHelp">0% invisibile · 100% originale (ripristino). Il fondale, i testi, i loghi e le firme non cambiano.</small>
+            
             <div class="layer-divider"></div>
             <strong>2. Sfondo indipendente</strong>
             <small>Sfondo attivo: <b id="backgroundThemeName">Classico</b></small>
             <input id="themeBackgroundId" type="hidden" value="classic">
             <div class="two-buttons">
               <button id="removeThemeBackground" class="button ghost small" type="button">Elimina solo fondale del tema</button>
-              <button id="lockThemeBackground" class="button lock-button" type="button" aria-pressed="false" aria-controls="themeSearch themeBackgroundOpacity resetThemeBackgroundOpacity removeThemeBackground locateTheme">Blocca sfondo</button>
+              <button id="lockThemeBackground" class="button lock-button" type="button" aria-pressed="false" aria-controls="themeSearch themeBackgroundOpacity removeThemeBackground locateTheme">Blocca sfondo</button>
             </div>
             <small>Seleziona un fondale dall'archivio. La cornice scelta rimane invariata, anche se assente.</small>
           </div>
@@ -207,8 +211,8 @@
             <span>Opacità fondale selezionato <output id="themeBackgroundOpacityValue" for="themeBackgroundOpacity">100%</output></span>
             <input id="themeBackgroundOpacity" type="range" min="0" max="100" step="1" value="100" aria-describedby="themeOpacityHelp">
           </label>
-          <small id="themeOpacityHelp">0% nasconde il fondale; 100% mantiene l'aspetto originale. Cornice, testi, loghi e firme restano invariati.</small>
-          <button id="resetThemeBackgroundOpacity" class="button ghost small" type="button" disabled>Ripristina sfondo del tema</button>
+          <small id="themeOpacityHelp">0% nasconde il fondale; 100% ripristina l'aspetto originale. Cornice, testi, loghi e firme restano invariati.</small>
+          
           <div class="theme-menus" id="themeGrid" role="group" aria-label="Archivio sfondi grafici da caricare"></div>
           <p id="themeEmpty" class="help-text hidden">Nessun fondale trovato. Cambia la ricerca.</p>
           <p class="help-text">Apri una disciplina e la sua sottocategoria, oppure una collezione generale, poi tocca uno sfondo per caricarlo nel progetto attuale; la cornice resta invariata: non crea nuovi progetti, non modifica nomi, loghi, firme o formato A4. L'anteprima mostra subito il risultato. Nessuna connessione necessaria.</p>
@@ -483,9 +487,9 @@
         <span class="step done">5</span>
         <div>
           <strong>Fatto</strong>
-          <p>Controlla l'anteprima e genera il PDF.</p>
+          <p>Scarica il PDF dal pulsante fisso sopra, oppure esporta il PNG qui.</p>
         </div>
-        <div class="finish-actions"><button id="downloadPdfBottom" class="button primary" type="button">Crea PDF</button><button id="downloadPng" class="button secondary" type="button">Esporta PNG 600 DPI</button></div>
+        <div class="finish-actions"><button id="downloadPng" class="button secondary" type="button">Esporta PNG 600 DPI</button></div>
       </section>
     </section>
   </main>
@@ -507,9 +511,9 @@
     <p>Ingrandisci con lo zoom del browser per controllare i dettagli. La griglia e le guide non vengono esportate.</p>
   </dialog>
 
-  <script src="js/pdf-vector.js?v=4.9.17-a4-personal"></script>
+  <script src="js/pdf-vector.js?v=4.9.18-clean-studio"></script>
   <script src="js/realistic-backgrounds.js?v=4.9.4"></script>
   <script src="js/premium-frames.js?v=4.9.17-a4-personal"></script>
-  <script src="js/app.js?v=4.9.17-a4-personal"></script>
+  <script src="js/app.js?v=4.9.18-clean-studio"></script>
 </body>
 </html>
