@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STUDIO_VERSION = "4.9.18-clean-studio";
+  const STUDIO_VERSION = "4.9.19-precision-controls";
   const FRAME_LIBRARY_VERSION = "4.9.17-a4-personal"; // asset invariati, versione indipendente
   const $ = id => document.getElementById(id);
   if ($("studioVersion")) $("studioVersion").textContent = ` · v${STUDIO_VERSION}`;
@@ -519,6 +519,15 @@
     $("logoUploadLabel").textContent = count ? "Carica un altro logo" : "Carica logo";
   }
 
+  function positionPercent(value, extent) {
+    return Math.max(0,Math.min(100,Math.round(value/extent*1000)/10));
+  }
+  function percentLabel(value) {return `${String(value).replace(".",",")}%`;}
+  function syncPositionRange(id, coordinate, extent) {
+    const value=positionPercent(coordinate,extent);
+    $(id).value=String(value);
+    $(`${id}Value`).value=percentLabel(value);
+  }
   function syncLogoControls() {
     const logo = getActiveLogo();
     if (!logo) {
@@ -528,12 +537,8 @@
     }
     $("logoScale").value = logo.scale;
     $("logoScaleValue").value = `${Math.round(logo.scale)}%`;
-    const xPct = Math.round((logo.x / W) * 100);
-    const yPct = Math.round((logo.y / H) * 100);
-    $("logoX").value = xPct;
-    $("logoY").value = yPct;
-    $("logoXValue").value = `${xPct}%`;
-    $("logoYValue").value = `${yPct}%`;
+    syncPositionRange("logoX",logo.x,W);
+    syncPositionRange("logoY",logo.y,H);
     $("logoTools").classList.remove("hidden");
     updateLogoManagerUI();
     applyLogoLockUI();
@@ -572,7 +577,7 @@
     const input=$("themeBackgroundOpacity");
     input.value=normalizeThemeOpacity(input.value);
     $("themeBackgroundOpacityValue").value=`${input.value}%`;
-    input.disabled=state.themeBackgroundLocked;
+    input.disabled=state.themeBackgroundLocked || activeBackgroundId()==="none";
 
   }
   function frameAlpha(){return Number(normalizeThemeOpacity($("frameOpacity").value))/100;}
@@ -601,7 +606,7 @@
     const locked = !!state.themeBackgroundLocked;
     ["themeSearch","themeBackgroundOpacity","removeThemeBackground","locateTheme"].forEach(id => {
       const el = $(id);
-      if (el) el.disabled = locked || (id==="removeThemeBackground" && activeBackgroundId()==="none") || (id==="locateTheme" && (!themePalettes[activeBackgroundId()] || archivedThemeIds.has(activeBackgroundId())));
+      if (el) el.disabled = locked || (["removeThemeBackground","themeBackgroundOpacity"].includes(id) && activeBackgroundId()==="none") || (id==="locateTheme" && (!themePalettes[activeBackgroundId()] || archivedThemeIds.has(activeBackgroundId())));
     });
     document.querySelectorAll('.theme-choice').forEach(btn => btn.disabled = locked);
     const btn = $("lockThemeBackground");
@@ -1371,8 +1376,17 @@
 
   function syncSignatureControls() {
     for (const id of signatureControlIds) {
-      const value = Number($(id).value);
-      $(`${id}Value`).value = `${id !== "signatureBlockScale" && value > 0 ? "+" : ""}${value}%`;
+      const input=$(id), value = Number(input.value);
+      if(id==="signatureBlockScale"){
+        const effective=Math.round(signatureGeometry().scale*1000)/10;
+        const label=effective+0.05<value?`${percentLabel(effective)} eff. (rich. ${value}%)`:percentLabel(value);
+        $(`${id}Value`).value=label;
+        input.setAttribute("aria-valuetext",label);
+      }else{
+        const label=`${value>0?"+":""}${value}%`;
+        $(`${id}Value`).value=label;
+        input.setAttribute("aria-valuetext",label);
+      }
     }
     applySignatureBlockLockUI();
   }
@@ -1601,13 +1615,6 @@
   }
 
   const GRID_STEP=85; // circa 15 mm, quadrati centrati sul foglio
-  function gridCoordinate(value, extent, min=0, max=extent) {
-    if(!showGrid)return value;
-    const origin=extent/2, low=Math.ceil((min-origin)/GRID_STEP), high=Math.floor((max-origin)/GRID_STEP);
-    if(low>high)return Math.max(min,Math.min(max,value));
-    const n=Math.max(low,Math.min(high,Math.round((value-origin)/GRID_STEP)));
-    return origin+n*GRID_STEP;
-  }
   function drawPreviewGrid() {
     const step = GRID_STEP;
     ctx.save();
@@ -1656,10 +1663,35 @@
       render();
     });
   }
+  // All range controls share a single update path. Input and change both
+  // update the model; the final value is persisted even with keyboard/touch.
+  function queueSliderRender(commit=false) {
+    if(state.exporting)return;
+    invalidateReadyBatch();
+    if(commit){clearTimeout(settingsSaveTimer);saveSettings();}
+    else deferSettingsSave();
+    scheduleAutosave(commit?250:650);
+    if(pendingPreviewFrame)return;
+    pendingPreviewFrame=requestAnimationFrame(()=>{
+      pendingPreviewFrame=0;
+      render({visualOnly:true});
+    });
+  }
+  function bindRange(id, allowed, update) {
+    const input=$(id);
+    const apply=(commit)=>{
+      if(!state.initialized||state.exporting||pendingEditorOperations||input.disabled||!allowed())return;
+      update(Number(input.value));
+      queueSliderRender(commit);
+    };
+    input.addEventListener("input",()=>apply(false));
+    input.addEventListener("change",()=>apply(true));
+  }
   function render({visualOnly=false}={}) {
     if (pendingPreviewFrame) { cancelAnimationFrame(pendingPreviewFrame); pendingPreviewFrame = 0; visualOnly=false; }
     if (!state.exporting && !visualOnly) invalidateReadyBatch();
     syncAutomaticCode();
+    syncSignatureControls();
     layoutWarnings = [];
     requestSelectedPhoto();
     requestSelectedFrame();
@@ -2053,38 +2085,19 @@
   $("backgroundFile").addEventListener("change", guardAsync(e => {if(!state.backgroundLocked)return loadImage(e.target.files[0], setBackground);}));
   $("logoFile").addEventListener("change", guardAsync(e => loadImage(e.target.files[0], setLogo)));
 
-  $("backgroundOpacity").addEventListener("input", e => {
-    state.backgroundOpacity = Number(e.target.value);
-    $("backgroundOpacityValue").value = `${state.backgroundOpacity}%`;
-    queuePreviewRender();
+  const canAdjustBackground=()=>!!state.backgroundImage&&!state.backgroundLocked;
+  bindRange("backgroundOpacity",canAdjustBackground,value=>{
+    state.backgroundOpacity=value;$("backgroundOpacityValue").value=percentLabel(value);
   });
-  $("backgroundScale").addEventListener("input", e => {
-    state.backgroundScale = Number(e.target.value);
-    $("backgroundScaleValue").value = `${state.backgroundScale}%`;
-    queuePreviewRender();
+  bindRange("backgroundScale",canAdjustBackground,value=>{
+    state.backgroundScale=value;$("backgroundScaleValue").value=percentLabel(value);
   });
-  $("backgroundX").addEventListener("change", () => {
-    if(state.backgroundLocked)return;
-    if(showGrid)$("backgroundX").value=String(Math.round(state.backgroundX/W*100));
-  });
-  $("backgroundX").addEventListener("input", e => {
-    if(state.backgroundLocked)return;
-    const value = Number(e.target.value);
-    state.backgroundX = gridCoordinate((value / 100) * W, W);
-    $("backgroundXValue").value = `${Math.round(state.backgroundX/W*100)}%`;
-    queuePreviewRender();
-  });
-  $("backgroundY").addEventListener("change", () => {
-    if(state.backgroundLocked)return;
-    if(showGrid)$("backgroundY").value=String(Math.round(state.backgroundY/H*100));
-  });
-  $("backgroundY").addEventListener("input", e => {
-    if(state.backgroundLocked)return;
-    const value = Number(e.target.value);
-    state.backgroundY = gridCoordinate((value / 100) * H, H);
-    $("backgroundYValue").value = `${Math.round(state.backgroundY/H*100)}%`;
-    queuePreviewRender();
-  });
+  for(const [id,axis] of [["backgroundX","X"],["backgroundY","Y"]]){
+    bindRange(id,canAdjustBackground,value=>{
+      state[`background${axis}`]=value/100*(axis==="X"?W:H);
+      $(`${id}Value`).value=percentLabel(value);
+    });
+  }
   $("fitBackground").addEventListener("click", () => {
     if(state.backgroundLocked)return;
     state.backgroundScale = 100;
@@ -2115,40 +2128,16 @@
     queuePreviewRender();
   });
 
-  $("logoScale").addEventListener("input", e => {
-    const logo = getActiveLogo();
-    if (!logo || logo.locked) return;
-    logo.scale = Number(e.target.value);
-    $("logoScaleValue").value = `${logo.scale}%`;
-    queuePreviewRender();
+  const canAdjustLogo=()=>{const logo=getActiveLogo();return !!logo&&!logo.locked;};
+  bindRange("logoScale",canAdjustLogo,value=>{
+    getActiveLogo().scale=value;$("logoScaleValue").value=percentLabel(value);
   });
-
-  $("logoX").addEventListener("change", () => {
-    const logo=getActiveLogo();if(!logo || logo.locked)return;
-    if(showGrid)$("logoX").value=String(Math.round(logo.x/W*100));
-  });
-  $("logoX").addEventListener("input", e => {
-    const logo = getActiveLogo();
-    if (!logo || logo.locked) return;
-    const value = Number(e.target.value);
-    logo.x = gridCoordinate((value / 100) * W, W);
-    $("logoXValue").value = `${Math.round(logo.x/W*100)}%`;
-    queuePreviewRender();
-  });
-
-  $("logoY").addEventListener("change", () => {
-    const logo=getActiveLogo();if(!logo || logo.locked)return;
-    if(showGrid)$("logoY").value=String(Math.round(logo.y/H*100));
-  });
-  $("logoY").addEventListener("input", e => {
-    const logo = getActiveLogo();
-    if (!logo || logo.locked) return;
-    const value = Number(e.target.value);
-    logo.y = gridCoordinate((value / 100) * H, H);
-    $("logoYValue").value = `${Math.round(logo.y/H*100)}%`;
-    queuePreviewRender();
-  });
-
+  for(const [id,axis] of [["logoX","x"],["logoY","y"]]){
+    bindRange(id,canAdjustLogo,value=>{
+      getActiveLogo()[axis]=value/100*(axis==="x"?W:H);
+      $(`${id}Value`).value=percentLabel(value);
+    });
+  }
   $("centerLogo").addEventListener("click", () => {
     const logo = getActiveLogo();
     if (!logo || logo.locked) return;
@@ -2445,13 +2434,13 @@
   async function requireSaved() {
     if (!await persistCurrentSnapshot()) throw new Error(recoveryBlocked ? "Recupero incompleto: salva un backup e riapri l'app prima di cambiare progetto." : "Salvataggio non riuscito: il progetto corrente non verrà sostituito. Esporta un backup JSON.");
   }
-  function scheduleAutosave() {
+  function scheduleAutosave(delay=250) {
     if (!state.initialized || state.exporting || recoveryBlocked) return;
     dirty=true;
     ++savedRevision; // un nuovo input non può essere marcato salvato da una scrittura precedente
     setSaveIndicator(state.currentProjectId ? "Salvataggio progetto…" : "Salvataggio lavoro…", "saving");
     clearTimeout(autosaveTimer);
-    if (!pendingEditorOperations) autosaveTimer=setTimeout(()=>{void persistCurrentSnapshot();},250);
+    if (!pendingEditorOperations) autosaveTimer=setTimeout(()=>{void persistCurrentSnapshot();},Number.isFinite(delay)?delay:250);
   }
   function flushPendingSave() {
     if (!state.initialized || state.exporting || pendingEditorOperations || recoveryBlocked || (!dirty && !pendingPreviewFrame)) return;
@@ -2495,7 +2484,8 @@
       state.personalFrameName=assets.personalFrame?String(data.personalFrame.name||"Cornice personale").slice(0,150):"";
       populateFrameOptions();
       for(const id of formIds){
-        const field=$(id), value=typeof migrated[id]==="string"?migrated[id]:String(fallback[id]??"");
+        const field=$(id), savedValue=migrated[id];
+        const value=typeof savedValue==="string" || (field.type==="range"&&typeof savedValue==="number"&&Number.isFinite(savedValue))?String(savedValue):String(fallback[id]??"");
         if(id==="frameStyle"){selectFrameValue(value);continue;}
         field.value=["themeBackgroundOpacity","frameOpacity"].includes(id)?normalizeThemeOpacity(value):value;
         if(field.tagName==="SELECT" && field.selectedIndex<0)field.value=String(fallback[id]??"");
@@ -2536,14 +2526,10 @@
     $("backgroundTools").classList.toggle("hidden", !hasBg);
     $("backgroundScale").value = state.backgroundScale;
     $("backgroundOpacity").value = state.backgroundOpacity;
-    $("backgroundX").value = Math.round(state.backgroundX / W * 100);
-    $("backgroundY").value = Math.round(state.backgroundY / H * 100);
-    for (const [id, value] of [
-      ["backgroundScaleValue", `${state.backgroundScale}%`],
-      ["backgroundOpacityValue", `${state.backgroundOpacity}%`],
-      ["backgroundXValue", `${Math.round(state.backgroundX / W * 100)}%`],
-      ["backgroundYValue", `${Math.round(state.backgroundY / H * 100)}%`]
-    ]) $(id).value = value;
+    syncPositionRange("backgroundX",state.backgroundX,W);
+    syncPositionRange("backgroundY",state.backgroundY,H);
+    $("backgroundScaleValue").value=percentLabel(state.backgroundScale);
+    $("backgroundOpacityValue").value=percentLabel(state.backgroundOpacity);
     applyBackgroundLockUI();
     syncLogoControls();
     syncSignatureControls();
@@ -3074,20 +3060,7 @@
     crop.width=1;crop.height=1;const image=await imageFromBlob(blob);checkImageBudget(image,state[`${prefix}Image`]);
     state[`${prefix}Image`]=image;state[`${prefix}Blob`]=blob;$( `${prefix}Mode`).value="image";$("signaturePadDialog").close();saveSettings();render();setStatus("Firma disegnata salvata nel progetto");
   }));
-  function snapSignatureAxis(id) {
-    if(!showGrid || state.signatureBlockLocked || id==="signatureBlockScale")return;
-    const input=$(id), raw=Number(input.value), axis=id==="signatureBlockX";
-    const position=()=>{const g=signatureGeometry();return axis?(g.slots[0].x+g.slots[g.slots.length-1].x)/2:g.lineY;};
-    const current=position();input.value=input.min;const lo=position();input.value=input.max;const hi=position();
-    const target=gridCoordinate(current,axis?W:H,lo,hi);
-    let best=raw, error=Infinity;
-    for(let v=Number(input.min);v<=Number(input.max);v+=Number(input.step)||1){input.value=String(v);const d=Math.abs(position()-target);if(d<error){error=d;best=v;}}
-    input.value=String(best);
-  }
-  for (const id of signatureControlIds) {
-    $(id).addEventListener("input", () => {if (state.signatureBlockLocked) return;syncSignatureControls();deferSettingsSave();queuePreviewRender();});
-    $(id).addEventListener("change", () => {if (state.signatureBlockLocked) return;snapSignatureAxis(id);syncSignatureControls();saveSettings();queuePreviewRender();});
-  }
+  for (const id of signatureControlIds) bindRange(id,()=>!state.signatureBlockLocked,()=>syncSignatureControls());
   $("resetSignatureBlock").addEventListener("click", () => {
     if (state.signatureBlockLocked) return;
     restoreSignatureControls();saveSettings();render();
@@ -3108,10 +3081,9 @@
     const button=event.target.closest(".theme-choice");
     if(button&&$("themeGrid").contains(button))void selectGalleryBackground(button.dataset.theme);
   });
-  $("themeBackgroundOpacity").addEventListener("input",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();deferSettingsSave();queuePreviewRender();});
-  $("themeBackgroundOpacity").addEventListener("change",()=>{if(state.themeBackgroundLocked)return;syncThemeOpacity();saveSettings();queuePreviewRender();});
-  $("frameOpacity").addEventListener("input",()=>{if(state.frameLocked)return;syncFrameOpacity();deferSettingsSave();queuePreviewRender();});
-  $("frameOpacity").addEventListener("change",()=>{if(state.frameLocked)return;syncFrameOpacity();saveSettings();queuePreviewRender();});
+  bindRange("themeBackgroundOpacity",()=>!state.themeBackgroundLocked&&activeBackgroundId()!=="none",syncThemeOpacity);
+  bindRange("frameOpacity",()=>!state.frameLocked&&$("frameStyle").value!=="none",syncFrameOpacity);
+  bindRange("fontScale",()=>true,value=>{$("fontScaleValue").value=percentLabel(value);});
   $("removeThemeBackground").addEventListener("click",()=>{
     if(state.themeBackgroundLocked)return;
     $("themeBackgroundId").value="none";syncDesignUI();saveSettings();render();
@@ -3141,7 +3113,7 @@
   for(const id of ["frameDiscipline","frameCollection"]) $(id).addEventListener("change",()=>{if(state.frameLocked)return;populateFrameOptions();updateFrameNavigatorUI();});
   $("prevFrame").addEventListener("click",()=>moveFrameSelection(-1));
   $("nextFrame").addEventListener("click",()=>moveFrameSelection(1));
-  for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "fontScale", "courseOutcome"]) {
+  for (const id of ["accentColor", "inkColor", "frameStyle", "ornamentStyle", "courseOutcome"]) {
     $(id).addEventListener("input", () => {
       if(id==="frameStyle" && state.frameLocked){syncDesignUI();return;}
       // Changing frame or colors must not change the background identity.
